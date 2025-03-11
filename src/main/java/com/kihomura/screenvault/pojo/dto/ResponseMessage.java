@@ -1,4 +1,4 @@
-package com.kihomura.screenvault.pojo;
+package com.kihomura.screenvault.pojo.dto;
 
 import org.springframework.http.HttpStatus;
 
@@ -15,6 +15,10 @@ public class ResponseMessage<T> {
 
     public static <T> ResponseMessage<T> success(T data) {
         return new ResponseMessage(HttpStatus.OK.value(), "success", data);
+    }
+
+    public static <T> ResponseMessage<T> success() {
+        return new ResponseMessage(HttpStatus.OK.value(), "success", null);
     }
 
     public Integer getCode() {
