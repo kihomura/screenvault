@@ -13,4 +13,22 @@ public interface IUserService {
      */
 
     User add(UserDto user);
+
+    /**
+     * get user
+     * @param id user's id
+     */
+    User getUser(Integer id);
+
+    /**
+     * update user
+     * @param user user object
+     */
+    User update(UserDto user);
+
+    /**
+     * delete user
+     * @param id user id
+     */
+    void delete(Integer id);
 }

@@ -21,4 +21,25 @@ public class UserService implements IUserService {
 
         return userRepository.save(userPojo);
     }
+
+    @Override
+    public User getUser(Integer id) {
+        return userRepository.findById(id).orElseThrow(() -> {
+            throw new IllegalArgumentException("user not found");
+        });
+    }
+
+    @Override
+    public User update(UserDto user) {
+        User userPojo = new User();
+        BeanUtils.copyProperties(user, userPojo);
+        return userRepository.save(userPojo);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        userRepository.deleteById(id);
+    }
+
+
 }
