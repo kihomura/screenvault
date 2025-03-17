@@ -14,10 +14,10 @@ public class Content {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "title", length = 225)
+    @Column(name = "title", length = 500, nullable = false)
     private String title;
 
-    @Column(name = "other_title", length = 225)
+    @Column(name = "other_title", length = 500)
     private String otherTitle;
 
     @Column(name = "country", length = 2)
@@ -26,8 +26,7 @@ public class Content {
     @Column(name = "language", length = 2)
     private String language;
 
-    @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "image", length = 500)
@@ -116,11 +115,11 @@ public class Content {
         this.releaseDate = releaseDate;
     }
 
-    public Genre getGenres() {
+    public Genre getGenre() {
         return genre;
     }
 
-    public void setGenres(Genre genre) {
+    public void setGenre(Genre genre) {
         this.genre = genre;
     }
 
