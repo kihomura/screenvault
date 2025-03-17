@@ -42,13 +42,7 @@ public enum Genre {
         return name;
     }
 
-    /**
-     * 从字符串转换为枚举值，处理空值情况
-     * @param name 类型名称
-     * @return 匹配的Genre枚举值，如果输入为空或找不到匹配则返回null
-     */
     public static Genre fromString(String name) {
-        // 处理空值情况
         if (name == null || name.trim().isEmpty()) {
             return null;
         }
@@ -59,17 +53,13 @@ public enum Genre {
             }
         }
 
-        // 如果找不到匹配项，可以选择返回null而不是抛出异常
         System.err.println("Warning: Unknown genre: " + name + " - returning null");
         return null;
-        // 或者保持原有行为，抛出异常
-        // throw new IllegalArgumentException("Unknown genre: " + name);
     }
 
     public static Set<Genre> parseGenres(String genreString) {
         Set<Genre> genres = new HashSet<>();
 
-        // 处理空字符串
         if (genreString == null || genreString.trim().isEmpty()) {
             return genres;
         }
