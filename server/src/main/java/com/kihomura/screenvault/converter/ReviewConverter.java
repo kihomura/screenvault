@@ -1,7 +1,6 @@
 package com.kihomura.screenvault.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kihomura.screenvault.pojo.ReviewDetail;
 import jakarta.persistence.AttributeConverter;

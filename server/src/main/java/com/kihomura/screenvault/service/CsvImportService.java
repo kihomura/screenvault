@@ -252,10 +252,10 @@ public class CsvImportService {
      */
     private Content parseContent(String[] line, Category defaultCategory) {
 
-        if (line.length < 10) {
-            logger.warn("Incorrect data row format, insufficient columns: {}", String.join(",", line));
-            return null;
-        }
+//        if (line.length < 10) {
+//            logger.warn("Incorrect data row format, insufficient columns: {}", String.join(",", line));
+//            return null;
+//        }
 
         Content content = new Content();
 
@@ -263,7 +263,7 @@ public class CsvImportService {
         if (line[0] != null && !line[0].isEmpty()) {
             content.setTitle(line[0]);
         } else {
-            logger.warn("Title cannot be empty, skipping this row");
+            logger.warn("Title cannot be empty, skipping row {}", line[0]);
             return null;
         }
 

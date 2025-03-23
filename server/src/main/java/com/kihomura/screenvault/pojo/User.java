@@ -1,63 +1,66 @@
 package com.kihomura.screenvault.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
 
+@Data
 @Table(name="users")
+@TableName("users")
 @Entity
 public class User {
     @Id
+    @TableId(type = IdType.AUTO)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    @TableField("id")
+    private Long id;
 
-    @Column(name = "username")
-    private String userName;
+    @Column(name = "username", unique = true, nullable = false, length = 50)
+    @TableField("username")
+    private String username;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false, length = 100)
+    @TableField("password")
     private String password;
 
-    @Column(name = "email")
-    private String email;
+    @Column(name = "nickname", length = 50)
+    @TableField("nickname")
+    private String nickname;
 
-    public Integer getId() {
-        return id;
+    @Column(name = "enabled")
+    @TableField("enabled")
+    private boolean enabled = true;
+
+    @Column(name = "created_at")
+    @TableField("created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    @TableField("updated_at")
+    private LocalDateTime updatedAt;
+
+    // OAuth2
+    @Column(name = "provider")
+    @TableField("provider")
+    private String provider;
+
+    @Column(name = "provider_id")
+    @TableField("provider_id")
+    private String providerId;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
