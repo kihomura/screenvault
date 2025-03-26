@@ -5,6 +5,7 @@ import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class AuthController {
      * @return ResponseEntity with the registration result.
      */
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody User user) {
         Map<String, Object> result = new HashMap<>();
 
         try {
