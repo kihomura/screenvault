@@ -60,6 +60,9 @@ public class WebSecurityConfig {
         // Logout config
         http.logout(logout -> logout
                 .logoutUrl("/auth/logout")
+                .clearAuthentication(true)
+                .invalidateHttpSession(true)
+                .deleteCookies("token")
                 .logoutSuccessHandler(new MyLogoutSuccessHandler())
                 .permitAll()
         );

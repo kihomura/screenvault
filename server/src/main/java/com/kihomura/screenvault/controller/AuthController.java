@@ -112,6 +112,23 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        SecurityContextHolder.clearContext();
+
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/user-info")
     public ResponseEntity<Map<String, Object>> getUserInfo() {
         Map<String, Object> result = new HashMap<>();
