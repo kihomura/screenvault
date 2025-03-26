@@ -1,6 +1,9 @@
 package com.kihomura.screenvault.config;
 
 import com.kihomura.screenvault.config.authentication.*;
+import com.kihomura.screenvault.security.JWTAuthenticationFilter;
+import com.kihomura.screenvault.security.JWTTokenProvider;
+import com.kihomura.screenvault.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,19 +17,25 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
 
     private final UserDetailsService userDetailsService;
+    private final JWTTokenProvider jwtTokenProvider;
+    private final UserService userService;
 
     /**
      * 使用构造函数注入UserDetailsService
      * @param userDetailsService 用来从数据库中加载用户信息
+     * @param jwtTokenProvider
      */
-    public WebSecurityConfig(UserDetailsService userDetailsService) {
+    public WebSecurityConfig(UserDetailsService userDetailsService, JWTTokenProvider jwtTokenProvider, UserService userService) {
         this.userDetailsService = userDetailsService;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userService = userService;
     }
 
     @Bean
@@ -43,7 +52,7 @@ public class WebSecurityConfig {
                 .loginProcessingUrl("/auth/login") //用于提交登录请求的路径
                 .usernameParameter("username") //对应前端表单的name
                 .passwordParameter("password")
-                .successHandler(new MyAuthenticationSuccessHandler())
+                .successHandler(new MyAuthenticationSuccessHandler(jwtTokenProvider))
                 .failureHandler(new MyAuthenticationFailureHandler())
                 .permitAll() //允许所有的用户访问登陆页面
         );
@@ -70,13 +79,23 @@ public class WebSecurityConfig {
                     NEVER,
                     STATELESS 无状态认证，不创建会话
                 }*/
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1)
-                .expiredSessionStrategy(new MySessionInformationExpiredStrategy())
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 设置为无Session状态认证，使用JWT进行认证
+//                .maximumSessions(1)
+//                .expiredSessionStrategy(new MySessionInformationExpiredStrategy())
         );
 
         // Disable CSRF
         http.csrf(csrf -> csrf.disable());
+
+        // JWT Filter
+        http.addFilterBefore(new JWTAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+
+        // OAuth2 login config
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/auth/login")
+                .successHandler(new MyOAuth2AuthenticationSuccessHandler(jwtTokenProvider, userService))
+                .failureHandler(new MyAuthenticationFailureHandler())
+        );
 
         //build()构建并返回一个SecurityFilterChain对象
         //该对象包含所有配置的安全策略，会被Spring Security在应用启动时自动加载和执行

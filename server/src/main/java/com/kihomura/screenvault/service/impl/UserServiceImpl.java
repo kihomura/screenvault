@@ -6,11 +6,13 @@ import com.kihomura.screenvault.mapper.UserMapper;
 import com.kihomura.screenvault.pojo.User;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -24,7 +26,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     //Break circular dependency by injecting PasswordEncoder through setter
     @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    public void setPasswordEncoder(@Lazy PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -88,5 +90,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         updateById(existingUser);
 
         return existingUser;
+    }
+
+    @Override
+    @Transactional
+    public User registerOAuthUser(User user) {
+        if (checkUsernameExists(user.getUsername())) {
+            throw new RuntimeException("OAuth user already exists");
+        }
+        if (user.getNickname() == null || user.getNickname().trim().isEmpty()) {
+            user.setNickname(user.getUsername());
+        }
+        // 为 OAuth2 用户设置默认密码（后续可支持修改或置空）
+        user.setPassword(passwordEncoder.encode("oauth2user"));
+        LocalDateTime now = LocalDateTime.now();
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+        user.setEnabled(true);
+        save(user);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User updateUserFromOAuth2(User user, Map<String, Object> attributes) {
+        // 根据 OAuth2 返回的属性更新用户信息，例如昵称同步
+        if (attributes.get("name") != null) {
+            user.setNickname((String) attributes.get("name"));
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+        updateById(user);
+        return user;
     }
 }

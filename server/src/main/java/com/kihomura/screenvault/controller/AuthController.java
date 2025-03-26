@@ -1,7 +1,12 @@
 package com.kihomura.screenvault.controller;
 
 import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -60,26 +65,35 @@ public class AuthController {
      * @return ResponseEntity
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest,
+                                                     HttpServletResponse response) {
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
 
         Map<String, Object> result = new HashMap<>();
 
         try {
-            // 创建认证令牌
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(username, password);
 
-            // 认证
             Authentication authentication = authenticationManager.authenticate(authToken);
 
-            // 存储认证信息
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 获取用户详情
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userService.findByUsername(userDetails.getUsername());
+
+            String jwt = new JWTTokenProvider().generateToken(authentication);
+
+            ResponseCookie cookie = ResponseCookie.from("token", jwt)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(24 * 60 * 60 * 30)
+                    .sameSite("Strict")
+                    .build();
+
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
             Map<String, Object> data = new HashMap<>();
             data.put("username", user.getUsername());

@@ -62,3 +62,5 @@ coverage
 
 *.tsbuildinfo
 
+# Application.properties
+/server/src/main/resources/application-local.properties
