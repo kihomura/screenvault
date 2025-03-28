@@ -1,5 +1,7 @@
 package com.kihomura.screenvault.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.kihomura.screenvault.mapper.UserMapper;
 import com.kihomura.screenvault.pojo.User;
 import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
@@ -25,10 +27,30 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private final JWTTokenProvider jwtTokenProvider;
+    private final UserMapper userMapper;
 
-    public AuthController(UserService userService, AuthenticationManager authenticationManager) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider, UserMapper userMapper) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userMapper = userMapper;
+    }
+
+    /**
+     * GET: /auth/me
+     * Indicates whether the current user is logged in
+     * @param authentication
+     * @return
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        System.out.println("--------------Authentication: " + authentication);
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        Object principal = authentication.getPrincipal();
+        return ResponseEntity.ok(principal);
     }
 
     /**
@@ -59,6 +81,15 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/check_username")
+    public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
+        int count = Math.toIntExact(userMapper.selectCount(new QueryWrapper<User>().eq("username", username)));
+        boolean exists = count > 0 ;
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("exists", exists);
+        return ResponseEntity.ok(result);
+    }
+
     /**
      * POST: /auth/login
      * Handles user login by authenticating the provided credentials (username and password).
@@ -84,7 +115,8 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userService.findByUsername(userDetails.getUsername());
 
-            String jwt = new JWTTokenProvider().generateToken(authentication);
+
+            String jwt = jwtTokenProvider.generateToken(authentication);
 
             ResponseCookie cookie = ResponseCookie.from("token", jwt)
                     .httpOnly(true)
@@ -107,6 +139,7 @@ public class AuthController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             result.put("code", 401);
+            result.put("username", username);
             result.put("message", "Login failed: " + e.getMessage());
             return ResponseEntity.status(401).body(result);
         }

@@ -2,11 +2,13 @@ package com.kihomura.screenvault.security;
 
 import io.jsonwebtoken.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 public class JWTTokenProvider {
@@ -21,7 +23,23 @@ public class JWTTokenProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+        String username;
+        if (authentication instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+            Map<String, Object> attributes = oauthToken.getPrincipal().getAttributes();
+            String registrationId = oauthToken.getAuthorizedClientRegistrationId();
+
+            if ("github".equalsIgnoreCase(registrationId)) {
+                username = (String) attributes.get("login");
+            } else if ("google".equalsIgnoreCase(registrationId)) {
+                username = (String) attributes.get("email");
+            } else {
+                username = (String) attributes.get("sub");
+            }
+        } else {
+            username = authentication.getName();
+        }
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 

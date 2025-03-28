@@ -23,7 +23,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("LoadUserByUsername - Raw username: [" + username + "]");
+        System.out.println("LoadUserByUsername - Username length: " + (username != null ? username.length() : "null"));
+
         User user = userService.findByUsername(username);
+
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
@@ -32,9 +36,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getUsername(),
                 user.getPassword(),
                 user.isEnabled(),
-                true, // accountNonExpired
-                true, // credentialsNonExpired
-                true, // accountNonLocked
+                true,
+                true,
+                true,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
     }

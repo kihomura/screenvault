@@ -35,7 +35,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                         .secure(false)
                         .path("/")
                         .maxAge(24 * 60 * 60 * 30)
-                        .sameSite("Strict")
+                        .sameSite("LAX")
                         .build();
 
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());

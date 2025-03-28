@@ -4,6 +4,7 @@ import com.kihomura.screenvault.config.authentication.*;
 import com.kihomura.screenvault.security.JWTAuthenticationFilter;
 import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +23,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+
+    @Autowired
+    private MyOAuth2AuthenticationSuccessHandler myOAuth2AuthenticationSuccessHandler;
 
     private final UserDetailsService userDetailsService;
     private final JWTTokenProvider jwtTokenProvider;
@@ -87,18 +91,18 @@ public class WebSecurityConfig {
 //                .expiredSessionStrategy(new MySessionInformationExpiredStrategy())
         );
 
+        // OAuth2 login config
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/auth/login")
+                .successHandler(myOAuth2AuthenticationSuccessHandler)
+                .failureHandler(new MyAuthenticationFailureHandler())
+        );
+
         // Disable CSRF
         http.csrf(csrf -> csrf.disable());
 
         // JWT Filter
         http.addFilterBefore(new JWTAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
-
-        // OAuth2 login config
-        http.oauth2Login(oauth2 -> oauth2
-                .loginPage("/auth/login")
-                .successHandler(new MyOAuth2AuthenticationSuccessHandler(jwtTokenProvider, userService))
-                .failureHandler(new MyAuthenticationFailureHandler())
-        );
 
         //build()构建并返回一个SecurityFilterChain对象
         //该对象包含所有配置的安全策略，会被Spring Security在应用启动时自动加载和执行

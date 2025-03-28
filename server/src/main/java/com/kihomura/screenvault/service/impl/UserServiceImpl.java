@@ -24,7 +24,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.userMapper = userMapper;
     }
 
-    //Break circular dependency by injecting PasswordEncoder through setter
+    // Break circular dependency by injecting PasswordEncoder through setter
     @Autowired
     public void setPasswordEncoder(@Lazy PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
@@ -33,12 +33,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public User register(User user) {
-        //check if the username is existed
+        // Check if the username exists
         if (checkUsernameExists(user.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
 
-        //use username as the default nickname
+        // Use username as the default nickname if not provided
         if (user.getNickname() == null || user.getNickname().trim().isEmpty()) {
             user.setNickname(user.getUsername());
         }
@@ -58,6 +58,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User findByUsername(String username) {
+        System.out.println("Debug - UserServiceImpl findByUsername: " + username);
         return userMapper.findByUsername(username);
     }
 
@@ -76,12 +77,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new RuntimeException("User not found");
         }
 
-        //update nickname
+        // Update nickname if provided
         if (user.getNickname() != null) {
             existingUser.setNickname(user.getNickname());
         }
 
-        //if password is updated, encrypt it first
+        // If password is updated, encrypt it first
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -92,6 +93,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return existingUser;
     }
 
+    /**
+     * 注册 OAuth2 用户，同时保存 provider 和 providerId 信息
+     */
     @Override
     @Transactional
     public User registerOAuthUser(User user) {
@@ -107,18 +111,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
         user.setEnabled(true);
+        // 此处要求在调用前已设置好 provider 和 providerId
         save(user);
         return user;
     }
 
+    /**
+     * 更新 OAuth2 用户信息，同时确保 provider 与 providerId 被保存
+     * 注意：在 OAuth2 登录过程中，如果用户已存在，且 provider 与 providerId 尚未设置，则进行保存
+     */
     @Override
     @Transactional
-    public User updateUserFromOAuth2(User user, Map<String, Object> attributes) {
-        // 根据 OAuth2 返回的属性更新用户信息，例如昵称同步
+    public User updateUserFromOAuth2(User user, Map<String, Object> attributes, String provider, String providerId) {
+        // 根据 OAuth2 返回的属性更新用户信息，例如更新昵称
         if (attributes.get("name") != null) {
             user.setNickname((String) attributes.get("name"));
         }
         user.setUpdatedAt(LocalDateTime.now());
+
+        // 如果用户的 provider 和 providerId 还未设置，则更新
+        if (user.getProvider() == null || user.getProvider().isEmpty()) {
+            user.setProvider(provider);
+        }
+        if (user.getProviderId() == null || user.getProviderId().isEmpty()) {
+            user.setProviderId(providerId);
+        }
         updateById(user);
         return user;
     }

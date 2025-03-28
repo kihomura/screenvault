@@ -11,5 +11,5 @@ public interface UserService extends IService<User> {
     boolean checkUsernameExists(String username);
     User updateUser(User user);
     User registerOAuthUser(User user);
-    User updateUserFromOAuth2(User user, Map<String, Object> attributes);
+    User updateUserFromOAuth2(User user, Map<String, Object> attributes, String provider, String providerId);
 }
