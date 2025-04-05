@@ -22,12 +22,15 @@
 <script>
 import Wrapper from "../components/form/wrapper.vue";
 import AnimatedGrid from '../components/animatedGrid.vue';
-import AppHeader from '../components/appHeader.vue';
+import AppHeader from '../components/ui/Header.vue';
 import AuthContainer from "../components/auth/authContainer.vue";
 import MessageDisplay from "../components/form/message.vue";
 
 export default {
   name: "Login",
+  mounted() {
+    document.body.style.backgroundColor = '#252525'
+  },
   components: {
     AuthContainer,
     AnimatedGrid,
@@ -62,7 +65,7 @@ export default {
           this.error = false;
 
           setTimeout(() => {
-            this.$router.push("/profile");
+            this.$router.push("/dashboard");
           }, 1000);
         } else {
           this.message = "Incorrect username or password";
@@ -82,6 +85,7 @@ export default {
 </script>
 
 <style scoped>
+
 h2 {
   text-align: center;
   margin-bottom: 50px;

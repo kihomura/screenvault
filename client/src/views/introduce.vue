@@ -45,10 +45,12 @@
 <script setup>
 import { onMounted } from 'vue';
 import AnimatedGrid from '../components/animatedGrid.vue';
-import AppHeader from '../components/appHeader.vue';
+import AppHeader from '../components/ui/Header.vue';
 import CyberButton from '../components/buttons/cyberButton.vue';
 
 onMounted(() => {
+  document.body.style.backgroundColor = '#252525'
+
   document.querySelectorAll('.glitch-text').forEach(element => {
     element.addEventListener('mouseover', () => {
       element.classList.add('active');
@@ -66,14 +68,14 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-:global(html), :global(body) {
-  background-color: #393939;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-}
+/*:global(html), :global(body) {*/
+/*  background-color: #393939;*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*  width: 100%;*/
+/*  height: 100%;*/
+/*  overflow-x: hidden;*/
+/*}*/
 
 * {
   margin: 0;

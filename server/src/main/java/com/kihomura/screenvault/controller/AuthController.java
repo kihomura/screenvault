@@ -50,6 +50,15 @@ public class AuthController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
         Object principal = authentication.getPrincipal();
+
+        if(principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("username", userDetails.getUsername());
+            userInfo.put("roles", userDetails.getAuthorities());
+            return ResponseEntity.ok(userInfo);
+        }
+
         return ResponseEntity.ok(principal);
     }
 

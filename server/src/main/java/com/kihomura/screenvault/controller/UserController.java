@@ -93,7 +93,6 @@ public class UserController {
      */
     @PutMapping("/change-password")
     public ResponseEntity<Map<String, Object>> changePassword(@RequestBody Map<String, String> passwords) {
-        String oldPassword = passwords.get("oldPassword");
         String newPassword = passwords.get("newPassword");
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -108,19 +107,11 @@ public class UserController {
             return ResponseEntity.status(404).body(result);
         }
 
-        // verify old password
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            result.put("code", 400);
-            result.put("message", "Old password does not match");
-            return ResponseEntity.badRequest().body(result);
-        }
-
         try {
-            User updateUser = new User();
-            updateUser.setId(user.getId());
-            updateUser.setPassword(newPassword);
+            String encodedNewPassword = passwordEncoder.encode(newPassword);
 
-            userService.updateUser(updateUser);
+            user.setPassword(encodedNewPassword);
+            userService.updateUser(user);
 
             result.put("code", 200);
             result.put("message", "Change password successful");

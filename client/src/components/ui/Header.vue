@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import CyberButton from './buttons/cyberButton.vue';
+import CyberButton from '../buttons/cyberButton.vue';
 </script>
 
 <style scoped>

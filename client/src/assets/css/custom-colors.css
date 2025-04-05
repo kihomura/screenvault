@@ -1,0 +1,27 @@
+:root {
+    --bs-blue: initial;
+    --bs-indigo: initial;
+    --bs-purple: initial;
+    --bs-pink: initial;
+    --bs-red: initial;
+    --bs-orange: initial;
+    --bs-yellow: initial;
+    --bs-green: initial;
+    --bs-teal: initial;
+    --bs-cyan: initial;
+    --bs-white: initial;
+    --bs-gray: initial;
+    --bs-gray-dark: initial;
+
+    --bs-primary: initial;
+    --bs-secondary: initial;
+    --bs-success: initial;
+    --bs-info: initial;
+    --bs-warning: initial;
+    --bs-danger: initial;
+    --bs-light: initial;
+    --bs-dark: initial;
+
+    --bs-body-bg: initial;
+    --bs-body-color: initial;
+}

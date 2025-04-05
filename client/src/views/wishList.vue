@@ -3,7 +3,7 @@
 </script>
 
 <template>
-<p>This is dashboard</p>
+
 </template>
 
 <style scoped>

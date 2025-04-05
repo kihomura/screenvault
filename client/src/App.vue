@@ -1,50 +1,45 @@
 <template>
-
   <div class="app-container">
-
-    <header v-if="isAuthenticated">
-      <nav>
-        <h1>ScreenVault</h1>
-        <div class="nav-links">
-          <router-link to="/profile">Profile</router-link>
-          <button @click="logout" class="logout-btn">Logout</button>
-        </div>
-      </nav>
-    </header>
-
-    <main>
+    <sidebar-nav v-if="isAuthenticated"></sidebar-nav>
+    <main class="content-area">
       <router-view />
     </main>
-
   </div>
 </template>
 
-<script>
-export default {
-  computed: {
-    isAuthenticated() {
-      return this.$store.getters.isAuthenticated;
-    }
-  },
-  methods: {
-    async logout() {
-      try {
-        await this.$http.post('/auth/logout', null, {
-          withCredentials: true
-        })
-      } catch (error) {
-        console.error('Logout failed:', error)
-      } finally {
-        this.$store.commit('setUser', null)
-        this.$router.push('/login')
-      }
-    }
-  }
-}
+<script setup>
+import { useThemeStore } from './store/themeStore.js';
+import { computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import SidebarNav from "./components/ui/Sidebar.vue";
+
+const themeStore = useThemeStore();
+const store = useStore();
+
+const isAuthenticated = computed(() => {
+  return store.getters.isAuthenticated;
+});
+
+onMounted(() => {
+  themeStore.applyTheme();
+});
 </script>
 
 <style>
-body, html {
-  background-color: #424242;
+html, body {
+  background-color: var(--background-muted);
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
 }
 </style>

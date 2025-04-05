@@ -22,12 +22,15 @@
 <script>
 import Wrapper from "../components/form/wrapper.vue";
 import AnimatedGrid from '../components/animatedGrid.vue';
-import AppHeader from '../components/appHeader.vue';
+import AppHeader from '../components/ui/Header.vue';
 import AuthContainer from "../components/auth/authContainer.vue";
 import MessageDisplay from "../components/form/message.vue";
 
 export default {
   name: "Register",
+  mounted() {
+    document.body.style.backgroundColor = '#252525'
+  },
   components: {
     AuthContainer,
     AnimatedGrid,

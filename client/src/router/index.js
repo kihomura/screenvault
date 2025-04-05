@@ -1,9 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import store from '../store';
+import store from '../store/store.js';
+
+// views
 import intro from '../views/introduce.vue';
 import login from '../views/login.vue';
 import register from '../views/register.vue';
+import dashboard from '../views/dashboard.vue';
+import watched from '../views/watched.vue';
+import playlists from '../views/playlist.vue';
+import wishlists from '../views/wishlist.vue';
+import statistics from '../views/statistics.vue';
 import profile from '../views/profile.vue';
+
 
 const routes = [
   {
@@ -25,17 +33,41 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: dashboard,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: profile,
     meta: { requiresAuth: true }
   },
-  // {
-  //   path: '/dashboard',
-  //   name: 'dashboard',
-  //   component: dashboard,
-  //   meta: { requiresAuth: true }
-  // }
+  {
+    path: '/watched',
+    name: 'watched',
+    component: watched,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/playlist',
+    name: 'playlist',
+    component: playlists,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wishlist',
+    name: 'wishlist',
+    component: wishlists,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/statistics',
+    name: 'statistics',
+    component: statistics,
+    meta: { requiresAuth: true }
+  }
 ];
 
 const router = createRouter({
@@ -55,7 +87,7 @@ router.beforeEach(async (to, from, next) => {
   }
   //如果已登录，重定向到Dashboard
   if ((to.name === 'login' || to.name === 'intro' || to.name === 'register') && isAuthenticated) {
-    return next({ name: 'profile' });
+    return next({ name: 'dashboard' });
   }
   next();
 });

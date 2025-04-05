@@ -1,0 +1,343 @@
+<template>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">ScreenVault</h2>
+    </div>
+
+    <div class="user-profile" @click="navigateToProfile">
+      <div class="avatar">
+        <img :src="userAvatar" alt="User avatar" />
+      </div>
+      <div class="user-info">
+        <p class="user-name">{{ userName }}</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <router-link to="/dashboard" class="nav-item">
+        <i class="nav-icon dashboard-icon"></i>
+        <span>Dashboard</span>
+      </router-link>
+      <router-link to="/watched" class="nav-item">
+        <i class="nav-icon watched-icon"></i>
+        <span>Watched</span>
+      </router-link>
+      <router-link to="/playlist" class="nav-item">
+        <i class="nav-icon list-icon"></i>
+        <span>List</span>
+      </router-link>
+      <router-link to="/wishlist" class="nav-item">
+        <i class="nav-icon wishlist-icon"></i>
+        <span>Wish List</span>
+      </router-link>
+      <router-link to="/statistics" class="nav-item">
+        <i class="nav-icon stats-icon"></i>
+        <span>Statistics</span>
+      </router-link>
+      <router-link to="/profile" class="nav-item">
+        <i class="nav-icon profile-icon"></i>
+        <span>Profile</span>
+      </router-link>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-selector">
+        <label for="theme-select">Theme</label>
+        <select
+            id="theme-select"
+            v-model="selectedTheme"
+            @change="changeTheme"
+            class="theme-select"
+        >
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="cyberpunk">Cyberpunk</option>
+        </select>
+      </div>
+
+      <button @click="logout" class="logout-btn">
+        <i class="nav-icon logout-icon"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useThemeStore } from '../../store/themeStore.js';
+import { useStore } from 'vuex';
+
+const router = useRouter();
+const themeStore = useThemeStore();
+const store = useStore();
+
+const selectedTheme = ref(themeStore.currentTheme);
+
+const userName = computed(() => {
+  return store.state.user?.username || 'Guest User';
+});
+
+const userAvatar = computed(() => {
+  return store.state.user?.avatar || '/images/default-avatar.png';
+});
+
+function changeTheme() {
+  themeStore.setTheme(selectedTheme.value);
+}
+
+function navigateToProfile() {
+  router.push('/profile');
+}
+
+async function logout() {
+  try {
+    await store.dispatch('logout');
+    await router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+}
+
+onMounted(() => {
+  // 确保主题在组件挂载时应用
+  selectedTheme.value = themeStore.currentTheme;
+});
+</script>
+
+<style scoped>
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: var(--background-base);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-level2-default);
+  transition: all 0.3s ease;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sidebar-title {
+  font-family: var(--font-family-secondary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-title {
+  font-family: var(--font-family-secondary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  letter-spacing: 0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+:root .theme-light .sidebar-title {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+:root .theme-dark .sidebar-title {
+  color: var(--primary);
+  text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+  border-bottom: 2px solid var(--secondary);
+  padding-bottom: var(--spacing-xs);
+}
+
+:root .theme-cyberpunk .sidebar-title {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--primary);
+  text-shadow: 0 0 5px var(--primary), 0 0 10px var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-left: 3px solid var(--secondary);
+  padding-left: var(--spacing-sm);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.user-profile:hover {
+  background: var(--background-subtle);
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+  background: var(--background-muted);
+  margin-right: var(--spacing-md);
+  border: 2px solid var(--border-medium);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-base);
+}
+
+.user-role {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.nav-menu {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background: var(--interactive-hover);
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.nav-item.router-link-active {
+  background: var(--interactive-active);
+  color: var(--primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: var(--spacing-md);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* 使用SVG图标作为背景 */
+.dashboard-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7'/%3E%3Crect x='14' y='3' width='7' height='7'/%3E%3Crect x='14' y='14' width='7' height='7'/%3E%3Crect x='3' y='14' width='7' height='7'/%3E%3C/svg%3E");
+}
+
+.watched-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");
+}
+
+.list-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' y1='6' x2='21' y2='6'/%3E%3Cline x1='8' y1='12' x2='21' y2='12'/%3E%3Cline x1='8' y1='18' x2='21' y2='18'/%3E%3Cline x1='3' y1='6' x2='3.01' y2='6'/%3E%3Cline x1='3' y1='12' x2='3.01' y2='12'/%3E%3Cline x1='3' y1='18' x2='3.01' y2='18'/%3E%3C/svg%3E");
+}
+
+.wishlist-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/%3E%3C/svg%3E");
+}
+
+.profile-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+.stats-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'/%3E%3Cline x1='12' y1='20' x2='12' y2='4'/%3E%3Cline x1='6' y1='20' x2='6' y2='14'/%3E%3C/svg%3E");
+}
+
+.logout-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' y1='12' x2='9' y2='12'/%3E%3C/svg%3E");
+}
+
+.sidebar-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+.theme-selector {
+  margin-bottom: var(--spacing-lg);
+}
+
+.theme-selector label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.theme-select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-select:hover {
+  border-color: var(--border-medium);
+}
+
+.theme-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--spacing-md);
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: var(--font-size-base);
+}
+
+.logout-btn:hover {
+  background: var(--accent-error);
+  color: white;
+  border-color: var(--accent-error);
+}
+
+.logout-btn .nav-icon {
+  margin-right: var(--spacing-md);
+}
+</style>

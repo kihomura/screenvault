@@ -3,7 +3,7 @@
 </script>
 
 <template>
-<p>This is dashboard</p>
+  <p>This is watched</p>
 </template>
 
 <style scoped>
