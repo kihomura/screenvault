@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.runner;
 
 import com.kihomura.screenvault.enums.Category;
-import com.kihomura.screenvault.service.CsvImportService;
+import com.kihomura.screenvault.service.impl.CsvImportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

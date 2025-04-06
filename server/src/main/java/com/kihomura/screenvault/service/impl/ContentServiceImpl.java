@@ -63,10 +63,6 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
 
         Content updatedContent = this.getById(content.getId());
 
-        if (updatedContent == null) {
-            throw new IllegalArgumentException("Content doesn't exist");
-        }
-
         if (updatedContent == null || !updatedContent.getCreatorId().equals(userService.getCurrentUserId())) {
             throw new IllegalArgumentException("Do not have permission to update this content");
         }

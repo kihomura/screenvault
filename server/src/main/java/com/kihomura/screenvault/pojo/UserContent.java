@@ -29,7 +29,7 @@ public class UserContent {
     private BigDecimal rate;
 
     @TableField(value = "review", typeHandler = ReviewDetailTypeHandler.class)
-    private List<ReviewDetail> reviews;
+    private List<ReviewDetail> review;
 
     @TableField("status")
     private Status status;

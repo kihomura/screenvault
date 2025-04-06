@@ -1,4 +1,4 @@
-package com.kihomura.screenvault.service;
+package com.kihomura.screenvault.service.impl;
 
 import com.kihomura.screenvault.pojo.Content;
 import com.kihomura.screenvault.enums.Category;
