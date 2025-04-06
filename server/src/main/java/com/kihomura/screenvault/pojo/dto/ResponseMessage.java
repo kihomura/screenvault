@@ -3,7 +3,7 @@ package com.kihomura.screenvault.pojo.dto;
 import org.springframework.http.HttpStatus;
 
 public class ResponseMessage<T> {
-    private Integer code;
+    private int code;
     private String message;
     private T data;
 
@@ -19,6 +19,10 @@ public class ResponseMessage<T> {
 
     public static <T> ResponseMessage<T> success() {
         return new ResponseMessage(HttpStatus.OK.value(), "success", null);
+    }
+
+    public static <T> ResponseMessage<T> error(int code, String message) {
+        return new ResponseMessage<>(code, message, null);
     }
 
     public Integer getCode() {
