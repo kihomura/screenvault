@@ -7,6 +7,9 @@ import com.kihomura.screenvault.pojo.User;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +61,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User findByUsername(String username) {
-        System.out.println("Debug - UserServiceImpl findByUsername: " + username);
         return userMapper.findByUsername(username);
     }
 
@@ -118,7 +120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 更新 OAuth2 用户信息，同时确保 provider 与 providerId 被保存
-     * 注意：在 OAuth2 登录过程中，如果用户已存在，且 provider 与 providerId 尚未设置，则进行保存
+     * 在 OAuth2 登录过程中，如果用户已存在，且 provider 与 providerId 尚未设置，则进行保存
      */
     @Override
     @Transactional
@@ -138,5 +140,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         updateById(user);
         return user;
+    }
+
+    @Override
+    public Integer getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() &&
+                !(authentication instanceof AnonymousAuthenticationToken)) {
+            String username = authentication.getName();
+            User user = this.getOne(new QueryWrapper<User>().eq("username", username));
+            return user != null ? user.getId() : null;
+        }
+        return null;
+    }
+
+    @Override
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() &&
+                !(authentication instanceof AnonymousAuthenticationToken)) {
+
+            String username = authentication.getName();
+            return this.getOne(new QueryWrapper<User>().eq("username", username));
+        }
+        return null;
     }
 }

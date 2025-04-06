@@ -12,4 +12,6 @@ public interface UserService extends IService<User> {
     User updateUser(User user);
     User registerOAuthUser(User user);
     User updateUserFromOAuth2(User user, Map<String, Object> attributes, String provider, String providerId);
+    Integer getCurrentUserId();
+    User getCurrentUser();
 }

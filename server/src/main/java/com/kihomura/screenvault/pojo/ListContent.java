@@ -1,69 +1,20 @@
 package com.kihomura.screenvault.pojo;
 
-import com.kihomura.screenvault.pojo.key.ListContentId;
-import jakarta.persistence.*;
-
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 import java.sql.Timestamp;
 
-@Table(name="list_content")
-@Entity
+@Data
+@TableName("list_content")
 public class ListContent {
 
-    @EmbeddedId
-    private ListContentId id;
+    @TableField("list_id")
+    private Integer listId;
 
-    @ManyToOne
-    @MapsId("listId")
-    @JoinColumn(name = "list_id", nullable = false)
-    private PlayList list;
+    @TableField("content_id")
+    private Integer contentId;
 
-    @ManyToOne
-    @MapsId("contentId")
-    @JoinColumn(name = "content_id", nullable = false)
-    private Content content;
-
-    @Column(name = "add_time")
+    @TableField("add_time")
     private Timestamp addTime;
-
-    public ListContentId getId() {
-        return id;
-    }
-
-    public void setId(ListContentId id) {
-        this.id = id;
-    }
-
-    public PlayList getList() {
-        return list;
-    }
-
-    public void setList(PlayList list) {
-        this.list = list;
-    }
-
-    public Content getContent() {
-        return content;
-    }
-
-    public void setContent(Content content) {
-        this.content = content;
-    }
-
-    public Timestamp getAddTime() {
-        return addTime;
-    }
-
-    public void setAddTime(Timestamp addTime) {
-        this.addTime = addTime;
-    }
-
-    @Override
-    public String toString() {
-        return "ListContent{" +
-                "id=" + id +
-                ", list=" + list +
-                ", content=" + content +
-                ", addTime=" + addTime +
-                '}';
-    }
 }

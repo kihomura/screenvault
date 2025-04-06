@@ -1,55 +1,16 @@
 package com.kihomura.screenvault.pojo;
 
-import com.kihomura.screenvault.pojo.key.TagContentId;
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
-@Table(name = "tag_content")
-@Entity
+@Data
+@TableName("tag_content")
 public class TagContent {
 
-    @EmbeddedId
-    private TagContentId id;
+    @TableField("tag_id")
+    private Integer tagId;
 
-    @ManyToOne
-    @MapsId("tagId")
-    @JoinColumn(name = "tag_id", nullable = false)
-    private Tag tag;
-
-    @ManyToOne
-    @MapsId("contentId")
-    @JoinColumn(name = "content_id", nullable = false)
-    private Content content;
-
-    public TagContentId getId() {
-        return id;
-    }
-
-    public void setId(TagContentId id) {
-        this.id = id;
-    }
-
-    public Tag getTag() {
-        return tag;
-    }
-
-    public void setTag(Tag tag) {
-        this.tag = tag;
-    }
-
-    public Content getContent() {
-        return content;
-    }
-
-    public void setContent(Content content) {
-        this.content = content;
-    }
-
-    @Override
-    public String toString() {
-        return "TagContent{" +
-                "id=" + id +
-                ", tag=" + tag +
-                ", content=" + content +
-                '}';
-    }
+    @TableField("content_id")
+    private Integer contentId;
 }

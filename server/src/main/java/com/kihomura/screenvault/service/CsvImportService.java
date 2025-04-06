@@ -4,7 +4,7 @@ import com.kihomura.screenvault.pojo.Content;
 import com.kihomura.screenvault.enums.Category;
 import com.kihomura.screenvault.enums.Genre;
 import com.kihomura.screenvault.enums.SourceType;
-import com.kihomura.screenvault.repository.ContentRepository;
+import com.kihomura.screenvault.mapper.ContentMapper;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -35,7 +35,7 @@ public class CsvImportService {
     private static final String CSV_DIR = "metadata";
 
     @Autowired
-    private ContentRepository contentRepository;
+    private ContentMapper contentMapper; // 使用MyBatis Plus的Mapper替换JPA的Repository
     // to avoid interruptions from unexpected errors,
     // records the last imported line, so it can resume from there next time
     private AtomicInteger lastSuccessfulLine = new AtomicInteger(0);
@@ -135,14 +135,16 @@ public class CsvImportService {
                     // Batch save data
                     if (batch.size() >= BATCH_SIZE) {
                         try {
-                            contentRepository.saveAll(batch);
+                            for (Content content : batch) {
+                                contentMapper.insert(content);
+                            }
                             logger.info("{} records imported", totalProcessed.addAndGet(batch.size()));
                             batch.clear();
                         } catch (Exception e) {
                             logger.error("Failed to batch save data: ", e);
                             // Record the current position to resume later
                             logger.info("Last successfully processed line: {}", lastSuccessfulLine.get());
-                            // Retry saving one record at a time
+                            // Retry saving one by one
                             saveOneByOne(batch);
                             batch.clear();
                         }
@@ -152,7 +154,9 @@ public class CsvImportService {
                 // Process the remaining data that doesn't make up a full batch
                 if (!batch.isEmpty()) {
                     try {
-                        contentRepository.saveAll(batch);
+                        for (Content content : batch) {
+                            contentMapper.insert(content);
+                        }
                         totalProcessed.addAndGet(batch.size());
                     } catch (Exception e) {
                         logger.error("Last batch save failed: ", e);
@@ -177,7 +181,7 @@ public class CsvImportService {
         int saved = 0;
         for (Content content : batch) {
             try {
-                contentRepository.save(content);
+                contentMapper.insert(content);
                 saved++;
             } catch (Exception e) {
                 logger.warn("Failed to save a single record: {}", e.getMessage());
@@ -335,7 +339,7 @@ public class CsvImportService {
             content.setSourceType(SourceType.OFFICIAL_DATA);
         }
 
-        content.setUser(null);
+        content.setCreatorId(null);
 
         return content;
     }

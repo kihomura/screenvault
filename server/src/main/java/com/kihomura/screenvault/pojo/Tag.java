@@ -1,66 +1,26 @@
 package com.kihomura.screenvault.pojo;
 
-import jakarta.persistence.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
 
-@Table(name="tags")
-@Entity
+@Data
+@TableName("tags")
 public class Tag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @Column(name = "tag_name", length = 50)
+    @TableField("tag_name")
     private String tagName;
 
-    @ManyToOne
-    @JoinColumn(name = "creator_id", nullable = false)
-    private User user;
+    @TableField("creator_id")
+    private Integer creatorId;
 
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
-    private Set<TagContent> tagContents = new HashSet<TagContent>();
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getTagName() {
-        return tagName;
-    }
-
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Set<TagContent> getTagContents() {
-        return tagContents;
-    }
-
-    public void setTagContents(Set<TagContent> tagContents) {
-        this.tagContents = tagContents;
-    }
-
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", tagName='" + tagName + '\'' +
-                ", user=" + user +
-                ", tagContents=" + tagContents +
-                '}';
-    }
+    @TableField(exist = false)
+    private Set<TagContent> tagContents = new HashSet<>();
 }
