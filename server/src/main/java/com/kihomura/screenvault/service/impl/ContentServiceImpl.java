@@ -44,11 +44,11 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
             throw new IllegalArgumentException("Title cannot be empty");
         }
 
-        if (content.getGenre() != null && isValidEnumValue(content.getGenre().toString(), Genre.class)){
+        if (content.getGenre() != null && !isValidEnumValue(content.getGenre().toString(), Genre.class)){
             throw new IllegalArgumentException("Genre doesn't exist");
         }
 
-        if (content.getCategory() != null && isValidEnumValue(content.getCategory().toString(), Category.class)){
+        if (content.getCategory() != null && !isValidEnumValue(content.getCategory().toString(), Category.class)){
             throw new IllegalArgumentException("Category doesn't exist");
         }
 
@@ -71,11 +71,11 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
             throw new IllegalArgumentException("Title cannot be empty");
         }
 
-        if (content.getGenre() != null && isValidEnumValue(content.getGenre().toString(), Genre.class)){
+        if (content.getGenre() != null && !isValidEnumValue(content.getGenre().toString(), Genre.class)){
             throw new IllegalArgumentException("Genre doesn't exist");
         }
 
-        if (content.getCategory() != null && isValidEnumValue(content.getCategory().toString(), Category.class)){
+        if (content.getCategory() != null && !isValidEnumValue(content.getCategory().toString(), Category.class)){
             throw new IllegalArgumentException("Category doesn't exist");
         }
 

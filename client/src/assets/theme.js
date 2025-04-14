@@ -2,41 +2,41 @@ export const themeConfig = {
     light: {
         name: 'light',
         colors: {
-            primary: '#3b82f6',
-            secondary: '#6366f1',
-            tertiary: '#8b5cf6',
-            'primary-dark': '#2563eb',
-            'primary-rgb': '59, 130, 246',
+            primary: '#3d3d3d',
+            secondary: '#5a5a5a',
+            tertiary: '#7c7c7c',
+            'primary-dark': '#212121',
+            'primary-rgb': '61, 61, 61',
 
             background: {
                 base: '#ffffff',
-                subtle: '#f8fafc',
-                muted: '#f1f5f9'
+                subtle: '#f9f9f9',
+                muted: '#f3f3f3'
             },
 
             text: {
-                primary: '#1e293b',
-                secondary: '#475569',
-                muted: '#64748b'
+                primary: '#1a1a1a',
+                secondary: '#4a4a4a',
+                muted: '#6e6e6e'
             },
 
             accent: {
-                success: '#22c55e',
-                warning: '#f59e0b',
-                error: '#ef4444',
-                info: '#0ea5e9'
+                success: '#4caf50',
+                warning: '#ff9800',
+                error: '#f44336',
+                info: '#2196f3'
             },
 
             interactive: {
-                hover: '#e2e8f0',
-                active: '#cbd5e1',
-                focus: '#94a3b8'
+                hover: '#eeeeee',
+                active: '#e0e0e0',
+                focus: '#bdbdbd'
             },
 
             border: {
-                light: '#e2e8f0',
-                medium: '#cbd5e1',
-                dark: '#94a3b8'
+                light: '#e0e0e0',
+                medium: '#bdbdbd',
+                dark: '#9e9e9e'
             }
         },
 
@@ -104,41 +104,41 @@ export const themeConfig = {
     dark: {
         name: 'dark',
         colors: {
-            primary: '#60a5fa',
-            secondary: '#818cf8',
-            tertiary: '#a78bfa',
-            'primary-dark': '#3b82f6',
-            'primary-rgb': '96, 165, 250',
+            primary: '#a18072',
+            secondary: '#8d7365',
+            tertiary: '#6d5a4f',
+            'primary-dark': '#8d7365',
+            'primary-rgb': '161, 128, 114',
 
             background: {
-                base: '#0f172a',
-                subtle: '#1e293b',
-                muted: '#334155'
+                base: '#121212',
+                subtle: '#1e1e1e',
+                muted: '#2c2c2c'
             },
 
             text: {
-                primary: '#f8fafc',
-                secondary: '#e2e8f0',
-                muted: '#cbd5e1'
+                primary: '#e0e0e0',
+                secondary: '#c7c7c7',
+                muted: '#a0a0a0'
             },
 
             accent: {
-                success: '#4ade80',
-                warning: '#fbbf24',
-                error: '#f87171',
-                info: '#38bdf8'
+                success: '#66bb6a',
+                warning: '#ffa726',
+                error: '#ef5350',
+                info: '#42a5f5'
             },
 
             interactive: {
-                hover: '#1e293b',
-                active: '#334155',
-                focus: '#475569'
+                hover: '#2a2a2a',
+                active: '#333333',
+                focus: '#424242'
             },
 
             border: {
-                light: '#334155',
-                medium: '#475569',
-                dark: '#64748b'
+                light: '#333333',
+                medium: '#424242',
+                dark: '#616161'
             }
         },
 
@@ -206,41 +206,41 @@ export const themeConfig = {
     cyberpunk: {
         name: 'cyberpunk',
         colors: {
-            primary: '#ff2a6d',
-            secondary: '#05d9e8',
-            tertiary: '#d1f7ff',
-            'primary-dark': '#ff0055',
-            'primary-rgb': '255, 42, 109',
+            primary: '#fe1b7c',
+            secondary: '#21f8f6',
+            tertiary: '#ffd900',
+            'primary-dark': '#d60062',
+            'primary-rgb': '254, 27, 124',
 
             background: {
-                base: '#01012b',
-                subtle: '#080838',
-                muted: '#101045'
+                base: '#181828',
+                subtle: '#232334',
+                muted: '#2f2f44'
             },
 
             text: {
-                primary: '#d1f7ff',
-                secondary: '#05d9e8',
-                muted: '#7678ed'
+                primary: '#f8f8ff',
+                secondary: '#21f8f6',
+                muted: '#b0e6ff'
             },
 
             accent: {
-                success: '#7fff00',
-                warning: '#ffd300',
-                error: '#ff2a6d',
-                info: '#05d9e8'
+                success: '#6df570',
+                warning: '#ffb627',
+                error: '#ff3a5e',
+                info: '#5be1ff'
             },
 
             interactive: {
-                hover: '#7678ed33',
-                active: '#05d9e833',
-                focus: '#ff2a6d33'
+                hover: 'rgba(33, 248, 246, 0.15)',
+                active: 'rgba(254, 27, 124, 0.15)',
+                focus: 'rgba(255, 217, 0, 0.15)'
             },
 
             border: {
-                light: '#05d9e8',
-                medium: '#7678ed',
-                dark: '#ff2a6d'
+                light: '#21f8f6',
+                medium: '#fe1b7c',
+                dark: '#ffd900'
             }
         },
 
@@ -274,16 +274,16 @@ export const themeConfig = {
 
         shadows: {
             level1: {
-                default: '0 0 5px rgba(5, 217, 232, 0.5)',
-                hover: '0 0 8px rgba(5, 217, 232, 0.7)'
+                default: '0 0 5px rgba(33, 248, 246, 0.6)',
+                hover: '0 0 8px rgba(33, 248, 246, 0.8)'
             },
             level2: {
-                default: '0 0 10px rgba(255, 42, 109, 0.5), 0 0 5px rgba(5, 217, 232, 0.3)',
-                hover: '0 0 15px rgba(255, 42, 109, 0.7), 0 0 10px rgba(5, 217, 232, 0.5)'
+                default: '0 0 10px rgba(254, 27, 124, 0.6), 0 0 5px rgba(33, 248, 246, 0.4)',
+                hover: '0 0 15px rgba(254, 27, 124, 0.8), 0 0 10px rgba(33, 248, 246, 0.6)'
             },
             level3: {
-                default: '0 0 15px rgba(255, 42, 109, 0.7), 0 0 10px rgba(5, 217, 232, 0.5), 0 0 5px rgba(118, 120, 237, 0.3)',
-                hover: '0 0 20px rgba(255, 42, 109, 0.9), 0 0 15px rgba(5, 217, 232, 0.7), 0 0 10px rgba(118, 120, 237, 0.5)'
+                default: '0 0 15px rgba(254, 27, 124, 0.7), 0 0 10px rgba(33, 248, 246, 0.5), 0 0 5px rgba(255, 217, 0, 0.3)',
+                hover: '0 0 20px rgba(254, 27, 124, 0.9), 0 0 15px rgba(33, 248, 246, 0.7), 0 0 10px rgba(255, 217, 0, 0.5)'
             }
         },
 
