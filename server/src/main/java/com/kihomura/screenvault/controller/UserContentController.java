@@ -25,6 +25,9 @@ public class UserContentController {
         return ResponseMessage.success(userContentService.findAll());
     }
 
+    /**
+     * GET: /record/id/{id}
+     */
     @GetMapping("/id/{id}")
     public ResponseMessage getRecordingById(@PathVariable int id) {
         UserContent userContent = userContentService.findById(id);
@@ -53,6 +56,9 @@ public class UserContentController {
         return ResponseMessage.success(userContent);
     }
 
+    /**
+     * DELETE: /record/id/{id}
+     */
     @DeleteMapping("/id/{id}")
     public ResponseMessage deleteRecordingById(@PathVariable int id) {
         boolean result = userContentService.delete(id);

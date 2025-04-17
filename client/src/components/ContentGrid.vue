@@ -1,4 +1,3 @@
-<!-- src/components/ContentGrid.vue -->
 <template>
   <div class="contents-container">
     <!-- Add new card - only shown on the first page and not in selection mode -->

@@ -6,62 +6,11 @@
         <button class="close-button" @click="closeModal">&times;</button>
       </div>
 
-      <div class="custom-content-option" v-if="!selectedContent">
-        <p @click="openCustomContentModal" class="custom-content-link">
-          Didn't find it? Add your own content here
-        </p>
-      </div>
-
-      <div class="modal-search" v-if="!selectedContent">
-        <div class="search-container">
-          <input
-              type="text"
-              v-model="searchQuery"
-              placeholder="Search for movies, shows, etc."
-              class="search-input"
-              @keyup.enter="fetchSearchResults"
-          />
-          <button class="search-button" @click="fetchSearchResults">
-            <span v-if="isLoading" class="loader"></span>
-            <span v-else class="search-icon">🔍</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Loading indicator -->
-      <div class="loading-container" v-if="isLoading">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">Searching...</p>
-      </div>
-
-      <!-- Search results: shown after search completes with results -->
-      <div class="search-results" v-if="!isLoading && searchSubmitted && searchResults.length > 0 && !selectedContent">
-        <div
-            v-for="result in sortedSearchResults"
-            :key="result.id"
-            class="search-result-item"
-            :class="{ 'already-added': result.alreadyAdded }"
-            @click="result.alreadyAdded ? null : selectContent(result)"
-        >
-          <div class="result-poster">
-            <img :src="result.image ? imgPrefix + result.image : '/placeholder-poster.jpg'" alt="Poster" />
-          </div>
-          <div class="result-details">
-            <h4 class="result-title">{{ result.title }}</h4>
-            <p class="result-year">{{ formatYear(result.releaseDate) }}</p>
-          </div>
-          <div v-if="result.alreadyAdded" class="already-added-badge">
-            already added
-          </div>
-        </div>
-      </div>
-
-      <!-- No results message -->
-      <div class="empty-search" v-if="!isLoading && searchSubmitted && searchResults.length === 0 && !selectedContent">
-        <p>No results found for "{{ searchQuery }}"</p>
-      </div>
-
-      <!-- Selected content form -->
+      <search-content-modal
+          v-if="!selectedContent"
+          :userRecordings="userRecordings"
+          @content-selected="selectContent"
+      />
 
       <div class="content-form" v-if="selectedContent">
         <div class="selected-content-header">
@@ -80,6 +29,8 @@
         </div>
 
         <div class="form-container">
+
+          <!-- Watch Date -->
           <div class="form-group">
             <label for="watchDate">Watch Date</label>
             <input
@@ -91,6 +42,7 @@
             />
           </div>
 
+          <!-- Rating -->
           <div class="form-group">
             <label for="rating">Rating (Only whole or half values allowed, e.g. 8 or 8.5)</label>
             <div class="rating-input">
@@ -102,7 +54,6 @@
                     @mousemove="handleStarHover($event, i)"
                     @click="handleStarClick($event, i)"
                 >
-                  <!-- Using a single star with a clip-path for half stars -->
                   <span class="star" :class="getStarClass(i)">★</span>
                 </div>
               </div>
@@ -122,8 +73,7 @@
             </div>
           </div>
 
-
-          <!-- Tags Section -->
+          <!-- Tag -->
           <div class="form-group">
             <label>Tags</label>
             <div class="tags-container">
@@ -150,7 +100,7 @@
             </div>
           </div>
 
-          <!-- Reviews Section -->
+          <!-- Review -->
           <div class="form-group">
             <label for="reviewText">Review</label>
             <textarea
@@ -162,7 +112,7 @@
             ></textarea>
             <p class="review-date-selector">
               <label>
-                <input type="checkbox" v-model="formData.reviews[0].useCustomDate">
+                <input type="checkbox" v-model="formData.reviews[0].useCustomDate" />
                 Use a different date than the actual viewing time
               </label>
               <input
@@ -175,14 +125,17 @@
             </p>
           </div>
 
-          <!-- Additional reviews -->
           <div v-if="!showMultipleReviews" class="multiple-reviews-prompt">
             <p @click="showMultipleReviews = true" class="custom-content-link">
               Seen it more than once? Click to add more reviews...
             </p>
           </div>
 
-          <div v-for="(review, index) in formData.reviews.slice(1)" :key="index + 1" class="form-group additional-review">
+          <div
+              v-for="(review, index) in formData.reviews.slice(1)"
+              :key="index + 1"
+              class="form-group additional-review"
+          >
             <div class="review-header">
               <label>Additional Review</label>
               <button class="remove-review-button" @click="removeReview(index + 1)">&times;</button>
@@ -195,7 +148,7 @@
             ></textarea>
             <p class="review-date-selector">
               <label>
-                <input type="checkbox" v-model="review.useCustomDate">
+                <input type="checkbox" v-model="review.useCustomDate" />
                 Use a different date than the actual viewing time
               </label>
               <input
@@ -215,30 +168,26 @@
       </div>
 
       <div class="form-actions" v-if="selectedContent">
-        <button class="cancel-button" @click="closeModal">Cancel</button>
+        <main-btn type="secondary" @click="closeModal">Cancel</main-btn>
         <div class="save-buttons">
-          <button class="save-button" @click="saveRecording(false)">Save</button>
+          <main-btn type="highlight" @click="saveRecording(false)">Save</main-btn>
         </div>
       </div>
-
     </div>
   </div>
-
-  <add-custom-content-modal
-      v-if="isCustomContentModalOpen"
-      :isOpen="isCustomContentModalOpen"
-      @close="closeCustomContentModal"
-      @save="handleCustomContentSaved"
-  />
 </template>
 
 <script>
 import AddCustomContentModal from './AddCustomContentModal.vue';
+import SearchContentModal from './SearchContentModal.vue';
+import MainBtn from "../buttons/MainBtn.vue";
 
 export default {
   name: 'AddRecordingModal',
   components: {
-    AddCustomContentModal
+    MainBtn,
+    AddCustomContentModal,
+    SearchContentModal
   },
   props: {
     isOpen: {
@@ -248,20 +197,15 @@ export default {
   },
   data() {
     return {
-      searchQuery: '',
-      searchResults: [],
-      searchSubmitted: false,
       selectedContent: null,
       currentDate: new Date().toISOString().split('T')[0],
+      // TODO: use imgPrefix only when content's source_type = 'OFFICIAL_DATA'
       imgPrefix: 'https://image.tmdb.org/t/p/w1280',
-      isLoading: false,
-      isCustomContentModalOpen: false,
-      hoverRating: null,
       showMultipleReviews: false,
       availableTags: [],
       selectedTags: [],
       newTagName: '',
-      userRecordings: [], // Store the user's existing recordings
+      userRecordings: [],
       formData: {
         contentId: null,
         rate: null,
@@ -275,20 +219,7 @@ export default {
           }
         ]
       }
-    }
-  },
-  computed: {
-    sortedSearchResults() {
-      // Create a copy of search results to avoid mutating the original
-      const results = [...this.searchResults];
-
-      // Sort results so that already added items appear at the bottom
-      return results.sort((a, b) => {
-        if (a.alreadyAdded && !b.alreadyAdded) return 1;
-        if (!a.alreadyAdded && b.alreadyAdded) return -1;
-        return 0;
-      });
-    }
+    };
   },
   created() {
     this.fetchTags();
@@ -297,7 +228,6 @@ export default {
   watch: {
     isOpen(newVal) {
       if (newVal) {
-        // Refresh user recordings whenever modal is opened
         this.fetchUserRecordings();
       }
     }
@@ -333,12 +263,10 @@ export default {
     },
     async createNewTag() {
       if (!this.newTagName.trim()) return;
-
       try {
         const response = await this.$http.post('/tag', {
           tagName: this.newTagName.trim()
         });
-
         if (response && response.data && response.data.data) {
           const newTag = response.data.data;
           this.availableTags.push(newTag);
@@ -365,9 +293,6 @@ export default {
       this.$emit('close');
     },
     resetForm() {
-      this.searchQuery = '';
-      this.searchResults = [];
-      this.searchSubmitted = false;
       this.selectedContent = null;
       this.selectedTags = [];
       this.showMultipleReviews = false;
@@ -385,65 +310,9 @@ export default {
         ]
       };
     },
-    async fetchSearchResults() {
-      if (this.searchQuery.length >= 2) {
-        this.searchSubmitted = true;
-        this.isLoading = true;
-
-        try {
-          const response = await this.$http.get(`/content/title/${this.searchQuery}`);
-          if (response && response.data && response.data.data) {
-            // Get search results
-            const results = response.data.data;
-
-            // Check each result if it exists in user's content
-            results.forEach(result => {
-              // Check if this content is already in user's recordings
-              result.alreadyAdded = this.userRecordings.some(
-                  recording => recording.contentId === result.id
-              );
-            });
-
-            this.searchResults = results;
-          } else {
-            this.searchResults = [];
-          }
-        } catch (error) {
-          console.error('Search error:', error);
-          this.searchResults = [];
-        } finally {
-          this.isLoading = false;
-        }
-      } else {
-        this.searchSubmitted = true;
-        this.searchResults = [];
-      }
-    },
     selectContent(content) {
-      if (content.alreadyAdded) return; // Prevent selecting already added content
-
       this.selectedContent = content;
       this.formData.contentId = content.id;
-      // Clear search results and set search box content to selected content title
-      this.searchResults = [];
-      this.searchQuery = content.title;
-    },
-    resetSelection() {
-      this.selectedContent = null;
-      this.formData.contentId = null;
-      this.searchQuery = '';
-      this.searchSubmitted = false;
-      this.searchResults = [];
-    },
-    openCustomContentModal() {
-      this.isCustomContentModalOpen = true;
-    },
-    closeCustomContentModal() {
-      this.isCustomContentModalOpen = false;
-    },
-    handleCustomContentSaved(newContent) {
-      this.selectContent(newContent);
-      this.closeCustomContentModal();
     },
     saveRecording(addAnother) {
       if (!this.formData.contentId) {
@@ -454,8 +323,6 @@ export default {
         alert('Please enter a watch date');
         return;
       }
-
-      // Process reviews, filtering out empty ones and setting correct dates
       const reviewList = this.formData.reviews
           .filter(review => review.text.trim() !== '')
           .map(review => {
@@ -471,70 +338,62 @@ export default {
         status: this.formData.status,
         watchDate: this.formData.watchDate,
         review: reviewList,
+      };
+
+      const tagData = {
         tags: this.selectedTags.map(tag => ({
           tagId: tag.id,
           contentId: this.formData.contentId
         }))
       };
 
-      // Pass data through event
-      this.$emit('save', recordingData);
+      this.$emit('save', {
+        recordingData: recordingData,
+        tagData: tagData
+      });
+
       this.closeModal();
     },
-
     handleStarHover(event, starIndex) {
       const rect = event.currentTarget.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
       const halfPoint = rect.width / 2;
-
-      // If mouse is on the left half of the star, set half-star rating
       if (mouseX < halfPoint) {
         this.hoverRating = starIndex - 0.5;
       } else {
         this.hoverRating = starIndex;
       }
     },
-
     handleStarClick(event, starIndex) {
       const rect = event.currentTarget.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
       const halfPoint = rect.width / 2;
-
-      // If clicked on the left half of the star, set half-star rating
       if (mouseX < halfPoint) {
         this.formData.rate = starIndex - 0.5;
       } else {
         this.formData.rate = starIndex;
       }
     },
-
     resetHoverRating() {
       this.hoverRating = null;
     },
-
     getStarClass(starIndex) {
-      // Use hover rating if available, otherwise use form rating
       const rating = this.hoverRating !== null ? this.hoverRating : this.formData.rate;
-
       if (!rating) return 'empty';
-
       if (starIndex <= Math.floor(rating)) {
-        return 'full'; // full star
+        return 'full';
       } else if (starIndex === Math.ceil(rating) && rating % 1 !== 0) {
-        return 'half'; // half star
+        return 'half';
       } else {
-        return 'empty'; // empty star
+        return 'empty';
       }
     },
-
     validateRating() {
       if (this.formData.rate !== null) {
-        // Ensure the value is a multiple of 0.5
         const roundedValue = Math.round(this.formData.rate * 2) / 2;
         if (roundedValue !== this.formData.rate) {
           this.formData.rate = roundedValue;
         }
-        // Ensure the value is between 0 and 10
         if (this.formData.rate > 10) {
           this.formData.rate = 10;
         } else if (this.formData.rate < 0) {
@@ -542,18 +401,20 @@ export default {
         }
       }
     },
-
+    resetSelection() {
+      this.selectedContent = null;
+      this.formData.contentId = null;
+    },
     formatYear(dateStr) {
       if (!dateStr) return '';
       const date = new Date(dateStr);
       return date.getFullYear();
     }
   }
-}
+};
 </script>
 
 <style scoped>
-/* Base styles and animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -645,251 +506,6 @@ export default {
   color: var(--accent-error);
 }
 
-/* Custom content option */
-.custom-content-option {
-  text-align: center;
-  padding: var(--spacing-xs);
-}
-
-.custom-content-link {
-  color: var(--accent-info);
-  cursor: pointer;
-  font-size: var(--font-fontSize-sm);
-  transition: color 0.2s ease;
-  display: inline-block;
-  text-decoration: none;
-  position: relative;
-}
-
-p.custom-content-link {
-  margin-bottom: 0;
-  margin-top: 0;
-}
-
-.custom-content-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 1px;
-  bottom: -2px;
-  left: 0;
-  background-color: var(--accent-info);
-  transition: width 0.2s ease;
-}
-
-.custom-content-link:hover {
-  color: var(--primary-dark);
-}
-
-.custom-content-link:hover::after {
-  width: 100%;
-}
-
-/* Search area */
-.modal-search {
-  padding: var(--spacing-xs) var(--spacing-xl) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.search-container {
-  display: flex;
-  position: relative;
-  box-shadow: var(--shadow-level1-default);
-  border-radius: var(--border-radius-full);
-}
-
-.search-input {
-  flex: 1;
-  padding: var(--spacing-lg) var(--spacing-xl);
-  padding-right: 50px;
-  border: 1px solid var(--border-light);
-  color: var(--text-primary);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-fontSize-base);
-  transition: all 0.25s ease;
-  background-color: var(--background-base);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--accent-info);
-  box-shadow: 0 0 0 3px rgba(var(--accent-info-rgb), 0.15);
-}
-
-.search-button {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius-full);
-  transition: all 0.2s ease;
-}
-
-.search-button:hover {
-  background-color: rgba(var(--accent-info-rgb), 0.1);
-}
-
-.search-icon {
-  font-size: var(--font-fontSize-lg);
-}
-
-/* Loading indicators */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xxl) 0;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(var(--accent-info-rgb), 0.15);
-  border-top-color: var(--accent-info);
-  border-radius: 50%;
-  animation: spin 1s ease-in-out infinite;
-}
-
-.loading-text {
-  margin-top: var(--spacing-lg);
-  color: var(--text-secondary);
-  font-size: var(--font-fontSize-base);
-  letter-spacing: 0.5px;
-}
-
-.loader {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(var(--accent-info-rgb), 0.3);
-  border-radius: 50%;
-  border-top-color: var(--accent-info);
-  animation: spin 0.8s linear infinite;
-}
-
-/* Search results */
-.search-results {
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: var(--spacing-md) var(--spacing-lg);
-  scrollbar-width: thin;
-  scrollbar-color: var(--tertiary) var(--background-subtle);
-}
-
-.search-results::-webkit-scrollbar {
-  width: 5px;
-}
-
-.search-results::-webkit-scrollbar-track {
-  background: var(--background-subtle);
-  border-radius: var(--border-radius-full);
-}
-
-.search-results::-webkit-scrollbar-thumb {
-  background-color: var(--tertiary);
-  border-radius: var(--border-radius-full);
-}
-
-.search-result-item {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius-lg);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  margin-bottom: var(--spacing-md);
-  border: 1px solid transparent;
-  background-color: var(--background-base);
-  box-shadow: var(--shadow-level1-default);
-}
-
-.search-result-item:hover {
-  box-shadow: var(--shadow-level2-hover);
-  transform: translateY(-3px);
-  border-color: rgba(var(--accent-info-rgb), 0.2);
-}
-
-.already-added {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.already-added:hover {
-  transform: none;
-  box-shadow: var(--shadow-level1-default);
-  border-color: transparent;
-}
-
-.result-poster {
-  width: 50px;
-  height: 75px;
-  overflow: hidden;
-  border-radius: var(--border-radius-md);
-  margin-right: var(--spacing-lg);
-  box-shadow: var(--shadow-level1-default);
-  flex-shrink: 0;
-}
-
-.result-poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.search-result-item:hover .result-poster img {
-  transform: scale(1.05);
-}
-
-.result-details {
-  flex-grow: 1;
-}
-
-.result-title {
-  margin: 0 0 var(--spacing-xs);
-  font-weight: var(--font-fontWeight-medium);
-  font-size: var(--font-fontSize-base);
-  color: var(--text-primary);
-}
-
-.result-year {
-  margin: 0;
-  font-size: var(--font-fontSize-sm);
-  color: var(--text-muted);
-}
-
-.already-added-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: var(--border-medium);
-  color: var(--text-secondary);
-  font-size: var(--font-fontSize-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--border-radius-full);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.empty-search {
-  display: flex;
-  justify-content: center;
-  padding: var(--spacing-xl);
-  color: var(--text-secondary);
-  font-size: var(--font-fontSize-base);
-}
-
-/* Selected content form */
 .content-form {
   padding: var(--spacing-xl);
   overflow-y: auto;
@@ -999,7 +615,7 @@ p.custom-content-link {
   box-shadow: 0 0 0 3px rgba(var(--accent-info-rgb), 0.15);
 }
 
-/* Rating stars with precision decimal display */
+/* Rating stars */
 .rating-stars {
   display: flex;
   margin-right: 20px;
@@ -1022,16 +638,14 @@ p.custom-content-link {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--border-medium); /* Default empty star color */
+  color: var(--border-medium);
   position: relative;
 }
 
-/* Full star - completely filled */
 .star.full {
   color: var(--accent-warning);
 }
 
-/* Half star - uses pseudo element with precise clipping */
 .star.half {
   position: relative;
   color: var(--border-medium);
@@ -1046,11 +660,9 @@ p.custom-content-link {
   justify-content: center;
   align-items: center;
   font-size: 28px;
-  /* This clip-path ensures only the left half is visible */
   clip-path: inset(0 50% 0 0);
 }
 
-/* Make sure the half star's background is empty */
 .star.half::after {
   content: '';
   position: absolute;
@@ -1321,79 +933,7 @@ textarea.form-control {
   gap: var(--spacing-md);
 }
 
-.cancel-button {
-  background-color: transparent;
-  border: 1px solid var(--border-dark);
-  color: var(--text-secondary);
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-fontSize-base);
-  font-weight: var(--font-fontWeight-medium);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
 
-.cancel-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background-color: rgba(var(--tertiary-rgb), 0.1);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.5s, height 0.5s;
-}
-
-.cancel-button:hover {
-  color: var(--text-primary);
-}
-
-.cancel-button:hover::after {
-  width: 200%;
-  height: 200%;
-}
-
-.save-button {
-  background: linear-gradient(135deg, var(--accent-success), rgba(var(--accent-success-rgb), 0.8));
-  color: white;
-  border: none;
-  padding: var(--spacing-md) var(--spacing-xxl);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-fontSize-base);
-  font-weight: var(--font-fontWeight-medium);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-level2-default), 0 0 0 0 rgba(var(--accent-success-rgb), 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.save-button::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transform: translateX(-100%);
-}
-
-.save-button:hover {
-  box-shadow: var(--shadow-level2-hover), 0 0 0 5px rgba(var(--accent-success-rgb), 0.15);
-  transform: translateY(-2px);
-}
-
-.save-button:hover::after {
-  transform: translateX(100%);
-  transition: transform 0.6s ease-in-out;
-}
-
-/* Additional UI improvements */
 input[type="date"].form-control {
   display: block;
   width: 100%;
@@ -1403,26 +943,4 @@ input[type="date"].form-control {
   position: relative;
 }
 
-/* JavaScript will be needed to properly implement half-star ratings
-   This CSS provides the visual foundation */
-.star.active-0-5::before { width: 50%; }
-.star.active-1-0::before { width: 100%; }
-.star.active-1-5::before { width: 50%; }
-.star.active-2-0::before { width: 100%; }
-.star.active-2-5::before { width: 50%; }
-.star.active-3-0::before { width: 100%; }
-.star.active-3-5::before { width: 50%; }
-.star.active-4-0::before { width: 100%; }
-.star.active-4-5::before { width: 50%; }
-.star.active-5-0::before { width: 100%; }
-.star.active-5-5::before { width: 50%; }
-.star.active-6-0::before { width: 100%; }
-.star.active-6-5::before { width: 50%; }
-.star.active-7-0::before { width: 100%; }
-.star.active-7-5::before { width: 50%; }
-.star.active-8-0::before { width: 100%; }
-.star.active-8-5::before { width: 50%; }
-.star.active-9-0::before { width: 100%; }
-.star.active-9-5::before { width: 50%; }
-.star.active-10-0::before { width: 100%; }
 </style>

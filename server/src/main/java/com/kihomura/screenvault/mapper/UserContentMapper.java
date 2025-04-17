@@ -10,7 +10,7 @@ import java.util.List;
 
 @Mapper
 public interface UserContentMapper extends BaseMapper<UserContent> {
-    @Select("SELECT * FROM user_content WHERE user_id = #{userId}")
+    @Select("SELECT * FROM user_content WHERE user_id = #{userId} AND status = 'WATCHED'")
     List<UserContent> findByUserId(int userId);
 
     @Insert("INSERT INTO user_content (user_id, content_id, status) VALUES (#{userId}, #{contentId}, #{status})")

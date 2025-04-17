@@ -1,19 +1,24 @@
 <template>
   <div class="watch-page">
-    <!-- Page Header with Filter Controls -->
-    <filter-controls
-        v-if="!selectionMode"
-        :ratingFilter="ratingFilter"
-        :yearFilter="yearFilter"
-        :monthFilter="monthFilter"
-        :sortBy="sortBy"
-        :availableYears="availableYears"
-        :months="months"
-        @update:ratingFilter="ratingFilter = $event"
-        @update:yearFilter="yearFilter = $event"
-        @update:monthFilter="monthFilter = $event"
-        @update:sortBy="sortBy = $event"
-    />
+    <!-- Header with Filter Controls -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">Watching Recordings</h1>
+      </div>
+      <filter-controls
+          v-if="!selectionMode"
+          :ratingFilter="ratingFilter"
+          :yearFilter="yearFilter"
+          :monthFilter="monthFilter"
+          :sortBy="sortBy"
+          :availableYears="availableYears"
+          :months="months"
+          @update:ratingFilter="ratingFilter = $event"
+          @update:yearFilter="yearFilter = $event"
+          @update:monthFilter="monthFilter = $event"
+          @update:sortBy="sortBy = $event"
+      />
+    </div>
 
     <!-- Selection Actions Bar (replaces filters when in selection mode) -->
     <selection-actions-bar
@@ -27,7 +32,7 @@
         @cancel="cancelSelectionMode"
     />
 
-    <!-- Content Grid with Cards -->
+    <!-- Content Grid with ContentCards -->
     <content-grid
         :records="paginatedRecords"
         :selectionMode="selectionMode"
@@ -42,10 +47,10 @@
 
     <!-- Add New link for pages after first page -->
     <div v-if="currentPage > 1 && !selectionMode" class="add-new-link-container">
-      <button class="add-new-link" @click="goToFirstPageAndAdd">
+      <main-btn type="text" class="add-new-link" @click="goToFirstPageAndAdd">
         <span class="add-new-icon">+</span>
         Back to first page to add new recording
-      </button>
+      </main-btn>
     </div>
 
     <!-- Pagination controls -->
@@ -79,17 +84,19 @@
 
 <script>
 import ContentCard from "../components/ContentCard.vue";
-import AddRecordingModal from "../components/modal/AddRecordingModal.vue";
+import AddRecordingModal from "../components/modal/AddRecordModal.vue";
 import DeleteModal from "../components/modal/DeleteModal.vue";
 import AddToListModal from "../components/modal/AddToListModal.vue";
 import Pagination from "../components/ui/Pagination.vue";
 import FilterControls from "../components/FilterContols.vue";
 import SelectionActionsBar from "../components/SelectionActionBar.vue";
 import ContentGrid from "../components/ContentGrid.vue";
+import MainBtn from "../components/buttons/MainBtn.vue";
 
 export default {
   name: 'WatchedPage',
   components: {
+    MainBtn,
     ContentCard,
     AddRecordingModal,
     DeleteModal,
@@ -212,17 +219,25 @@ export default {
         console.error("Error fetching records:", error);
       }
     },
-    async saveNewRecording(recordingData) {
+    async saveNewRecording(data)  {
       try {
-        const response = await this.$http.post('/record', recordingData);
-        if (response.data && response.data.data) {
+        const recordResponse = await this.$http.post('/record', data.recordingData);
+        if (recordResponse.data && recordResponse.data.data) {
+          for (const tag of data.tagData.tags) {
+            try {
+              const tagResponse = await this.$http.post('/tag-content', tag);
+              console.log('Tag added successfully:', tagResponse.data);
+            } catch (error) {
+              console.error('Failed to add tag:', tag, error);
+            }
+          }
           await this.getRecords();
           this.closeAddRecordingModal();
         } else {
-          console.error("Invalid response format on save", response);
+          console.error('Invalid response format when saving record:', recordResponse);
         }
       } catch (error) {
-        console.error("Error saving new recording:", error);
+        console.error('Error saving new record:', error);
       }
     },
     goToPage(page) {
@@ -235,14 +250,14 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
         this.openAddRecordingModal();
-      }, 300);
+      }, 500);
     },
     openRecordDetails(record) {
       if (this.selectionMode) {
         this.toggleCardSelection(record);
       } else {
-        console.log("Open details for record:", record.id);
-        // 可在这里加入路由跳转等逻辑
+        localStorage.setItem('watchedPageNumber', this.currentPage)
+        this.$router.push({ name: 'RecordDetail', params: { id: record.id } });
       }
     },
     toggleCardSelection(record) {
@@ -258,9 +273,6 @@ export default {
     cancelSelectionMode() {
       this.selectionMode = false;
       this.selectedRecords = [];
-    },
-    isSelected(record) {
-      return this.selectedRecords.some(r => r.id === record.id);
     },
     selectAll() {
       this.selectedRecords = [...this.filteredRecords];
@@ -296,9 +308,6 @@ export default {
         }
 
         this.showDeleteModal = false;
-
-        console.log(`Deleted ${successCount} record${successCount !== 1 ? 's' : ''}; Failed to delete ${failureCount} record${failureCount !== 1 ? 's' : ''}.`);
-
         await this.getRecords();
         this.cancelSelectionMode();
       } catch (error) {
@@ -317,7 +326,7 @@ export default {
     handleCreateList(newListName) {
       console.log("Create new list:", newListName);
       this.cancelAddToList();
-    }
+    },
   },
   watch: {
     ratingFilter() {
@@ -336,11 +345,46 @@ export default {
   },
   mounted() {
     this.getRecords();
+
+    // restore page number from localstorage
+    // for when come back from RecordDetail page
+    const savedPage = localStorage.getItem('watchedPageNumber');
+    if (savedPage) {
+      this.currentPage = parseInt(savedPage);
+      localStorage.setItem('watchedPageNumber', '');
+    }
   }
 }
 </script>
 
 <style scoped>
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+@media (min-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+.page-title {
+  font-family: var(--font-fontFamily-secondary);
+  font-weight: var(--font-fontWeight-bold);
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
 .watch-page {
   max-width: 1400px;
   margin: 0 auto;

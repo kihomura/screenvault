@@ -2,40 +2,36 @@
   <div class="selection-actions-bar">
     <div class="selection-info">
       <span class="selected-count">{{ selectedCount }} items selected</span>
-    </div>
-
-    <div class="selection-actions">
-      <button class="action-btn add-to-list-btn" @click="$emit('add-to-list')">
-        <span class="action-icon">+</span>
-        Add to List
-      </button>
-      <button class="action-btn delete-btn" @click="$emit('confirm-delete')">
-        <span class="action-icon">🗑</span>
-        Delete
-      </button>
+      <main-btn type="text"
+                class="selection-control-btn select-all-btn ms-2"
+                @click="$emit('select-all')"
+                v-if="selectedCount < totalCount"
+      >
+        Select All
+      </main-btn>
     </div>
 
     <div class="selection-controls">
-      <button
-          class="selection-control-btn select-all-btn"
-          @click="$emit('select-all')"
-          v-if="selectedCount < totalCount"
-      >
-        Select All
-      </button>
-      <button class="selection-control-btn clear-btn" @click="$emit('clear-selection')">
-        Clear Selection
-      </button>
-      <button class="selection-control-btn cancel-btn" @click="$emit('cancel')">
+
+      <main-btn type="primary" class="action-btn add-to-list-btn" @click="$emit('add-to-list')">
+        Add to List
+      </main-btn>
+      <main-btn type="danger" class="action-btn delete-btn" @click="$emit('confirm-delete')">
+        Delete
+      </main-btn>
+      <main-btn type="secondary" class="selection-control-btn cancel-btn" @click="$emit('cancel')">
         Cancel
-      </button>
+      </main-btn>
     </div>
   </div>
 </template>
 
 <script>
+import MainBtn from "./buttons/MainBtn.vue";
+
 export default {
   name: 'SelectionActionsBar',
+  components: {MainBtn},
   props: {
     selectedCount: {
       type: Number,

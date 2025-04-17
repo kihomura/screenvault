@@ -1,91 +1,85 @@
 <template>
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Watching Recordings</h1>
+  <div class="filter-controls">
+    <!-- Rating filter -->
+    <div class="filter-dropdown">
+      <label for="rating-filter">Filter by rating:</label>
+      <div class="custom-select">
+        <select
+            id="rating-filter"
+            :value="ratingFilter"
+            @change="$emit('update:ratingFilter', $event.target.value)"
+            class="filter-select"
+        >
+          <option value="all">All ratings</option>
+          <option value="10-plus">10</option>
+          <option value="9-plus">9+</option>
+          <option value="8-plus">8+</option>
+          <option value="7-plus">7+</option>
+          <option value="6-plus">6+</option>
+          <option value="5-plus">5+</option>
+          <option value="4-plus">4+</option>
+          <option value="3-plus">3+</option>
+          <option value="2-plus">2+</option>
+        </select>
+        <div class="select-arrow">▼</div>
+      </div>
     </div>
 
-    <div class="filter-controls">
-      <!-- Rating filter -->
-      <div class="filter-dropdown">
-        <label for="rating-filter">Filter by rating:</label>
-        <div class="custom-select">
-          <select
-              id="rating-filter"
-              :value="ratingFilter"
-              @change="$emit('update:ratingFilter', $event.target.value)"
-              class="filter-select"
-          >
-            <option value="all">All ratings</option>
-            <option value="10-plus">10</option>
-            <option value="9-plus">9+</option>
-            <option value="8-plus">8+</option>
-            <option value="7-plus">7+</option>
-            <option value="6-plus">6+</option>
-            <option value="5-plus">5+</option>
-            <option value="4-plus">4+</option>
-            <option value="3-plus">3+</option>
-            <option value="2-plus">2+</option>
-          </select>
-          <div class="select-arrow">▼</div>
-        </div>
+    <!-- Year filter -->
+    <div class="filter-dropdown">
+      <label for="year-filter">Year:</label>
+      <div class="custom-select">
+        <select
+            id="year-filter"
+            :value="yearFilter"
+            @change="$emit('update:yearFilter', $event.target.value)"
+            class="filter-select"
+        >
+          <option value="all">All years</option>
+          <option v-for="year in availableYears" :key="year" :value="year">
+            {{ year }}
+          </option>
+        </select>
+        <div class="select-arrow">▼</div>
       </div>
+    </div>
 
-      <!-- Year filter -->
-      <div class="filter-dropdown">
-        <label for="year-filter">Year:</label>
-        <div class="custom-select">
-          <select
-              id="year-filter"
-              :value="yearFilter"
-              @change="$emit('update:yearFilter', $event.target.value)"
-              class="filter-select"
-          >
-            <option value="all">All years</option>
-            <option v-for="year in availableYears" :key="year" :value="year">
-              {{ year }}
-            </option>
-          </select>
-          <div class="select-arrow">▼</div>
-        </div>
+    <!-- Month filter -->
+    <div class="filter-dropdown">
+      <label for="month-filter">Month:</label>
+      <div class="custom-select">
+        <select
+            id="month-filter"
+            :value="monthFilter"
+            @change="$emit('update:monthFilter', $event.target.value)"
+            class="filter-select"
+            :disabled="yearFilter === 'all'"
+        >
+          <option value="all">All months</option>
+          <option v-for="month in months" :key="month.value" :value="month.value">
+            {{ month.label }}
+          </option>
+        </select>
+        <div class="select-arrow">▼</div>
       </div>
+    </div>
 
-      <!-- Month filter -->
-      <div class="filter-dropdown">
-        <label for="month-filter">Month:</label>
-        <div class="custom-select">
-          <select
-              id="month-filter"
-              :value="monthFilter"
-              @change="$emit('update:monthFilter', $event.target.value)"
-              class="filter-select"
-              :disabled="yearFilter === 'all'"
-          >
-            <option value="all">All months</option>
-            <option v-for="month in months" :key="month.value" :value="month.value">
-              {{ month.label }}
-            </option>
-          </select>
-          <div class="select-arrow">▼</div>
-        </div>
-      </div>
-
-      <!-- Sort dropdown -->
-      <div class="filter-dropdown">
-        <label for="sort-by">Sort by:</label>
-        <div class="custom-select">
-          <select
-              id="sort-by"
-              :value="sortBy"
-              @change="$emit('update:sortBy', $event.target.value)"
-              class="filter-select"
-          >
-            <option value="date-desc">Date (Newest First)</option>
-            <option value="date-asc">Date (Oldest First)</option>
-            <option value="rating-desc">Rating (High to Low)</option>
-            <option value="rating-asc">Rating (Low to High)</option>
-          </select>
-          <div class="select-arrow">▼</div>
-        </div>
+    <!-- Sort dropdown -->
+    <div class="filter-dropdown">
+      <label for="sort-by">Sort by:</label>
+      <div class="custom-select">
+        <select
+            id="sort-by"
+            :value="sortBy"
+            @change="$emit('update:sortBy', $event.target.value)"
+            class="filter-select"
+        >
+          <option value="date-desc">Date (Newest First)</option>
+          <option value="date-asc">Date (Oldest First)</option>
+          <option value="rating-desc">Rating (High to Low)</option>
+          <option value="rating-asc">Rating (Low to High)</option>
+        </select>
+        <div class="select-arrow">▼</div>
       </div>
     </div>
   </div>
@@ -124,33 +118,6 @@ export default {
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-}
-
-@media (min-width: 768px) {
-  .page-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-}
-
-.page-title {
-  font-family: var(--font-fontFamily-secondary);
-  font-weight: var(--font-fontWeight-bold);
-  font-size: 1.75rem;
-  color: var(--text-primary);
-  margin: 0;
-}
-
 .filter-controls {
   display: flex;
   flex-wrap: wrap;

@@ -5,6 +5,7 @@ export const themeConfig = {
             primary: '#3d3d3d',
             secondary: '#5a5a5a',
             tertiary: '#7c7c7c',
+            highlight: '#AECA5FFF',
             'primary-dark': '#212121',
             'primary-rgb': '61, 61, 61',
 
@@ -107,6 +108,7 @@ export const themeConfig = {
             primary: '#a18072',
             secondary: '#8d7365',
             tertiary: '#6d5a4f',
+            highlight: '#e68300',
             'primary-dark': '#8d7365',
             'primary-rgb': '161, 128, 114',
 
@@ -209,6 +211,7 @@ export const themeConfig = {
             primary: '#fe1b7c',
             secondary: '#21f8f6',
             tertiary: '#ffd900',
+            highlight: '#05D9E8FF',
             'primary-dark': '#d60062',
             'primary-rgb': '254, 27, 124',
 

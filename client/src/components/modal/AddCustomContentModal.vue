@@ -187,12 +187,12 @@
 
       <div class="form-actions">
         <div class="action-buttons">
-          <button class="cancel-button" @click="closeModal">Cancel</button>
+          <main-btn type="secondary" class="cancel-button" @click="closeModal">Cancel</main-btn>
           <div class="save-buttons">
-            <button class="save-button" @click="saveContent(false)" :disabled="!isFormValid">Save</button>
-            <button class="save-add-button" @click="saveContent(true)" :disabled="!isFormValid">
+            <main-btn type="primary" class="save-button" @click="saveContent(false)" :disabled="!isFormValid">Save</main-btn>
+            <main-btn type="highlight" class="save-add-button" @click="saveContent(true)" :disabled="!isFormValid">
               Save & Add Recording
-            </button>
+            </main-btn>
           </div>
         </div>
       </div>
@@ -201,8 +201,11 @@
 </template>
 
 <script>
+import MainBtn from "../buttons/MainBtn.vue";
+
 export default {
   name: 'AddCustomContentModal',
+  components: {MainBtn},
   props: {
     isOpen: {
       type: Boolean,
@@ -390,7 +393,6 @@ export default {
     },
 
     handleCountryBlur() {
-      // Add a small delay to allow clicks on suggestions to register
       setTimeout(() => {
         this.isFocusedCountry = false;
         if (this.countryInput.length === 2) {
@@ -401,7 +403,6 @@ export default {
     },
 
     handleLanguageBlur() {
-      // Add a small delay to allow clicks on suggestions to register
       setTimeout(() => {
         this.isFocusedLanguage = false;
         if (this.languageInput.length === 2) {
@@ -446,7 +447,7 @@ export default {
         if (response && response.data.data) {
           const newContent = response.data.data;
 
-          // Keep adding a new watching recording
+          // keep adding a new watching recording
           if (addRecording) {
             this.$emit('save', newContent);
           } else {
@@ -464,7 +465,6 @@ export default {
 </script>
 
 <style scoped>
-/* Modal Layout and Structure */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -502,7 +502,6 @@ export default {
   }
 }
 
-/* Modal Header */
 .modal-header {
   display: flex;
   align-items: center;
@@ -542,7 +541,6 @@ export default {
   color: var(--primary-dark);
 }
 
-/* Modal Body */
 .modal-body {
   padding: var(--spacing-xl);
   overflow-y: auto;
