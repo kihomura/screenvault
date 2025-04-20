@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import ContentCard from "./ContentCard.vue";
+import ContentCard from "./card/RecordCard.vue";
 import EmptyState from "./EmptyState.vue";
 
 export default {

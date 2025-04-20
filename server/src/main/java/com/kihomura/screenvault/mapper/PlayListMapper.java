@@ -10,6 +10,6 @@ import java.util.List;
 @Mapper
 public interface PlayListMapper extends BaseMapper<PlayList> {
 
-    @Select("SELECT * FROM lists WHERE creator_id = #{userId}")
+    @Select("SELECT * FROM lists WHERE creator_id = #{userId} AND is_default = false")
     List<PlayList> findByUserId(int userId);
 }

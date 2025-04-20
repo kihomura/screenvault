@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import ContentCard from "../components/ContentCard.vue";
+import ContentCard from "../components/card/RecordCard.vue";
 import AddRecordingModal from "../components/modal/AddRecordModal.vue";
 import DeleteModal from "../components/modal/DeleteModal.vue";
 import AddToListModal from "../components/modal/AddToListModal.vue";
