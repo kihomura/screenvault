@@ -23,7 +23,7 @@
 import Wrapper from "../components/form/wrapper.vue";
 import AnimatedGrid from '../components/animatedGrid.vue';
 import AppHeader from '../components/ui/Header.vue';
-import AuthContainer from "../components/auth/authContainer.vue";
+import AuthContainer from "../components/ui/auth/authContainer.vue";
 import MessageDisplay from "../components/form/message.vue";
 
 export default {

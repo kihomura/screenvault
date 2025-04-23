@@ -43,6 +43,7 @@ export default {
   methods: {
     handleClick(event) {
       if (!this.disabled) {
+        event.stopPropagation();
         this.$emit('click', event);
       }
     }
@@ -85,7 +86,6 @@ export default {
   height: 16px;
 }
 
-/* 可以根据需要调整尺寸 */
 .delete-button.small {
   width: 24px;
   height: 24px;

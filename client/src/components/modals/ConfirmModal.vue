@@ -10,6 +10,7 @@
 
       <div class="modal-content">
         <p>{{ message }}</p>
+        <span class="delete-warning">This action cannot be undone.</span>
       </div>
 
       <div class="modal-actions">
@@ -94,22 +95,28 @@ export default {
   justify-content: center;
   z-index: 100;
   backdrop-filter: blur(3px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-container {
-  width: 100%;
-  max-width: 400px;
   background-color: var(--background-base);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-level3-default);
+  width: 90%;
+  max-width: 450px;
   overflow: hidden;
-  animation: modal-appear 0.2s ease-out;
+  animation: modalSlideUp 0.3s ease;
 }
 
-@keyframes modal-appear {
+@keyframes modalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -154,81 +161,34 @@ export default {
 
 .modal-content {
   padding: var(--spacing-lg);
+  font-size: var(--font-fontSize-base);
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+  line-height: var(--font-lineHeight-relaxed);
 }
 
 .modal-content p {
-  margin: 0;
   font-size: var(--font-fontSize-base);
-  line-height: var(--font-lineHeight-normal);
   color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+  line-height: var(--font-lineHeight-relaxed);
+}
+
+.delete-warning {
+  color: var(--accent-error);
+  font-weight: var(--font-fontWeight-medium);
+  display: inline-block;
+  margin-top: var(--spacing-md);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
-  gap: var(--spacing-sm);
-}
-
-button {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  font-family: var(--font-fontFamily-primary);
-  font-weight: var(--font-fontWeight-medium);
-  font-size: var(--font-fontSize-sm);
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  cursor: pointer;
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-.cancel-button {
-  background-color: var(--background-muted);
-  border: 1px solid var(--border-light);
-  color: var(--text-secondary);
-}
-
-.cancel-button:hover {
-  background-color: var(--interactive-hover);
-}
-
-.confirm-button {
-  color: white;
-  border: none;
-}
-
-.danger {
-  background-color: var(--accent-error);
-}
-
-.danger:hover {
-  background-color: rgba(var(--accent-error-rgb), 0.9);
-}
-
-.warning {
-  background-color: var(--accent-warning);
-}
-
-.warning:hover {
-  background-color: rgba(var(--accent-warning-rgb), 0.9);
-}
-
-.info {
-  background-color: var(--accent-info);
-}
-
-.info:hover {
-  background-color: rgba(var(--accent-info-rgb), 0.9);
-}
-
-.success {
-  background-color: var(--accent-success);
-}
-
-.success:hover {
-  background-color: rgba(var(--accent-success-rgb), 0.9);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+  gap: var(--spacing-md);
 }
 
 @media (max-width: 480px) {
@@ -238,11 +198,6 @@ button:active {
 
   .modal-actions {
     flex-direction: column;
-  }
-
-  .cancel-button, .confirm-button {
-    width: 100%;
-    padding: var(--spacing-md);
   }
 }
 </style>

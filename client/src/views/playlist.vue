@@ -15,9 +15,7 @@
       </div>
     </div>
 
-    <!-- list items -->
     <div class="lists-container">
-
       <!-- no list state -->
       <div v-if="lists.length === 0" class="empty-state">
         <div class="empty-icon">📋</div>
@@ -33,19 +31,20 @@
             :list="list"
             :index="index"
             :isManageMode="isManageMode"
-            @delete="deleteList"
             @reorder="handleReorder"
-            @show-delete-confirm="showDeleteConfirm"
+            @show-delete-confirm="showConfirmModal"
         />
       </div>
     </div>
 
+    <!-- create new list -->
     <add-list-modal
         :show="showAddModal"
         @close="showAddModal = false"
         @create="addNewList"
     />
 
+    <!-- confirm delete modal -->
     <confirm-modal
         :visible="deleteModalVisible"
         :title="'Delete List'"
@@ -53,17 +52,17 @@
         :confirm-text="'Delete'"
         :cancel-text="'Cancel'"
         type="danger"
-        @confirm="confirmDeleteList"
+        @confirm="deleteList"
         @cancel="deleteModalVisible = false"
     />
   </div>
 </template>
 
 <script>
-import ListItem from '../components/ListItem.vue';
-import AddListModal from "../components/modal/AddListModal.vue";
+import ListItem from '../components/ui/list/ListItem.vue';
+import AddListModal from "../components/modals/AddListModal.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
-import ConfirmModal from "../components/modal/ConfirmModal.vue";
+import ConfirmModal from "../components/modals/ConfirmModal.vue";
 
 export default {
   name: 'playlist',
@@ -81,10 +80,10 @@ export default {
       lists: [],
       // store the custom order of lists
       storageKey: 'user-playlist-order',
-      // 确认删除Modal相关状态
       deleteModalVisible: false,
       listToDelete: null,
-      deleteMessage: ''
+      deleteMessage: '',
+      isDeleting: null
     }
   },
   methods: {
@@ -108,35 +107,30 @@ export default {
         console.log('Error adding new list: ',error);
       }
     },
-    // 显示确认删除Modal
-    showDeleteConfirm(list) {
+    showConfirmModal(list) {
       this.listToDelete = list;
-      this.deleteMessage = `Are you sure you want to delete '${list.listName}'?`;
+      this.deleteMessage = `Are you sure you want to delete list '${list.listName}'?`;
       this.deleteModalVisible = true;
     },
-    // 确认删除后执行
-    async confirmDeleteList() {
-      if (!this.listToDelete) return;
-
+    async deleteList() {
+      if (!this.listToDelete || this.isDeleting) return;
       try {
-        await this.$http.delete(`/playlist/id/${this.listToDelete.id}`);
-        this.lists = this.lists.filter(list => list.id !== this.listToDelete.id);
-        this.saveListOrderToLocalStorage();
+        const listToDeleteId = this.listToDelete.id;
+        this.isDeleting = true;
+        const response = await this.$http.delete(`/playlist/id/${listToDeleteId}`);
+
+        if (response.data && response.data.code === 200) {
+          this.lists = this.lists.filter(list => list.id !== listToDeleteId);
+          this.saveListOrderToLocalStorage();
+        } else {
+          console.error('Server returned error:', response.data);
+        }
       } catch (error) {
         console.log('Error deleting list: ', error);
       } finally {
         this.deleteModalVisible = false;
         this.listToDelete = null;
-      }
-    },
-    async deleteList(listId) {
-      try {
-        // const response = await this.$http.delete(`/playlist/id/${listId}`);
-        // console.log(response.data);
-        this.lists = this.lists.filter(list => list.id !== listId);
-        this.saveListOrderToLocalStorage();
-      } catch (error) {
-        console.log('Error deleting list: ', error)
+        this.isDeleting = false;
       }
     },
     async fetchAllLists() {

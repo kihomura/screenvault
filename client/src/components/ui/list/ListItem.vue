@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import DeleteButton from "./buttons/DeleteBtn.vue";
+import DeleteButton from "../../buttons/DeleteBtn.vue";
 
 export default {
   name: 'ListItem',

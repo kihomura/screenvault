@@ -1,12 +1,11 @@
 <template>
   <div class="watch-page">
     <!-- Header with Filter Controls -->
-    <div class="page-header">
+    <div class="page-header" v-if="!selectionMode">
       <div class="header-content">
         <h1 class="page-title">Watching Recordings</h1>
       </div>
       <filter-controls
-          v-if="!selectionMode"
           :ratingFilter="ratingFilter"
           :yearFilter="yearFilter"
           :monthFilter="monthFilter"
@@ -34,13 +33,14 @@
 
     <!-- Content Grid with ContentCards -->
     <content-grid
-        :records="paginatedRecords"
+        :items="paginatedRecordsWithType"
+        itemType="record"
         :selectionMode="selectionMode"
-        :selectedRecords="selectedRecords"
-        :currentPage="currentPage"
+        :selectedItems="selectedRecords"
         :showAddCard="currentPage === 1 && !selectionMode"
-        :filteredRecordsCount="filteredRecords.length"
-        @open-record="openRecordDetails"
+        :totalItems="filteredRecords.length"
+        addCardText="Track your latest watch"
+        @open-item="openRecordDetails"
         @toggle-selection="toggleCardSelection"
         @add-new="openAddRecordingModal"
     />
@@ -60,18 +60,33 @@
         @page-changed="goToPage"
     />
 
-    <!-- Modals -->
-    <add-recording-modal
+    <!-- ContentTabModal for selecting content -->
+    <content-tab-modal
         :isOpen="isAddModalOpen"
+        :visibleTabs="['search', 'custom', 'wishlist']"
+        mode="addRecord"
+        :multiSelect="false"
         @close="closeAddRecordingModal"
+        @content-selected="handleContentSelected"
+    />
+
+    <!-- AddRecordModal for adding details to selected content -->
+    <add-recording-modal
+        :isOpen="isRecordDetailsModalOpen"
+        :selectedContent="selectedContent"
+        @close="closeRecordDetailsModal"
         @save="saveNewRecording"
     />
 
-    <delete-modal
-        v-if="showDeleteModal"
-        :count="selectedRecords.length"
-        @cancel="cancelDelete"
+    <confirm-modal
+        :visible="showDeleteModal"
+        :title="'Delete Record'"
+        :message="deleteMessage"
+        :confirm-text="'Delete'"
+        :cancel-text="'Cancel'"
+        type="danger"
         @confirm="deleteSelected"
+        @cancel="cancelDelete"
     />
 
     <add-to-list-modal
@@ -83,28 +98,28 @@
 </template>
 
 <script>
-import ContentCard from "../components/card/RecordCard.vue";
-import AddRecordingModal from "../components/modal/AddRecordModal.vue";
-import DeleteModal from "../components/modal/DeleteModal.vue";
-import AddToListModal from "../components/modal/AddToListModal.vue";
+import ContentGrid from "../components/ui/CardGrid.vue";
+import AddRecordingModal from "../components/modals/AddRecordModal.vue";
+import AddToListModal from "../components/modals/AddToListModal.vue";
 import Pagination from "../components/ui/Pagination.vue";
 import FilterControls from "../components/FilterContols.vue";
-import SelectionActionsBar from "../components/SelectionActionBar.vue";
-import ContentGrid from "../components/ContentGrid.vue";
+import SelectionActionsBar from "../components/ui/SelectionBar.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
+import ContentTabModal from "../components/modals/ContentTabModal.vue";
+import ConfirmModal from "../components/modals/ConfirmModal.vue";
 
 export default {
   name: 'WatchedPage',
   components: {
+    ConfirmModal,
+    ContentTabModal,
     MainBtn,
-    ContentCard,
+    ContentGrid,
     AddRecordingModal,
-    DeleteModal,
     AddToListModal,
     Pagination,
     FilterControls,
-    SelectionActionsBar,
-    ContentGrid
+    SelectionActionsBar
   },
   data() {
     return {
@@ -114,6 +129,8 @@ export default {
       monthFilter: 'all',
       records: [],
       isAddModalOpen: false,
+      isRecordDetailsModalOpen: false,
+      selectedContent: null,
       currentPage: 1,
       firstPageItems: 17,
       regularPageItems: 18,
@@ -124,6 +141,7 @@ export default {
       showAddToListModal: false,
       newListName: '',
       hoveredCard: null,
+      deleteMessage: '',
       months: [
         { value: '01', label: 'January' },
         { value: '02', label: 'February' },
@@ -194,6 +212,13 @@ export default {
           : this.firstPageItems + (this.currentPage - 2) * this.regularPageItems;
       return this.filteredRecords.slice(startIndex, startIndex + pageSize);
     },
+    paginatedRecordsWithType() {
+      // Add type property to each record for ContentGrid component
+      return this.paginatedRecords.map(record => ({
+        ...record,
+        type: 'record'
+      }));
+    },
     totalPages() {
       if (this.filteredRecords.length <= this.firstPageItems) return 1;
       const remainingItems = this.filteredRecords.length - this.firstPageItems;
@@ -206,6 +231,15 @@ export default {
     },
     closeAddRecordingModal() {
       this.isAddModalOpen = false;
+    },
+    handleContentSelected(content) {
+      this.selectedContent = content;
+      this.isAddModalOpen = false;
+      this.isRecordDetailsModalOpen = true;
+    },
+    closeRecordDetailsModal() {
+      this.isRecordDetailsModalOpen = false;
+      this.selectedContent = null;
     },
     async getRecords() {
       try {
@@ -232,7 +266,7 @@ export default {
             }
           }
           await this.getRecords();
-          this.closeAddRecordingModal();
+          this.closeRecordDetailsModal();
         } else {
           console.error('Invalid response format when saving record:', recordResponse);
         }
@@ -284,6 +318,7 @@ export default {
     confirmDelete() {
       if (this.selectedRecords.length === 0) return;
       this.showDeleteModal = true;
+      this.deleteMessage = `Are you sure you want to delete ${this.selectedRecords.length} records?`;
     },
     cancelDelete() {
       this.showDeleteModal = false;

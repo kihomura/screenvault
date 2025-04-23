@@ -1,93 +1,121 @@
 <template>
   <div class="contents-container">
-    <!-- Add new card - only shown on the first page and not in selection mode -->
-    <div v-if="showAddCard" class="contents-card add-card" @click="$emit('add-new')">
+    <!-- Add new card - only shown when specified and not in selection mode -->
+    <div v-if="showAddCard && totalItems !== 0" class="contents-card add-card" @click="$emit('add-new')">
       <div class="add-content">
         <div class="add-icon-wrapper">
           <span class="add-icon">+</span>
         </div>
-        <p class="add-subtext">Track your latest watch</p>
+        <p class="add-subtext">{{ addCardText }}</p>
       </div>
     </div>
 
     <!-- Content cards -->
     <div
-        v-for="record in records"
-        :key="record.id"
+        v-for="item in items"
+        :key="item.id"
         class="content-card-wrapper"
-        @click="$emit('open-record', record)"
-        @mouseover="hoveredCard = record.id"
-        @mouseleave="hoveredCard = null"
+        @click="$emit('open-item', item)"
+        @mouseover="hoveredItem = item.id"
+        @mouseleave="hoveredItem = null"
     >
-      <content-card
-          :record="record"
-          :class="{ 'content-card-blur': selectionMode && !isSelected(record) }"
+      <component
+          :is="cardComponent"
+          :record="item.type === 'record' ? item : null"
+          :content="item.type === 'content' ? item : null"
+          :class="{ 'content-card-blur': selectionMode && !isSelected(item) }"
       />
 
       <!-- Hoverable selection checkbox -->
       <div
           class="hover-selection-checkbox"
           :class="{
-          'visible': hoveredCard === record.id || isSelected(record) || selectionMode,
-          'selected': isSelected(record)
+          'visible': hoveredItem === item.id || isSelected(item) || selectionMode,
+          'selected': isSelected(item)
         }"
-          @click.stop="$emit('toggle-selection', record)"
+          @click.stop="$emit('toggle-selection', item)"
       >
         <div class="selection-indicator">
-          <span class="checkmark" v-if="isSelected(record)">✓</span>
+          <span class="checkmark" v-if="isSelected(item)">✓</span>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Empty state -->
-    <empty-state v-if="filteredRecordsCount === 0" />
+  <!-- Empty state -->
+  <div class="empty-state-container" v-if="totalItems === 0">
+    <empty-state :title="emptyStateTitle" :message="emptyStateMessage"/>
+    <main-btn type="highlight" @click="$emit('add-new')">Add + </main-btn>
   </div>
 </template>
 
 <script>
-import ContentCard from "./card/RecordCard.vue";
+import RecordCard from "../cards/RecordCard.vue";
+import ContentCard from "../cards/ContentCard.vue";
 import EmptyState from "./EmptyState.vue";
+import MainBtn from "../buttons/MainBtn.vue";
 
 export default {
-  name: 'ContentGrid',
+  name: 'CardGrid',
   components: {
+    MainBtn,
+    RecordCard,
     ContentCard,
     EmptyState
   },
+  emits: ['add-new', 'open-item', 'toggle-selection'],
   props: {
-    records: {
+    items: {
       type: Array,
       required: true
+    },
+    itemType: {
+      type: String,
+      default: 'record',
+      validator: value => ['record', 'content'].includes(value)
     },
     selectionMode: {
       type: Boolean,
       default: false
     },
-    selectedRecords: {
+    selectedItems: {
       type: Array,
       default: () => []
-    },
-    currentPage: {
-      type: Number,
-      required: true
     },
     showAddCard: {
       type: Boolean,
       default: false
     },
-    filteredRecordsCount: {
+    totalItems: {
       type: Number,
       required: true
-    }
+    },
+    addCardText: {
+      type: String,
+      default: "Add new item"
+    },
   },
   data() {
     return {
-      hoveredCard: null
+      hoveredItem: null
+    }
+  },
+  computed: {
+    cardComponent() {
+      return this.itemType === 'record' ? 'record-card' : 'content-card';
+    },
+    emptyStateTitle() {
+      return this.itemType === 'record' ? 'Your Watching Recording Is Empty' : 'The List Is Empty';
+    },
+    emptyStateMessage() {
+      return this.itemType === 'record' ?
+          'Start tracking your watching journey by adding your first recording!' :
+          'Start organizing your watching by adding first content!'
     }
   },
   methods: {
-    isSelected(record) {
-      return this.selectedRecords.some(r => r.id === record.id);
+    isSelected(item) {
+      return this.selectedItems.some(selectedItem => selectedItem.id === item.id);
     }
   }
 }
@@ -244,5 +272,11 @@ export default {
   color: var(--text-secondary);
   font-size: var(--font-fontSize-sm);
   margin: 0;
+}
+
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

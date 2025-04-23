@@ -1,17 +1,30 @@
-<!-- src/components/EmptyState.vue -->
 <template>
   <div class="empty-state">
-    <div class="empty-state-icon">🎬</div>
-    <h3 class="empty-state-title">Your Watch List Is Empty</h3>
+    <div class="empty-state-icon">{{ icon }}</div>
+    <h3 class="empty-state-title">{{ title }}</h3>
     <p class="empty-state-message">
-      Start tracking your watching journey by adding your first recording!
+      {{ message }}
     </p>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'EmptyState'
+  name: 'EmptyState',
+  props: {
+    title: {
+      type: String,
+      default: 'Your Watching Recording Is Empty'
+    },
+    message: {
+      type: String,
+      default: 'Start tracking your watching journey by adding your first recording!'
+    },
+    icon: {
+      type: String,
+      default: '🎬'
+    }
+  }
 }
 </script>
 
@@ -23,7 +36,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
-  background-color: var(--background-subtle);
+
   border-radius: var(--border-radius-lg);
   text-align: center;
 }

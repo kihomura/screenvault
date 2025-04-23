@@ -43,8 +43,8 @@
 
 <script>
 import BackButton from "../components/buttons/BackButton.vue";
-import ContentInfoCard from "../components/card/ContentInfoCard.vue";
-import RecordingInfoCard from "../components/card/RecordInfoCard.vue";
+import ContentInfoCard from "../components/cards/ContentInfoCard.vue";
+import RecordingInfoCard from "../components/cards/RecordInfoCard.vue";
 
 export default {
   name: 'RecordDetailPage',

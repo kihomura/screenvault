@@ -13,7 +13,7 @@
 
     <div class="selection-controls">
 
-      <main-btn type="primary" class="action-btn add-to-list-btn" @click="$emit('add-to-list')">
+      <main-btn type="primary" v-if="showAddToList" class="action-btn add-to-list-btn" @click="$emit('add-to-list')">
         Add to List
       </main-btn>
       <main-btn type="danger" class="action-btn delete-btn" @click="$emit('confirm-delete')">
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import MainBtn from "./buttons/MainBtn.vue";
+import MainBtn from "../buttons/MainBtn.vue";
 
 export default {
   name: 'SelectionActionsBar',
@@ -40,6 +40,10 @@ export default {
     totalCount: {
       type: Number,
       required: true
+    },
+    showAddToList: {
+      type: Boolean,
+      default: true
     }
   }
 }
@@ -74,11 +78,6 @@ export default {
   font-size: var(--font-fontSize-sm);
 }
 
-.selection-actions {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
 .action-btn {
   display: flex;
   align-items: center;
@@ -109,10 +108,6 @@ export default {
 
 .delete-btn:hover {
   background-color: rgba(var(--accent-error-rgb), 0.2);
-}
-
-.action-icon {
-  font-size: var(--font-fontSize-lg);
 }
 
 .selection-controls {

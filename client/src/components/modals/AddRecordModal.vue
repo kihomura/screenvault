@@ -1,18 +1,15 @@
 <template>
   <div class="modal-backdrop" v-if="isOpen" @click.self="closeModal">
     <div class="modal-container">
+
+      <!-- header -->
       <div class="modal-header">
         <h2 class="modal-title">Add New Recording</h2>
         <button class="close-button" @click="closeModal">&times;</button>
       </div>
 
-      <search-content-modal
-          v-if="!selectedContent"
-          :userRecordings="userRecordings"
-          @content-selected="selectContent"
-      />
-
-      <div class="content-form" v-if="selectedContent">
+      <!-- selected content -->
+      <div class="content-form">
         <div class="selected-content-header">
           <div class="selected-content-info">
             <img
@@ -25,11 +22,9 @@
               <p>{{ formatYear(selectedContent.releaseDate) }}</p>
             </div>
           </div>
-          <button class="change-selection-button" @click="resetSelection">Change</button>
         </div>
 
         <div class="form-container">
-
           <!-- Watch Date -->
           <div class="form-group">
             <label for="watchDate">Watch Date</label>
@@ -46,6 +41,8 @@
           <div class="form-group">
             <label for="rating">Rating (Only whole or half values allowed, e.g. 8 or 8.5)</label>
             <div class="rating-input">
+
+              <!-- stars -->
               <div class="rating-stars" @mouseleave="resetHoverRating">
                 <div
                     v-for="i in 10"
@@ -57,6 +54,7 @@
                   <span class="star" :class="getStarClass(i)">★</span>
                 </div>
               </div>
+              <!-- number -->
               <div class="rating-number">
                 <input
                     type="number"
@@ -76,6 +74,7 @@
           <!-- Tag -->
           <div class="form-group">
             <label>Tags</label>
+            <!-- select existed tags -->
             <div class="tags-container">
               <div class="tags-list">
                 <div
@@ -87,6 +86,7 @@
                   {{ tag.tagName }}
                 </div>
               </div>
+              <!-- or add new tag -->
               <div class="add-tag-input">
                 <input
                     type="text"
@@ -103,6 +103,7 @@
           <!-- Review -->
           <div class="form-group">
             <label for="reviewText">Review</label>
+            <!-- review text -->
             <textarea
                 id="reviewText"
                 v-model="formData.reviews[0].text"
@@ -110,6 +111,7 @@
                 class="form-control"
                 rows="4"
             ></textarea>
+            <!-- review date (watch date as default) -->
             <p class="review-date-selector">
               <label>
                 <input type="checkbox" v-model="formData.reviews[0].useCustomDate" />
@@ -131,6 +133,7 @@
             </p>
           </div>
 
+          <!-- add multiple reviews -->
           <div
               v-for="(review, index) in formData.reviews.slice(1)"
               :key="index + 1"
@@ -167,7 +170,7 @@
         </div>
       </div>
 
-      <div class="form-actions" v-if="selectedContent">
+      <div class="form-actions">
         <main-btn type="secondary" @click="closeModal">Cancel</main-btn>
         <div class="save-buttons">
           <main-btn type="highlight" @click="saveRecording(false)">Save</main-btn>
@@ -178,26 +181,26 @@
 </template>
 
 <script>
-import AddCustomContentModal from './AddCustomContentModal.vue';
-import SearchContentModal from './SearchContentModal.vue';
 import MainBtn from "../buttons/MainBtn.vue";
+import {formatYear} from "../../utils/index.js";
 
 export default {
-  name: 'AddRecordingModal',
+  name: 'AddRecordModal',
   components: {
-    MainBtn,
-    AddCustomContentModal,
-    SearchContentModal
+    MainBtn
   },
   props: {
     isOpen: {
       type: Boolean,
       default: false
+    },
+    selectedContent: {
+      type: Object,
+      default: null
     }
   },
   data() {
     return {
-      selectedContent: null,
       currentDate: new Date().toISOString().split('T')[0],
       // TODO: use imgPrefix only when content's source_type = 'OFFICIAL_DATA'
       imgPrefix: 'https://image.tmdb.org/t/p/w1280',
@@ -205,7 +208,7 @@ export default {
       availableTags: [],
       selectedTags: [],
       newTagName: '',
-      userRecordings: [],
+      hoverRating: null,
       formData: {
         contentId: null,
         rate: null,
@@ -221,28 +224,23 @@ export default {
       }
     };
   },
-  created() {
-    this.fetchTags();
-    this.fetchUserRecordings();
-  },
   watch: {
     isOpen(newVal) {
-      if (newVal) {
-        this.fetchUserRecordings();
+      if (newVal && this.selectedContent) {
+        this.formData.contentId = this.selectedContent.id;
+      }
+    },
+    selectedContent(newContent) {
+      if (newContent) {
+        this.formData.contentId = newContent.id;
       }
     }
   },
+  created() {
+    this.fetchTags();
+  },
   methods: {
-    async fetchUserRecordings() {
-      try {
-        const response = await this.$http.get('/record');
-        if (response && response.data && response.data.data) {
-          this.userRecordings = response.data.data;
-        }
-      } catch (error) {
-        console.error('Error fetching user recordings:', error);
-      }
-    },
+    formatYear,
     async fetchTags() {
       try {
         const response = await this.$http.get('/tag');
@@ -293,11 +291,10 @@ export default {
       this.$emit('close');
     },
     resetForm() {
-      this.selectedContent = null;
       this.selectedTags = [];
       this.showMultipleReviews = false;
       this.formData = {
-        contentId: null,
+        contentId: this.selectedContent ? this.selectedContent.id : null,
         rate: null,
         status: 'WATCHED',
         watchDate: new Date().toISOString().split('T')[0],
@@ -310,13 +307,9 @@ export default {
         ]
       };
     },
-    selectContent(content) {
-      this.selectedContent = content;
-      this.formData.contentId = content.id;
-    },
     saveRecording(addAnother) {
       if (!this.formData.contentId) {
-        alert('Please select content');
+        alert('Content ID is missing');
         return;
       }
       if (!this.formData.watchDate) {
@@ -373,6 +366,7 @@ export default {
       } else {
         this.formData.rate = starIndex;
       }
+      this.hoverRating = null;
     },
     resetHoverRating() {
       this.hoverRating = null;
@@ -400,15 +394,6 @@ export default {
           this.formData.rate = 0;
         }
       }
-    },
-    resetSelection() {
-      this.selectedContent = null;
-      this.formData.contentId = null;
-    },
-    formatYear(dateStr) {
-      if (!dateStr) return '';
-      const date = new Date(dateStr);
-      return date.getFullYear();
     }
   }
 };

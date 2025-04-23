@@ -20,7 +20,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-import FormButton from "../buttons/formButton.vue";
+import FormButton from "../../buttons/formButton.vue";
 import AuthForm from "./authForm.vue";
 
 const props = defineProps({

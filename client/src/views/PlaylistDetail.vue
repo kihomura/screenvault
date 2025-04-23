@@ -1,10 +1,12 @@
 <template>
-  <div class="wishlist-page">
+  <div class="list-detail-page">
     <!-- header -->
     <div class="page-header" v-if="!selectionMode">
-      <div class="header-content">
-        <h1 class="page-title">Wishlist</h1>
-      </div>
+      <back-button
+          :to="{ name: 'playlist' }"
+          aria-label="Back to playlist"
+      />
+      <h1 class="page-title">{{ list.listName }}</h1>
 
       <!-- sort section -->
       <div class="header-actions">
@@ -56,16 +58,17 @@
 
     <content-tab-modal
         :is-open="isAddModalOpen"
-        :visibleTabs="['search', 'custom']"
-        mode="addToWishlist"
+        :visibleTabs="['search', 'custom', 'watched', 'wishlist']"
+        mode="addToList"
+        :targetListId="list.id"
         :multiSelect="true"
         @close="closeAddContentModal"
-        @items-selected="addToWishlist"
+        @items-selected="addContentToList"
     />
 
     <confirm-modal
         :visible="showDeleteModal"
-        :title="'Remove contents from wishlist'"
+        :title="'Remove contents from list'"
         :message="deleteMessage"
         :confirm-text="'Remove'"
         :cancel-text="'Cancel'"
@@ -77,31 +80,28 @@
 </template>
 
 <script>
-import ContentGrid from "../components/ui/CardGrid.vue";
-import AddRecordingModal from "../components/modals/AddRecordModal.vue";
-import AddToListModal from "../components/modals/AddToListModal.vue";
-import Pagination from "../components/ui/Pagination.vue";
-import FilterControls from "../components/FilterContols.vue";
-import SelectionActionsBar from "../components/ui/SelectionBar.vue";
+import ContentGrid from '../components/ui/CardGrid.vue';
 import MainBtn from "../components/buttons/MainBtn.vue";
+import SelectionActionsBar from "../components/ui/SelectionBar.vue";
+import AddToListModal from "../components/modals/AddToListModal.vue";
+import BackButton from "../components/buttons/BackButton.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 
 export default {
-  name: 'WishlistPage',
+  name: 'ListDetail',
   components: {
     ConfirmModal,
     ContentTabModal,
+    BackButton,
     MainBtn,
     ContentGrid,
-    AddRecordingModal,
+    SelectionActionsBar,
     AddToListModal,
-    Pagination,
-    FilterControls,
-    SelectionActionsBar
   },
   data() {
     return {
+      list: {},
       contents: [],
       contentCount: 0,
       listContents: [],
@@ -112,10 +112,14 @@ export default {
       selectedContents: [],
       showDeleteModal: false,
       isAddModalOpen: false,
-      deleteMessage: ''
-    }
+      deleteMessage: '',
+      isDeleting: false
+    };
   },
   computed: {
+    listId() {
+      return this.$route.params.id;
+    },
     sortedContents() {
       if (!this.contents.length) return [];
 
@@ -154,17 +158,23 @@ export default {
     }
   },
   methods: {
-    async fetchWishlist() {
+    async fetchListDetails() {
       try {
-        const response = await this.$http.get(`/record/wishlist`);
-        if (response.data.data) {
-          this.listContents = response.data.data;
-          this.contentCount = this.listContents.length;
-
-          await this.fetchContentDetails();
-        }
+        const response = await this.$http.get(`/playlist/id/${this.listId}`);
+        this.list = response.data.data;
       } catch (error) {
-        console.error('Error fetching wishlist: ', error);
+        console.error('Error fetching list details:', error);
+      }
+    },
+    async fetchListContents() {
+      try {
+        const response = await this.$http.get(`/list-content/list/${this.listId}`);
+        this.listContents = response.data.data || [];
+        this.contentCount = this.listContents.length;
+
+        await this.fetchContentDetails();
+      } catch (error) {
+        console.error('Error fetching list contents:', error);
         this.listContents = [];
         this.contentCount = 0;
       } finally {
@@ -185,57 +195,11 @@ export default {
         console.error('Error fetching content details:', error);
       }
     },
-    async addToWishlist(items) {
-      this.loading = true;
-
-      try {
-        const wishlistResponse = await this.$http.get(`/playlist/wishlist`);
-        const wishlistId = wishlistResponse.data.data.id;
-
-        if (!wishlistId) {
-          console.error('Error fetching wishlist');
-          return;
-        }
-
-        const addPromises = [];
-
-        // create batch of ListContent
-        const listContents = items.map(item => ({
-          listId: wishlistId,
-          contentId: item.id,
-          addTime: new Date().toISOString()
-        }));
-        addPromises.push(this.$http.post('/list-content/batch', listContents));
-
-        // then add each item to user-content table and set their status = WANT_TO_WATCH
-        for (const item of items) {
-          const userContent = {
-            contentId: item.id
-            // status will be set at backend
-          };
-          addPromises.push(this.$http.post('/record/wishlist', userContent));
-        }
-
-        const responses = await Promise.all(addPromises);
-        const allSuccessful = responses.every(response => response.data.code === 200);
-
-        if (allSuccessful) {
-          console.log(`Successfully added ${items.length} items to wishlist`);
-          await this.fetchWishlist();
-        }
-      } catch (e) {
-        console.error(`Error adding items to wishlist`, e)
-      } finally {
-        this.loading = false;
-      }
-    },
-
     viewContentDetails(content) {
       if (!this.selectionMode) {
         this.$router.push(`/content/${content.id}`);
       }
     },
-
     toggleContentSelection(content) {
       const index = this.selectedContents.findIndex(c => c.id === content.id);
       if (!this.selectionMode) {
@@ -267,48 +231,59 @@ export default {
     confirmDelete() {
       if (this.selectedContents.length === 0) return;
       this.showDeleteModal = true;
-      this.deleteMessage =  `Are you sure you want to remove ${this.selectedContents.length} contents from wishlist?`
+      this.deleteMessage = `Are you sure you want to remove ${this.selectedContents.length} contents from list ${this.list.listName}?`
     },
     cancelDelete() {
       this.showDeleteModal = false;
     },
     async deleteSelected() {
+      if (this.isDeleting){
+        return
+      }
       this.showDeleteModal = false;
 
       try {
-        const wishlistResponse = await this.$http.get(`/playlist/wishlist`);
-        const wishlistId = wishlistResponse.data.data.id;
+        this.isDeleting = true;
+        const deletePromises = this.selectedContents.map(content => {
+          const listContent = {
+            listId: this.listId,
+            contentId: content.id
+          };
+          return this.$http.delete('/list-content', { data: listContent });
+        });
 
-        if (wishlistId) {
-          const deletePromises = [];
-          for (const content of this.selectedContents) {
-            const listContent = {
-              listId: wishlistId,
-              contentId: content.id
-            };
-            deletePromises.push(this.$http.delete('/list-content', {data: listContent}));
-            deletePromises.push(this.$http.delete('/record/wishlist', {
-              data: content.id,
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              transformRequest: [(data) => data]
-            }));
-          }
+        const results = await Promise.all(deletePromises);
+        const allSuccessful = results.every(response => response.data.code === 200);
 
-          const results = await Promise.all(deletePromises);
-          const allSuccessful = results.every(response => response.data.code === 200);
-          if (allSuccessful) {
-            console.log(`Successfully removed ${this.selectedContents.length} contents from wishlist`);
-            await this.fetchWishlist();
-            this.cancelSelectionMode();
-          } else {
-            console.error('Error deleting contents from wishlist');
-            console.log(results)
-          }
+        if (allSuccessful) {
+          console.log(`Successfully removed ${this.selectedContents.length} contents from list ${this.list.listName}`);
+          await this.fetchListContents();
+          this.cancelSelectionMode();
+        } else {
+          console.error('Some items failed to be removed from the list');
         }
       } catch (error) {
-        console.error('Error removing contents from wishlist');
+        console.error('Error removing contents from list:', error);
+      } finally {
+        this.isDeleting = false;
+      }
+    },
+    async addContentToList(items) {
+      try {
+        const listContents = items.map(item => ({
+          listId: this.listId,
+          contentId: item.id,
+          addTime: new Date().toISOString()
+        }));
+        const response = await this.$http.post(`/list-content/batch`, listContents);
+        if (response.data.code === 200) {
+          console.log(`Successfully add ${items.length}items to list ${this.list.listName}`);
+          await this.fetchListContents();
+        } else {
+          console.log('Failed to add to list:', response.data.code, response.data.message);
+        }
+      } catch (e) {
+        console.error('Error adding content to list:', e);
       }
     },
     openAddContentModal() {
@@ -319,21 +294,37 @@ export default {
     }
   },
   created() {
-    this.fetchWishlist();
-    this.fetchContentDetails();
+    this.fetchListDetails();
+    this.fetchListContents();
   }
-}
+};
 </script>
 
 <style scoped>
+.list-detail-page {
+  font-family: var(--font-fontFamily-primary);
+  color: var(--text-primary);
+  padding: var(--spacing-xl) var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
 .page-header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xxl);
+  padding-bottom: var(--spacing-md);
   border-bottom: 1px solid var(--border-light);
+}
+
+.page-title {
+  font-family: var(--font-fontFamily-secondary);
+  font-weight: var(--font-fontWeight-bold);
+  font-size: var(--font-fontSize-xxl);
+  color: var(--text-primary);
+  margin: 0;
 }
 
 @media (min-width: 768px) {
@@ -345,18 +336,48 @@ export default {
   }
 }
 
-.page-title {
-  font-family: var(--font-fontFamily-secondary);
-  font-weight: var(--font-fontWeight-bold);
-  font-size: 1.75rem;
-  color: var(--text-primary);
-  margin: 0;
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
 }
 
-.wishlist-page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: var(--spacing-lg);
-  position: relative;
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.sort-select {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-light);
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+  font-size: var(--font-fontSize-sm);
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--background-muted);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

@@ -1,31 +1,26 @@
 <template>
   <div class="content-card" @click="openContentDetails">
     <div class="poster-container">
-
       <!-- Poster -->
-      <img :src="imgPrefix + contentDetails.image || '/placeholder-poster.jpg'"
-           :alt="(contentDetails.title || 'Content') + ' poster'"
+      <img :src="imgPrefix + content.image || '/placeholder-poster.jpg'"
+           :alt="(content.title || 'Content') + ' poster'"
            class="content-poster">
-
-      <!-- Rate -->
-      <div class="rating-container">
-        <div class="star-rating">
-          <div class="stars-outer">
-            <div class="stars-inner" :style="{ width: getStarRatingWidth() }"></div>
-          </div>
-        </div>
-      </div>
 
       <!-- Category -->
       <div class="content-category">
-        <span>{{contentDetails.category}}</span>
+        <span>{{content.category}}</span>
       </div>
     </div>
 
-    <!-- Content Title and Watch Date -->
+    <!-- Content Title and Release Date -->
     <div class="content-info">
-      <h3 class="content-title">{{ contentDetails.title }}</h3>
-      <span class="watch-date">Watch Date : {{ formatDate(record.watchDate) }}</span>
+      <h3 class="content-title">{{ content.title }}</h3>
+      <span class="release-date">Release Date : {{ formatDate(content.releaseDate) }}</span>
+
+      <!-- Source Type -->
+      <div class="source-type" v-if="content.contentType">
+        {{ formatContentType(content.contentType) }}
+      </div>
     </div>
   </div>
 </template>
@@ -34,14 +29,13 @@
 export default {
   name: 'ContentCard',
   props: {
-    record: {
+    content: {
       type: Object,
       required: true
     }
   },
   data() {
     return {
-      contentDetails: {},
       imgPrefix: 'https://image.tmdb.org/t/p/w1280',
     }
   },
@@ -51,32 +45,16 @@ export default {
       const d = new Date(date);
       return d.toLocaleDateString();
     },
-    async getContentDetails() {
-      try {
-        const response = await this.$http.get(`/content/id/${this.record.contentId}`);
-        if (response.data && response.data.data) {
-          this.contentDetails = response.data.data;
-        } else {
-          console.error("Invalid content API response", response);
-        }
-      } catch (error) {
-        console.error("Error fetching content details:", error);
-      }
+    formatContentType(type) {
+      if (!type) return '';
+      return type
+          .toLowerCase()
+          .split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
     },
     openContentDetails() {
-      // 您可能需要添加此方法的实现来处理点击事件
-      this.$emit('card-click', this.record);
-    },
-    getStarRatingWidth() {
-      // 计算星星填充百分比
-      const rating = this.record.rate || 0;
-      const percentage = (rating / 10) * 100;
-      return `${percentage}%`;
-    }
-  },
-  mounted() {
-    if (this.record.contentId) {
-      this.getContentDetails();
+      this.$emit('card-click', this.content);
     }
   }
 }
@@ -157,52 +135,6 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* 评分星星样式 */
-.rating-container {
-  position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  z-index: 2;
-  padding: var(--spacing-xs);
-  backdrop-filter: blur(5px);
-  border-radius: var(--border-radius-md);
-}
-
-.star-rating {
-  display: flex;
-  align-items: center;
-}
-
-.stars-outer {
-  position: relative;
-  display: inline-block;
-  font-size: 18px;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.stars-outer::before {
-  content: "★★★★★";
-}
-
-.stars-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  color: rgb(255, 213, 2);
-}
-
-.stars-inner::before {
-  content: "★★★★★";
-}
-
-.watch-date {
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
 .content-category {
   position: absolute;
   bottom: var(--spacing-sm);
@@ -219,7 +151,23 @@ export default {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.11);
 }
 
-/* 添加优雅的边框效果 */
+.release-date {
+  display: block;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: var(--spacing-xs);
+}
+
+.source-type {
+  display: inline-block;
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--background-subtle);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-fontSize-sm);
+  color: var(--text-secondary);
+}
+
 .content-card::after {
   content: '';
   position: absolute;
@@ -237,7 +185,6 @@ export default {
   box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.5);
 }
 
-/* 添加特殊效果 - 适配cyberpunk主题 */
 :root[data-theme="cyberpunk"] .content-card::before {
   height: 2px;
   background: linear-gradient(90deg,
@@ -252,7 +199,6 @@ export default {
   border: 1px solid var(--border-light);
 }
 
-:root[data-theme="cyberpunk"] .rating-container,
 :root[data-theme="cyberpunk"] .content-category {
   box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.7);
 }
