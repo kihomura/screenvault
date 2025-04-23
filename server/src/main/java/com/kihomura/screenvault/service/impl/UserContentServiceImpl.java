@@ -45,6 +45,13 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
     }
 
     @Override
+    public List<UserContent> findWishList() {
+        int userId = userService.getCurrentUserId();
+        List<UserContent> results = userContentMapper.findWishlistByUserId(userId);
+        return results;
+    }
+
+    @Override
     public boolean create(UserContent userContent) {
 
         Content content = contentService.getById(userContent.getContentId());
@@ -103,5 +110,10 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
         userContent.setStatus(Status.WANT_TO_WATCH);
 
         return userContentMapper.addToWishList(userContent);
+    }
+
+    @Override
+    public boolean removeFromWishList(int contentId) {
+        return userContentMapper.removeFromWishList(contentId);
     }
 }

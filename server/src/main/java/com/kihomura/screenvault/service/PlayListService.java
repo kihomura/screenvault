@@ -8,6 +8,7 @@ import java.util.List;
 public interface PlayListService extends IService<PlayList> {
     PlayList findById(int id);
     List<PlayList> findAll();
+    PlayList findWishlist();
     boolean createWishList();
     boolean createPlayList(PlayList playList);
     boolean updatePlayList(PlayList playList);

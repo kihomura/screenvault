@@ -33,6 +33,11 @@ public class PlayListController {
         return ResponseMessage.success(playList);
     }
 
+    @GetMapping("/wishlist")
+    public ResponseMessage getWishList() {
+        return ResponseMessage.success(playListService.findWishlist());
+    }
+
     @PostMapping("/wishlist")
     public ResponseMessage createWishList() {
         boolean result = playListService.createWishList();

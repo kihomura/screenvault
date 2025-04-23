@@ -3,6 +3,7 @@ package com.kihomura.screenvault.controller;
 import com.kihomura.screenvault.pojo.UserContent;
 import com.kihomura.screenvault.pojo.dto.ResponseMessage;
 import com.kihomura.screenvault.service.UserContentService;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,14 @@ public class UserContentController {
     @GetMapping
     public ResponseMessage getAllRecording() {
         return ResponseMessage.success(userContentService.findAll());
+    }
+
+    /**
+     * GET: /record/wishlist
+     */
+    @GetMapping("/wishlist")
+    public ResponseMessage getWishList() {
+        return ResponseMessage.success(userContentService.findWishList());
     }
 
     /**
@@ -73,6 +82,15 @@ public class UserContentController {
         boolean result = userContentService.addToWishList(userContent);
         if (!result) {
             return ResponseMessage.error(400, "wishlist not added");
+        }
+        return ResponseMessage.success();
+    }
+
+    @DeleteMapping("/wishlist")
+    public ResponseMessage removeFromWishlist(@RequestBody int contentId) {
+        boolean result = userContentService.removeFromWishList(contentId);
+        if (!result) {
+            return ResponseMessage.error(400, "wishlist not removed");
         }
         return ResponseMessage.success();
     }

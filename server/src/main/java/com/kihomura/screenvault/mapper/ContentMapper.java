@@ -26,6 +26,9 @@ public interface ContentMapper extends BaseMapper<Content> {
             "AND (creator_id = #{currentUserId})")
     List<Content> findByTitleAndCreator(@Param("title") String title, @Param("currentUserId") Integer currentUserId);
 
+    @Select("SELECT * FROM contents WHERE source_type = 'CUSTOM_DATA' AND creator_id = #{userId}")
+    List<Content> findCustomContentByUserId(int userId);
+
     @Insert("INSERT INTO contents (title, other_title, country, language, " +
             "description, image, release_date, genre, category, source_type, creator_id)" +
             "VALUES (#{title}, #{otherTitle}, #{country}, #{language}, #{description}, #{image}, #{releaseDate}, #{genre}, #{category}, #{sourceType}, #{creatorId})")

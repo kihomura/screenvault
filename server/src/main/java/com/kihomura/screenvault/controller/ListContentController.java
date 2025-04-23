@@ -48,6 +48,7 @@ public class ListContentController {
     }
 
     /**
+     * DELETE: /list-content
      * remove a content from a list
      */
     @DeleteMapping

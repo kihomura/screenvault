@@ -37,6 +37,11 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
     }
 
     @Override
+    public List<Content> findCustomContent() {
+        return contentMapper.findCustomContentByUserId(userService.getCurrentUserId());
+    }
+
+    @Override
     @Transactional
     public boolean create(Content content) {
 

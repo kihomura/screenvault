@@ -1,6 +1,7 @@
 package com.kihomura.screenvault.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kihomura.screenvault.mapper.ListContentMapper;
 import com.kihomura.screenvault.mapper.PlayListMapper;
 import com.kihomura.screenvault.pojo.PlayList;
 import com.kihomura.screenvault.service.PlayListService;
@@ -15,10 +16,12 @@ import java.util.List;
 public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> implements PlayListService {
 
     private final PlayListMapper playListMapper;
+    private final ListContentMapper listContentMapper;
     private final UserService userService;
 
-    public PlayListServiceImpl(PlayListMapper playListMapper, UserService userService) {
+    public PlayListServiceImpl(PlayListMapper playListMapper, ListContentMapper listContentMapper, UserService userService) {
         this.playListMapper = playListMapper;
+        this.listContentMapper = listContentMapper;
         this.userService = userService;
     }
 
@@ -37,6 +40,11 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
         List<PlayList> results = playListMapper.findByUserId(userId);
 
         return results;
+    }
+
+    @Override
+    public PlayList findWishlist() {
+        return playListMapper.findWishlistByUserId(userService.getCurrentUserId());
     }
 
     @Override
@@ -96,6 +104,7 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
             throw new IllegalArgumentException("Can not delete default playlist");
         }
 
-        return this.removeById(id);
+        listContentMapper.deleteByListId(id);
+        return playListMapper.deleteByListId(id) > 0;
     }
 }

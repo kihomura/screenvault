@@ -60,6 +60,14 @@ public class ContentController {
     }
 
     /**
+     * GET: /content/custom
+     */
+    @GetMapping("/custom")
+    public ResponseMessage getCustomContent() {
+        return ResponseMessage.success(contentService.findCustomContent());
+    }
+
+    /**
      * POST: /content
      * @param content
      * @return

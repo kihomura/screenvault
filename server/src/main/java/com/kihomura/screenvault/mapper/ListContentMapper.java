@@ -20,4 +20,7 @@ public interface ListContentMapper extends BaseMapper<ListContent> {
 
     @Delete("DELETE FROM list_content WHERE list_id = #{listId} AND content_id = #{contentId}")
     int deleteByListIdAndContentId(@Param("listId") Integer listId, @Param("contentId") Integer contentId);
+
+    @Delete("DELETE FROM list_content WHERE list_id = #{listId}")
+    int deleteByListId(@Param("listId") Integer listId);
 }

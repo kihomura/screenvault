@@ -8,8 +8,10 @@ import java.util.List;
 public interface UserContentService extends IService<UserContent> {
     UserContent findById(int id);
     List<UserContent> findAll();
+    List<UserContent> findWishList();
     boolean create(UserContent userContent);
     boolean update(UserContent userContent);
     boolean delete(int id);
     boolean addToWishList(UserContent userContent);
+    boolean removeFromWishList(int contentId);
 }
