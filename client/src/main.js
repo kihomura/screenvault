@@ -3,6 +3,7 @@ import axios from 'axios'
 import App from './App.vue'
 import router from './router'
 import store from './store/store.js'
+import utilsPlugin from './plugins/utils.js'
 import { createPinia } from 'pinia';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.js'
@@ -27,5 +28,6 @@ app.component("font-awesome-icon", FontAwesomeIcon);
 app.use(pinia);
 app.use(router)
 app.use(store)
+app.use(utilsPlugin)
 
 app.mount('#app')
