@@ -10,9 +10,8 @@ public interface UserContentService extends IService<UserContent> {
     UserContent findByContentId(int contentId);
     List<UserContent> findAll();
     List<UserContent> findWishList();
-    boolean create(UserContent userContent);
-    boolean update(UserContent userContent);
+    boolean saveOrUpdateByUserAndContentId(UserContent userContent);
     boolean delete(int id);
-    boolean addToWishList(UserContent userContent);
+    boolean addToWishList(int contentId);
     boolean removeFromWishList(int contentId);
 }

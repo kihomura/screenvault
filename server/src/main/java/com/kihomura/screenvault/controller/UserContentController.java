@@ -55,20 +55,14 @@ public class UserContentController {
         return ResponseMessage.success(userContent);
     }
 
+    /**
+     * POST: /record
+     */
     @PostMapping
-    public ResponseMessage addRecording(@RequestBody UserContent userContent) {
-        boolean result = userContentService.create(userContent);
+    public ResponseMessage saveOrUpdateRecord(@RequestBody UserContent userContent) {
+        boolean result = userContentService.saveOrUpdateByUserAndContentId(userContent);
         if (!result) {
             return ResponseMessage.error(400, "recording not created");
-        }
-        return ResponseMessage.success(userContent);
-    }
-
-    @PatchMapping
-    public ResponseMessage updateRecording(@RequestBody UserContent userContent) {
-        boolean result = userContentService.update(userContent);
-        if (!result) {
-            return ResponseMessage.error(400, "recording not updated");
         }
         return ResponseMessage.success(userContent);
     }
@@ -86,8 +80,8 @@ public class UserContentController {
     }
 
     @PostMapping("/wishlist")
-    public ResponseMessage addWishlist(@RequestBody UserContent userContent) {
-        boolean result = userContentService.addToWishList(userContent);
+    public ResponseMessage addToWishlist(@RequestBody UserContent userContent) {
+        boolean result = userContentService.addToWishList(userContent.getContentId());
         if (!result) {
             return ResponseMessage.error(400, "wishlist not added");
         }

@@ -31,10 +31,10 @@ public class ListContentServiceImpl extends ServiceImpl<ListContentMapper, ListC
 
     @Override
     public boolean addContentToList(ListContent listContent) {
-        List<ListContent> existingItems = listContentMapper.findByListIdAndContentId(
+        ListContent existingItem = listContentMapper.findByListIdAndContentId(
                 listContent.getListId(), listContent.getContentId());
 
-        if (!existingItems.isEmpty()) {
+        if (existingItem == null) {
             throw new IllegalArgumentException("Content already exists in the list");
         }
 

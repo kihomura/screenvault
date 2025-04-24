@@ -20,8 +20,11 @@ public interface UserContentMapper extends BaseMapper<UserContent> {
     @Select("SELECT * FROM user_content WHERE content_id = #{contentId} AND user_id = #{userId} AND status = 'WATCHED'")
     UserContent findByContentId(int contentId, int userId);
 
-    @Insert("INSERT INTO user_content (user_id, content_id, status) VALUES (#{userId}, #{contentId}, #{status})")
-    boolean addToWishList(UserContent userContent);
+    @Select("SELECT * FROM user_content WHERE content_id = #{contentId} AND user_id = #{userId}")
+    UserContent selectByUserAndContentId(int userId, int contentId);
+
+    @Insert("INSERT INTO user_content (user_id, content_id, status) VALUES (#{userId}, #{contentId}, 'WANT_TO_WATCH')")
+    boolean addToWishList(int contentId, int userId);
 
     @Delete("DELETE FROM user_content WHERE content_id = #{contentId} AND status = 'WANT_TO_WATCH'")
     boolean removeFromWishList(int contentId);

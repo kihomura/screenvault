@@ -2,8 +2,12 @@ package com.kihomura.screenvault.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kihomura.screenvault.enums.Status;
+import com.kihomura.screenvault.mapper.ListContentMapper;
+import com.kihomura.screenvault.mapper.PlayListMapper;
 import com.kihomura.screenvault.mapper.UserContentMapper;
 import com.kihomura.screenvault.pojo.Content;
+import com.kihomura.screenvault.pojo.ListContent;
+import com.kihomura.screenvault.pojo.PlayList;
 import com.kihomura.screenvault.pojo.UserContent;
 import com.kihomura.screenvault.service.ContentService;
 import com.kihomura.screenvault.service.UserContentService;
@@ -17,11 +21,15 @@ import java.util.List;
 public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserContent> implements UserContentService {
 
     private final UserContentMapper userContentMapper;
+    private final ListContentMapper listContentMapper;
+    private final PlayListMapper playListMapper;
     private final UserService userService;
     private final ContentService contentService;
 
-    public UserContentServiceImpl(UserContentMapper userContentMapper, UserService userService, ContentService contentService) {
+    public UserContentServiceImpl(UserContentMapper userContentMapper, ListContentMapper listContentMapper, PlayListMapper playListMapper, UserService userService, ContentService contentService) {
         this.userContentMapper = userContentMapper;
+        this.listContentMapper = listContentMapper;
+        this.playListMapper = playListMapper;
         this.userService = userService;
         this.contentService = contentService;
     }
@@ -57,35 +65,66 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
     }
 
     @Override
-    public boolean create(UserContent userContent) {
+    public boolean saveOrUpdateByUserAndContentId(UserContent userContent) {
+        boolean result;
+        int userId = userService.getCurrentUserId();
+        int contentId = userContent.getContentId();
 
-        Content content = contentService.getById(userContent.getContentId());
-        if (content == null) {
-            throw new IllegalArgumentException("Content does not exist");
+        userContent.setUserId(userId);
+        Status status = userContent.getStatus();
+        UserContent existing = userContentMapper.selectByUserAndContentId(userId, contentId);
+
+        if (existing == null) {
+            result = this.save(userContent);
+            if (status == Status.WANT_TO_WATCH) {
+                result = result && addToWishList(contentId);
+            }
+        } else {
+            Status oldStatus = existing.getStatus();
+            userContent.setId(existing.getId());
+            result = this.updateById(userContent);
+
+            if (oldStatus != status) {
+                if (status == Status.WANT_TO_WATCH) {
+                    result = result && addToWishList(contentId);
+                } else if (oldStatus == Status.WANT_TO_WATCH && status == Status.WATCHED) {
+                    result = result && removeFromWishList(contentId);
+                }
+            }
         }
 
-        userContent.setUserId(userService.getCurrentUserId());
-        userContent.setStatus(Status.WATCHED);
-
-        return userContentMapper.insert(userContent) > 0;
+        return result;
     }
 
     @Override
-    public boolean update(UserContent userContent) {
+    public boolean addToWishList(int contentId) {
 
-        UserContent oldUserContent = userContentMapper.selectById(userContent.getId());
-        if (oldUserContent == null) {
-            throw new IllegalArgumentException("Recording not fonud");
+        int userId = userService.getCurrentUserId();
+        PlayList wishlist = playListMapper.findWishlistByUserId(userId);
+
+        boolean userContentUpdated = userContentMapper.addToWishList(contentId, userId);
+
+        ListContent existing = listContentMapper.findByListIdAndContentId(wishlist.getId(), contentId);
+        if (existing != null) {
+            return userContentUpdated;
         }
 
-        if (!oldUserContent.getUserId().equals(userService.getCurrentUserId())) {
-            throw new IllegalArgumentException("Do not have permission to update this recording");
-        }
+        ListContent listContent = new ListContent();
+        listContent.setContentId(contentId);
+        listContent.setListId(wishlist.getId());
+        return userContentUpdated && listContentMapper.insert(listContent) > 0;
+    }
 
-        userContent.setUserId(userService.getCurrentUserId());
-        userContent.setStatus(Status.WATCHED);
+    @Override
+    public boolean removeFromWishList(int contentId) {
 
-        return userContentMapper.updateById(userContent) > 0;
+        int userId = userService.getCurrentUserId();
+        PlayList wishlist = playListMapper.findWishlistByUserId(userId);
+
+        boolean userContentUpdated = userContentMapper.removeFromWishList(contentId);
+        boolean listContentRemoved = listContentMapper.deleteByListIdAndContentId(wishlist.getId(), contentId) >= 0;
+
+        return userContentUpdated && listContentRemoved;
     }
 
     @Override
@@ -103,22 +142,4 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
         return userContentMapper.deleteById(id) > 0;
     }
 
-    @Override
-    public boolean addToWishList(UserContent userContent) {
-
-        Content content = contentService.getById(userContent.getContentId());
-        if (content == null) {
-            throw new IllegalArgumentException("Content does not exist");
-        }
-
-        userContent.setUserId(userService.getCurrentUserId());
-        userContent.setStatus(Status.WANT_TO_WATCH);
-
-        return userContentMapper.addToWishList(userContent);
-    }
-
-    @Override
-    public boolean removeFromWishList(int contentId) {
-        return userContentMapper.removeFromWishList(contentId);
-    }
 }

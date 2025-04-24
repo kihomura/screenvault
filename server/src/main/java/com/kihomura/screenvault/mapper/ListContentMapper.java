@@ -16,7 +16,7 @@ public interface ListContentMapper extends BaseMapper<ListContent> {
     List<ListContent> findByContentId(@Param("contentId") Integer contentId);
 
     @Select("SELECT * FROM list_content WHERE list_id = #{listId} AND content_id = #{contentId}")
-    List<ListContent> findByListIdAndContentId(@Param("listId") Integer listId, @Param("contentId") Integer contentId);
+    ListContent findByListIdAndContentId(@Param("listId") Integer listId, @Param("contentId") Integer contentId);
 
     @Delete("DELETE FROM list_content WHERE list_id = #{listId} AND content_id = #{contentId}")
     int deleteByListIdAndContentId(@Param("listId") Integer listId, @Param("contentId") Integer contentId);
