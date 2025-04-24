@@ -17,6 +17,9 @@ public interface UserContentMapper extends BaseMapper<UserContent> {
     @Select("SELECT * FROM user_content WHERE user_id = #{userId} AND status = 'WANT_TO_WATCH'")
     List<UserContent> findWishlistByUserId(int userId);
 
+    @Select("SELECT * FROM user_content WHERE content_id = #{contentId} AND user_id = #{userId} AND status = 'WATCHED'")
+    UserContent findByContentId(int contentId, int userId);
+
     @Insert("INSERT INTO user_content (user_id, content_id, status) VALUES (#{userId}, #{contentId}, #{status})")
     boolean addToWishList(UserContent userContent);
 

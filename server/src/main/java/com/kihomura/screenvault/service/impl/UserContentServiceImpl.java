@@ -36,6 +36,11 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
     }
 
     @Override
+    public UserContent findByContentId(int contentId) {
+        return userContentMapper.findByContentId(contentId, userService.getCurrentUserId());
+    }
+
+    @Override
     public List<UserContent> findAll() {
 
         int userId = userService.getCurrentUserId();

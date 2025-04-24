@@ -1,11 +1,8 @@
 <template>
-  <div class="record-detail-page">
+  <div class="content-detail-page">
     <div class="page-header">
-      <back-button
-          :to="{ name: 'watched' }"
-          aria-label="Back to recordings"
-      />
-      <h1 class="page-title">Watching Recordings</h1>
+      <back-button aria-label="Back to previous page"/>
+      <h1 class="page-title">{{ this.content.title }}</h1>
     </div>
 
     <div v-if="loading" class="loading-state">
@@ -16,28 +13,37 @@
       {{ error }}
     </div>
 
-    <div v-else class="record-detail-content">
+    <div v-else class="content-detail-content">
       <div class="content-detail-container">
         <!-- Content Detail -->
         <content-info-card :content="content" :img-prefix="imgPrefix" />
 
         <!-- User's Record Detail -->
         <recording-info-card
-            :user-content="userContent"
+            :user-content="record"
             :tags="tags"
             :lists="lists"
             @edit="openEditModal"
+            @add-record="openAddRecordModal"
         />
       </div>
     </div>
 
-    <!-- Edit modal (didnt apply) -->
+    <!-- Edit modal -->
     <!-- <edit-recording-modal
         v-if="showEditModal"
         :record="userContent"
         @close="closeEditModal"
         @save="saveUpdatedRecord"
     /> -->
+
+    <!-- Add Record Modal -->
+    <add-record-modal
+        :is-open="showAddRecordModal"
+        :selected-content="content"
+        @close="closeAddRecordModal"
+        @save="saveNewRecord"
+    />
   </div>
 </template>
 
@@ -45,24 +51,27 @@
 import BackButton from "../components/buttons/BackButton.vue";
 import ContentInfoCard from "../components/cards/ContentInfoCard.vue";
 import RecordingInfoCard from "../components/cards/RecordInfoCard.vue";
+import AddRecordModal from "../components/modals/AddRecordModal.vue";
 
 export default {
-  name: 'RecordDetailPage',
+  name: 'ContentDetailPage',
   components: {
     BackButton,
     ContentInfoCard,
-    RecordingInfoCard
+    RecordingInfoCard,
+    AddRecordModal
   },
   data() {
     return {
-      recordId: null,
-      userContent: null,
+      contentId: null,
       content: null,
+      record: null,
       tags: [],
       lists: [],
       loading: true,
       error: null,
       showEditModal: false,
+      showAddRecordModal: false,
       // TODO: use imgPrefix only when content's source_type = 'OFFICIAL_DATA'
       imgPrefix: 'https://image.tmdb.org/t/p/w1280'
     }
@@ -74,39 +83,44 @@ export default {
     closeEditModal() {
       this.showEditModal = false;
     },
-    async fetchRecordDetails() {
+    openAddRecordModal() {
+      this.showAddRecordModal = true;
+    },
+    closeAddRecordModal() {
+      this.showAddRecordModal = false;
+    },
+    async fetchContentDetails() {
       this.loading = true;
       this.error = null;
       try {
-        const userContentResponse = await this.$http.get(`/record/id/${this.recordId}`);
-        if (userContentResponse.data && userContentResponse.data.data) {
-          this.userContent = userContentResponse.data.data;
-          // use contentId in user_content to get content detail (include tag and list)
-          await this.fetchContentDetails(this.userContent.contentId);
-          await this.fetchTags(this.userContent.contentId);
-          await this.fetchLists(this.userContent.contentId);
+        const response = await this.$http.get(`/content/id/${this.contentId}`);
+        if (response.data && response.data.data) {
+          this.content = response.data.data;
+          await this.fetchTags(this.contentId);
+          await this.fetchLists(this.contentId)
         } else {
-          this.error = "Failed to load record details";
-        }
-      } catch (error) {
-        console.error("Error fetching record details:", error);
-        this.error = "Error loading record details. Please try again.";
-      } finally {
-        this.loading = false;
-      }
-    },
-    async fetchContentDetails(contentId) {
-      try {
-        const contentResponse = await this.$http.get(`/content/id/${contentId}`);
-        if (contentResponse.data && contentResponse.data.data) {
-          this.content = contentResponse.data.data;
-        } else {
-          console.error("Invalid content response format", contentResponse);
           this.error = "Failed to load content details";
         }
       } catch (error) {
         console.error("Error fetching content details:", error);
-        this.error = "Error loading content details";
+        this.error = "Error loading content details. Please try again.";
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchRecordDetails() {
+      try {
+        const response = await this.$http.get(`/record/content/${this.contentId}`);
+        if (response.data && response.data.data) {
+          this.record = response.data.data;
+        } else {
+          // set record to null when no record fetched
+          this.record = null;
+          console.log("No record found for this content");
+        }
+      } catch (error) {
+        console.error("Error fetching record details:", error);
+        this.record = null;
       }
     },
     async fetchTags(contentId) {
@@ -143,14 +157,35 @@ export default {
     },
     async saveUpdatedRecord(updatedData) {
       // TODO: edit Record method
+    },
+    async saveNewRecord(recordData) {
+      try {
+        const recordResponse = await this.$http.post('/record', recordData.recordingData);
+
+        if (recordResponse.data && recordResponse.data.data) {
+          // If tags are selected, save them
+          if (recordData.tagData && recordData.tagData.tags.length > 0) {
+            await this.$http.post('/tag-content/batch', recordData.tagData);
+          }
+
+          // Refresh record data
+          await this.fetchRecordDetails();
+          await this.fetchTags(this.contentId);
+          await this.fetchLists(this.contentId);
+        }
+      } catch (error) {
+        console.error("Error saving new record:", error);
+        alert("Failed to save your recording. Please try again.");
+      }
     }
   },
   created() {
-    this.recordId = this.$route.params.id;
-    if (this.recordId) {
+    this.contentId = this.$route.params.id;
+    if (this.contentId) {
+      this.fetchContentDetails();
       this.fetchRecordDetails();
     } else {
-      this.error = "Invalid record ID";
+      this.error = "Invalid content ID";
       this.loading = false;
     }
   }
@@ -158,7 +193,7 @@ export default {
 </script>
 
 <style scoped>
-.record-detail-page {
+.content-detail-page {
   font-family: var(--font-fontFamily-primary);
   color: var(--text-primary);
   padding: var(--spacing-xl) var(--spacing-xl);
@@ -201,7 +236,7 @@ export default {
 }
 
 /* Main content container */
-.record-detail-content {
+.content-detail-content {
   padding: 0;
 }
 
@@ -219,7 +254,7 @@ export default {
 }
 
 @media (max-width: 600px) {
-  .record-detail-page {
+  .content-detail-page {
     padding: var(--spacing-lg) var(--spacing-md);
   }
 

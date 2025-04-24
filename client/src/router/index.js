@@ -11,7 +11,7 @@ import playlists from '../views/playlist.vue';
 import wishlists from '../views/Wishlist.vue';
 import statistics from '../views/statistics.vue';
 import profile from '../views/profile.vue';
-import recordDetail from "../views/RecordDetail.vue";
+import contentDetail from "../views/ContentDetail.vue";
 import playlistDetail from "../views/PlaylistDetail.vue";
 
 
@@ -71,9 +71,9 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/record/:id',
-    name:'RecordDetail',
-    component: recordDetail,
+    path: '/content/:id',
+    name:'ContentDetail',
+    component: contentDetail,
     meta: { requiresAuth: true }
   },
   {

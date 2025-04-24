@@ -27,6 +27,14 @@ public class UserContentController {
     }
 
     /**
+     * GET: /record/content/{id}
+     */
+    @GetMapping("/content/{id}")
+    public ResponseMessage getRecordByContentId(@PathVariable int id) {
+        return ResponseMessage.success(userContentService.findByContentId(id));
+    }
+
+    /**
      * GET: /record/wishlist
      */
     @GetMapping("/wishlist")

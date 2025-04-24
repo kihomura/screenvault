@@ -291,7 +291,7 @@ export default {
         this.toggleCardSelection(record);
       } else {
         localStorage.setItem('watchedPageNumber', this.currentPage)
-        this.$router.push({ name: 'RecordDetail', params: { id: record.id } });
+        this.$router.push({ name: 'ContentDetail', params: { id: record.contentId } });
       }
     },
     toggleCardSelection(record) {

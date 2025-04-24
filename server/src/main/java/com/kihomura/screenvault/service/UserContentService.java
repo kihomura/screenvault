@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface UserContentService extends IService<UserContent> {
     UserContent findById(int id);
+    UserContent findByContentId(int contentId);
     List<UserContent> findAll();
     List<UserContent> findWishList();
     boolean create(UserContent userContent);

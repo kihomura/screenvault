@@ -2,74 +2,85 @@
   <div class="recording-info-card">
     <div class="record-header">
       <h3>Your Watching Recording</h3>
-      <main-btn type="text" class="" @click="$emit('edit')">Edit</main-btn>
+      <main-btn type="text" class="" v-if="hasRecord" @click="$emit('edit')">Edit</main-btn>
     </div>
 
-    <div class="record-info">
-      <div class="info-row">
-        <span class="info-label">Watch Date:</span>
-        <span class="info-value">{{ formatDate(userContent.watchDate) }}</span>
+    <!-- no record message -->
+    <div v-if="!hasRecord" class="no-record-container">
+      <div class="no-record-message">
+        <p>No watching recording</p>
+        <main-btn type="text" @click="$emit('add-record')">Add Now</main-btn>
       </div>
+    </div>
 
-      <div class="info-row rating-row">
-        <span class="info-label">Rating:</span>
-        <div class="rating-display">
-          <span class="rating-value">{{ userContent.rate }}/10</span>
-          <div class="stars-container">
-            <span
-                v-for="index in 10"
-                :key="index"
-                class="star"
-                :class="{
-                'filled': index <= Math.floor(userContent.rate),
-                'half-filled': index === Math.floor(userContent.rate) + 1 && hasHalfStar(userContent.rate),
-                'empty': index > Math.floor(userContent.rate) + (hasHalfStar(userContent.rate) ? 1 : 0)
-              }"
-            >★</span>
+    <!-- record info details -->
+    <div v-else class="record-detail-content">
+      <div class="record-info">
+        <div class="info-row">
+          <span class="info-label">Watch Date:</span>
+          <span class="info-value">{{ formatDate(userContent.watchDate) }}</span>
+        </div>
+
+        <div class="info-row rating-row">
+          <span class="info-label">Rating:</span>
+          <div class="rating-display">
+            <span class="rating-value">{{ userContent.rate }}/10</span>
+            <div class="stars-container">
+              <span
+                  v-for="index in 10"
+                  :key="index"
+                  class="star"
+                  :class="{
+                  'filled': index <= Math.floor(userContent.rate),
+                  'half-filled': index === Math.floor(userContent.rate) + 1 && hasHalfStar(userContent.rate),
+                  'empty': index > Math.floor(userContent.rate) + (hasHalfStar(userContent.rate) ? 1 : 0)
+                }"
+              >★</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="review-section">
-      <h3>Review</h3>
-      <div class="review-content">
-        <div v-if="userContent.review && userContent.review.length" class="review-list">
-          <div v-for="(reviewItem, index) in userContent.review" :key="index" class="review-item">
-            <p>{{ reviewItem.text }}</p>
-            <p class="review-date">{{ formatDate(reviewItem.date) }}</p>
+      <div class="review-section">
+        <h3>Review</h3>
+        <div class="review-content">
+          <div v-if="userContent.review && userContent.review.length" class="review-list">
+            <div v-for="(reviewItem, index) in userContent.review" :key="index" class="review-item">
+              <p>{{ reviewItem.text }}</p>
+              <p class="review-date">{{ formatDate(reviewItem.date) }}</p>
+            </div>
+          </div>
+          <div v-else class="no-review">
+            No reviews added yet
           </div>
         </div>
-        <div v-else class="no-review">
-          No reviews added yet
-        </div>
       </div>
-    </div>
 
-    <div class="tags-section">
-      <h3>Tags</h3>
-      <div class="tags-container">
-        <div v-if="tags.length" class="tag-list">
-          <span v-for="tag in tags" :key="tag.id" class="tag-item">
-            {{ tag.tagName }}
-          </span>
-        </div>
-        <div v-else class="no-tags">
-          No tags added yet
-        </div>
-      </div>
-    </div>
-
-    <div class="lists-section">
-      <h3>Lists</h3>
-      <div class="lists-container">
-        <div v-if="lists.length" class="list-items">
-          <div v-for="list in lists" :key="list.id" class="list-item">
-            {{ list.listName }}
+      <div class="tags-section">
+        <h3>Tags</h3>
+        <div class="tags-container">
+          <div v-if="tags.length" class="tag-list">
+            <span v-for="tag in tags" :key="tag.id" class="tag-item">
+              {{ tag.tagName }}
+            </span>
+          </div>
+          <div v-else class="no-tags">
+            No tags added yet
           </div>
         </div>
-        <div v-else class="no-lists">
-          Not added to any lists yet
+      </div>
+
+      <div class="lists-section">
+        <h3>Lists</h3>
+        <div class="lists-container">
+          <div v-if="lists.length" class="list-items">
+            <div v-for="list in lists" :key="list.id" class="list-item">
+              {{ list.listName }}
+            </div>
+          </div>
+          <div v-else class="no-lists">
+            Not added to any lists yet
+          </div>
         </div>
       </div>
     </div>
@@ -85,7 +96,7 @@ export default {
   props: {
     userContent: {
       type: Object,
-      required: true
+      default: null
     },
     tags: {
       type: Array,
@@ -94,6 +105,11 @@ export default {
     lists: {
       type: Array,
       default: () => []
+    }
+  },
+  computed: {
+    hasRecord() {
+      return this.userContent !== null;
     }
   },
   methods: {
@@ -141,6 +157,33 @@ export default {
   margin: 0 0 var(--spacing-md) 0;
   padding-bottom: var(--spacing-xs);
   position: relative;
+}
+
+/* No record state */
+.no-record-container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl) 0;
+}
+
+.no-record-message {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.no-record-message p {
+  font-size: var(--font-fontSize-lg);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Record detail content */
+.record-detail-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .record-info {
@@ -394,38 +437,6 @@ export default {
 .list-item:hover {
   background-color: var(--interactive-hover);
   transform: translateX(2px);
-}
-
-/* Action buttons */
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-light);
-}
-
-.edit-button {
-  background-color: var(--accent-info);
-  color: white;
-  border: none;
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-fontWeight-medium);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-level1-default);
-}
-
-.edit-button:hover {
-  background-color: var(--accent-info);
-  opacity: 0.9;
-  box-shadow: var(--shadow-level1-hover);
-  transform: translateY(-2px);
-}
-
-.edit-button:active {
-  transform: translateY(0);
 }
 
 @media (max-width: 600px) {
