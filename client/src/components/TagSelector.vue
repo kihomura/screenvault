@@ -98,7 +98,6 @@ export default {
         }
       } catch (error) {
         console.error('Error creating tag:', error);
-        alert('Failed to create tag');
       }
     }
   }

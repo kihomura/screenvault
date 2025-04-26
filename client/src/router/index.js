@@ -13,7 +13,7 @@ import statistics from '../views/statistics.vue';
 import profile from '../views/profile.vue';
 import contentDetail from "../views/ContentDetail.vue";
 import playlistDetail from "../views/PlaylistDetail.vue";
-
+import Manage from "../views/Manage.vue";
 
 const routes = [
   {
@@ -80,6 +80,13 @@ const routes = [
     path: '/playlist/:id',
     name: 'PlaylistDetail',
     component: playlistDetail,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/manage/:section',
+    name: 'manage',
+    component: Manage,
+    props: true,
     meta: { requiresAuth: true }
   }
 ];

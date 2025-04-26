@@ -30,6 +30,30 @@
         <i class="nav-icon wishlist-icon"></i>
         <span>Wish List</span>
       </router-link>
+
+      <div class="nav-section">
+        <div class="section-header" @click="toggleManageSection">
+          <div class="nav-item-wrapper">
+            <i class="nav-icon manage-icon"></i>
+            <span class="me-5">Manage</span>
+            <i class="toggle-icon ms-5" :class="{ 'expanded': isManageSectionOpen }"></i>
+          </div>
+        </div>
+
+        <transition name="slide">
+          <div v-show="isManageSectionOpen" class="section-content">
+            <router-link to="/manage/tags" class="nav-item sub-nav-item" :class="{ 'router-link-active': isActiveRoute('/manage/tags') }">
+              <i class="nav-icon tag-icon"></i>
+              <span>Tags</span>
+            </router-link>
+            <router-link to="/manage/custom-content" class="nav-item sub-nav-item" :class="{ 'router-link-active': isActiveRoute('/manage/custom-content') }">
+              <i class="nav-icon custom-content-icon"></i>
+              <span>Custom Content</span>
+            </router-link>
+          </div>
+        </transition>
+      </div>
+
       <router-link to="/statistics" class="nav-item">
         <i class="nav-icon stats-icon"></i>
         <span>Statistics</span>
@@ -65,13 +89,31 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useThemeStore } from '../../store/themeStore.js';
 import { useStore } from 'vuex';
 
 const router = useRouter();
+const route = useRoute();
 const themeStore = useThemeStore();
 const store = useStore();
+const isManageSectionOpen = ref(false);
+
+const isActiveManage = computed(() => route.path.startsWith('/manage'));
+
+onMounted(() => {
+  if (isActiveManage.value) {
+    isManageSectionOpen.value = true;
+  }
+});
+
+function isActiveRoute(path) {
+  return route.path === path;
+}
+
+function toggleManageSection() {
+  isManageSectionOpen.value = !isManageSectionOpen.value;
+}
 
 const selectedTheme = ref(themeStore.currentTheme);
 
@@ -101,7 +143,6 @@ async function logout() {
 }
 
 onMounted(() => {
-  // 确保主题在组件挂载时应用
   selectedTheme.value = themeStore.currentTheme;
 });
 </script>
@@ -125,17 +166,9 @@ onMounted(() => {
 }
 
 .sidebar-title {
-  font-family: var(--font-family-secondary);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0;
-  letter-spacing: 0.5px;
-}
-
-.sidebar-title {
-  font-family: var(--font-family-secondary);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-fontFamily-secondary);
+  font-size: var(--font-fontSize-xl);
+  font-weight: var(--font-fontWeight-bold);
   margin: 0;
   letter-spacing: 0.5px;
   position: relative;
@@ -200,15 +233,9 @@ onMounted(() => {
 }
 
 .user-name {
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-fontWeight-medium);
   margin: 0 0 var(--spacing-xs);
-  font-size: var(--font-size-base);
-}
-
-.user-role {
-  color: var(--text-muted);
-  margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-fontSize-base);
 }
 
 .nav-menu {
@@ -238,7 +265,72 @@ onMounted(() => {
 .nav-item.router-link-active {
   background: var(--interactive-active);
   color: var(--primary);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-fontWeight-medium);
+}
+
+.nav-section {
+  margin-bottom: var(--spacing-sm);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: var(--spacing-xs) 0;
+}
+
+.nav-item-wrapper {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.section-header:hover .nav-item-wrapper {
+  background: var(--interactive-hover);
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.section-content {
+  padding-left: var(--spacing-md);
+  overflow: hidden;
+}
+
+.sub-nav-item {
+  padding-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-xs);
+}
+
+.toggle-icon {
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transition: transform 0.3s ease;
+  margin-right: var(--spacing-md);
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+  max-height: 100px;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 
 .nav-icon {
@@ -250,7 +342,6 @@ onMounted(() => {
   background-size: contain;
 }
 
-/* 使用SVG图标作为背景 */
 .dashboard-icon {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7'/%3E%3Crect x='14' y='3' width='7' height='7'/%3E%3Crect x='14' y='14' width='7' height='7'/%3E%3Crect x='3' y='14' width='7' height='7'/%3E%3C/svg%3E");
 }
@@ -279,6 +370,18 @@ onMounted(() => {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' y1='12' x2='9' y2='12'/%3E%3C/svg%3E");
 }
 
+.manage-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3Cline x1='16' y1='13' x2='8' y2='13'/%3E%3Cline x1='16' y1='17' x2='8' y2='17'/%3E%3Cpolyline points='10 9 9 9 8 9'/%3E%3C/svg%3E");
+}
+
+.tag-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z'/%3E%3Cline x1='7' y1='7' x2='7.01' y2='7'/%3E%3C/svg%3E");
+}
+
+.custom-content-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'/%3E%3Cpath d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'/%3E%3C/svg%3E");
+}
+
 .sidebar-footer {
   padding: var(--spacing-lg);
   border-top: 1px solid var(--border-light);
@@ -292,7 +395,7 @@ onMounted(() => {
   display: block;
   margin-bottom: var(--spacing-xs);
   color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-fontSize-sm);
 }
 
 .theme-select {
@@ -302,7 +405,7 @@ onMounted(() => {
   color: var(--text-primary);
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-fontSize-sm);
   outline: none;
   cursor: pointer;
   transition: all 0.2s;
@@ -328,7 +431,7 @@ onMounted(() => {
   border-radius: var(--border-radius-md);
   cursor: pointer;
   transition: all 0.2s;
-  font-size: var(--font-size-base);
+  font-size: var(--font-fontSize-base);
 }
 
 .logout-btn:hover {

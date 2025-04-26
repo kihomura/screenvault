@@ -19,6 +19,11 @@ public class TagContentController {
         this.tagContentService = tagContentService;
     }
 
+    /**
+     * GET: /tag-content/tag/{tagId}
+     * @param tagId
+     * @return a list of content ids
+     */
     @GetMapping("/tag/{tagId}")
     public ResponseMessage getContentIdsByTag(@PathVariable int tagId) {
         List<Integer> contentIds = tagContentService.getContentIdsByTagId(tagId);
