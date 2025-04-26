@@ -36,24 +36,9 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     }
 
     @Override
-    public boolean createTag(Tag tag) {
+    public boolean saveOrUpdateTag(Tag tag) {
         tag.setCreatorId(userService.getCurrentUserId());
-        return this.save(tag);
-    }
-
-    @Override
-    public boolean updateTag(Tag tag) {
-        Tag oldTag = tagMapper.selectById(tag.getId());
-        if (oldTag == null) {
-            throw new IllegalArgumentException("Tag not found");
-        }
-
-        if (!oldTag.getCreatorId().equals(userService.getCurrentUserId())) {
-            throw new IllegalArgumentException("Do not have permission to update tag");
-        }
-
-        tag.setCreatorId(userService.getCurrentUserId());
-        return this.updateById(tag);
+        return this.saveOrUpdate(tag);
     }
 
     @Override

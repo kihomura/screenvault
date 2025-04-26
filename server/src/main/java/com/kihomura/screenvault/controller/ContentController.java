@@ -74,21 +74,11 @@ public class ContentController {
      */
     @PostMapping
     public ResponseMessage createContent(@RequestBody Content content) {
-        boolean result = contentService.create(content);
+        boolean result = contentService.saveOrUpdateContent(content);
         if (result) {
             return ResponseMessage.success(content);
         } else {
             return ResponseMessage.error(400, "content not created");
-        }
-    }
-
-    @PutMapping
-    public ResponseMessage updateContent(@RequestBody Content content) {
-        boolean result = contentService.update(content);
-        if (result) {
-            return ResponseMessage.success(content);
-        } else {
-            return ResponseMessage.error(400, "content not updated");
         }
     }
 

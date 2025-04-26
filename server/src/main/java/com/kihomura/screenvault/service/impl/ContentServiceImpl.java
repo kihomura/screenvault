@@ -42,9 +42,7 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
     }
 
     @Override
-    @Transactional
-    public boolean create(Content content) {
-
+    public boolean saveOrUpdateContent(Content content) {
         if (content.getTitle() == null || content.getTitle().isEmpty()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
@@ -60,34 +58,7 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
         content.setSourceType(SourceType.CUSTOM_DATA);
         content.setCreatorId(userService.getCurrentUserId());
 
-        return contentMapper.createContent(content);
-    }
-
-    @Override
-    public boolean update(Content content) {
-
-        Content updatedContent = this.getById(content.getId());
-
-        if (updatedContent == null || !updatedContent.getCreatorId().equals(userService.getCurrentUserId())) {
-            throw new IllegalArgumentException("Do not have permission to update this content");
-        }
-
-        if (content.getTitle() == null || content.getTitle().isEmpty()) {
-            throw new IllegalArgumentException("Title cannot be empty");
-        }
-
-        if (content.getGenre() != null && !isValidEnumValue(content.getGenre().toString(), Genre.class)){
-            throw new IllegalArgumentException("Genre doesn't exist");
-        }
-
-        if (content.getCategory() != null && !isValidEnumValue(content.getCategory().toString(), Category.class)){
-            throw new IllegalArgumentException("Category doesn't exist");
-        }
-
-        content.setSourceType(SourceType.CUSTOM_DATA);
-        content.setCreatorId(userService.getCurrentUserId());
-
-        return contentMapper.updateContent(content);
+        return this.saveOrUpdateContent(content);
     }
 
     @Override

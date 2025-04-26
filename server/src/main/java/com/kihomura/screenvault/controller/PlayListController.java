@@ -49,18 +49,9 @@ public class PlayListController {
 
     @PostMapping
     public ResponseMessage addPlayList(@RequestBody PlayList playList) {
-        boolean result = playListService.createPlayList(playList);
+        boolean result = playListService.saveOrUpdateList(playList);
         if(!result) {
             return ResponseMessage.error(404, "List not created");
-        }
-        return ResponseMessage.success(playList);
-    }
-
-    @PatchMapping
-    public ResponseMessage updatePlayList(@RequestBody PlayList playList) {
-        boolean result = playListService.updatePlayList(playList);
-        if(!result) {
-            return ResponseMessage.error(404, "List not updated");
         }
         return ResponseMessage.success(playList);
     }

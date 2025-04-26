@@ -8,7 +8,6 @@ import java.util.List;
 public interface TagService extends IService<Tag> {
     Tag findById(int id);
     List<Tag> findAll();
-    boolean createTag(Tag tag);
-    boolean updateTag(Tag tag);
+    boolean saveOrUpdateTag(Tag tag);
     boolean deleteTag(int id);
 }

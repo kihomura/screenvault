@@ -33,18 +33,9 @@ public class TagController {
 
     @PostMapping
     public ResponseMessage createTag(@RequestBody Tag tag) {
-        boolean result = tagService.createTag(tag);
+        boolean result = tagService.saveOrUpdateTag(tag);
         if (!result) {
             return ResponseMessage.error(404, "Tag not created");
-        }
-        return ResponseMessage.success(tag);
-    }
-
-    @PatchMapping
-    public ResponseMessage updateTag(@RequestBody Tag tag) {
-        boolean result = tagService.updateTag(tag);
-        if (!result) {
-            return ResponseMessage.error(404, "Tag not updated");
         }
         return ResponseMessage.success(tag);
     }

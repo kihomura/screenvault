@@ -58,35 +58,13 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
     }
 
     @Override
-    public boolean createPlayList(PlayList playList) {
+    public boolean saveOrUpdateList(PlayList playList) {
         playList.setCreatorId(userService.getCurrentUserId());
         playList.setIsDefault(false);
         playList.setCreateDate(Date.valueOf(LocalDate.now()));
-        return this.save(playList);
+        return this.saveOrUpdateList(playList);
     }
 
-    @Override
-    public boolean updatePlayList(PlayList playList) {
-
-        PlayList oldPlayList = playListMapper.selectById(playList.getId());
-        if (oldPlayList == null) {
-            throw new IllegalArgumentException("list not found");
-        }
-
-        if (!oldPlayList.getCreatorId().equals(userService.getCurrentUserId())) {
-            throw new IllegalArgumentException("Do not have permission to update playlist");
-        }
-
-        if (oldPlayList.getIsDefault()) {
-            throw new IllegalArgumentException("Can not update default playlist");
-        }
-
-        playList.setCreatorId(userService.getCurrentUserId());
-        playList.setIsDefault(false);
-        playList.setCreateDate(Date.valueOf(LocalDate.now()));
-
-        return this.updateById(playList);
-    }
 
     @Override
     public boolean deletePlayList(int id) {

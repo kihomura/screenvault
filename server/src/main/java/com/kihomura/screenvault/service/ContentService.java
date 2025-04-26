@@ -9,7 +9,6 @@ public interface ContentService extends IService<Content> {
     List<Content> findByTitle(String title);
     List<Content> findByTitleAndCreator(String title);
     List<Content> findCustomContent();
-    boolean create(Content content);
-    boolean update(Content content);
+    boolean saveOrUpdateContent(Content content);
     boolean delete(int contentId);
 }
