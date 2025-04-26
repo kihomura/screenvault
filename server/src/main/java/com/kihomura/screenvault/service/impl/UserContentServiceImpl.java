@@ -66,6 +66,8 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
 
     @Override
     public boolean saveOrUpdateByUserAndContentId(UserContent userContent) {
+
+        System.out.println("----content---- " + userContent);
         boolean result;
         int userId = userService.getCurrentUserId();
         int contentId = userContent.getContentId();
@@ -89,6 +91,7 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
                     result = result && addToWishList(contentId);
                 } else if (oldStatus == Status.WANT_TO_WATCH && status == Status.WATCHED) {
                     result = result && removeFromWishList(contentId);
+                    System.out.println("==========final result:" + result);
                 }
             }
         }
@@ -121,10 +124,16 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
         int userId = userService.getCurrentUserId();
         PlayList wishlist = playListMapper.findWishlistByUserId(userId);
 
-        boolean userContentUpdated = userContentMapper.removeFromWishList(contentId);
-        boolean listContentRemoved = listContentMapper.deleteByListIdAndContentId(wishlist.getId(), contentId) >= 0;
+        boolean listContentRemoved = listContentMapper.deleteByListIdAndContentId(wishlist.getId(), contentId) > 0;
 
-        return userContentUpdated && listContentRemoved;
+        UserContent userContent = userContentMapper.selectByUserAndContentId(userId, contentId);
+        if (userContent != null && userContent.getStatus() == Status.WANT_TO_WATCH) {
+            boolean userContentUpdated = userContentMapper.removeFromWishList(contentId, userId) > 0;
+
+            return  userContentUpdated && listContentRemoved;
+        }
+
+        return listContentRemoved;
     }
 
     @Override

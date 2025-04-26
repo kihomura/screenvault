@@ -58,6 +58,7 @@
               :targetListId="targetListId"
               @content-selected="handleContentSelected"
               @toggle-selection="handleToggleSelection"
+              @refresh="fetchCustomContent"
           />
 
           <watched-tab
@@ -133,7 +134,7 @@ export default {
     },
     multiSelect: {
       type: Boolean,
-      default: false  // ture when mode = addToList or addToWishlist
+      default: false  // true when mode = addToList or addToWishlist
     }
   },
   data() {
@@ -159,7 +160,7 @@ export default {
       return this.tabs.filter(tab => this.visibleTabs.includes(tab.id));
     },
     confirmButtonText() {
-      switch(this.mode) {
+      switch (this.mode) {
         case 'addToList':
           return `Add to List (${this.selectedItems.length})`;
         case 'addToWishlist':
@@ -202,7 +203,6 @@ export default {
         this.$emit('update:visibleTabs', ['search', 'custom', 'wishlist']);
       }
 
-      // similarly, in addToWishlist mode
       // content has already been added should not be displayed
       else if (newMode === 'addToWishlist') {
         this.$emit('update:visibleTabs', ['search', 'custom', 'watched']);
@@ -230,7 +230,7 @@ export default {
           dataFetchPromises.push(this.fetchWishlistContent());
         }
 
-        if(this.isTabVisible('custom') || this.isTabVisible('search')) {
+        if (this.isTabVisible('custom') || this.isTabVisible('search')) {
           dataFetchPromises.push(this.fetchCustomContent());
         }
 

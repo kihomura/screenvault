@@ -187,11 +187,10 @@
 
       <div class="form-actions">
         <div class="action-buttons">
-          <main-btn type="secondary" class="cancel-button" @click="closeModal">Cancel</main-btn>
+          <main-btn type="secondary" @click="closeModal">Cancel</main-btn>
           <div class="save-buttons">
-            <main-btn type="primary" class="save-button" @click="saveContent(false)" :disabled="!isFormValid">Save</main-btn>
-            <main-btn type="highlight" class="save-add-button" @click="saveContent(true)" :disabled="!isFormValid">
-              Save & Add Recording
+            <main-btn type="highlight" @click="saveCustomContent" :disabled="!isFormValid">
+              Save
             </main-btn>
           </div>
         </div>
@@ -202,6 +201,7 @@
 
 <script>
 import MainBtn from "../buttons/MainBtn.vue";
+import { COUNTRIES, LANGUAGES, GENRES, CATEGORY, SOURCE_TYPE } from '../../utils/enums.js';
 
 export default {
   name: 'AddCustomContentModal',
@@ -220,6 +220,15 @@ export default {
       titleError: false,
       categoryError: false,
       genreError: false,
+      countryInput: '',
+      languageInput: '',
+      isFocusedCountry: false,
+      isFocusedLanguage: false,
+      isSaving: false,
+
+      filteredCountries: [],
+      filteredLanguages: [],
+
       formData: {
         title: '',
         otherTitle: '',
@@ -230,85 +239,13 @@ export default {
         releaseDate: '',
         genre: '',
         category: '',
-        sourceType: 'CUSTOM_DATA'
+        sourceType: SOURCE_TYPE.CUSTOM_DATA
       },
-      countryInput: '',
-      languageInput: '',
-      isFocusedCountry: false,
-      isFocusedLanguage: false,
-      // Common countries with their 2-letter codes
-      countries: [
-        { code: 'US', name: 'United States' },
-        { code: 'GB', name: 'United Kingdom' },
-        { code: 'CA', name: 'Canada' },
-        { code: 'AU', name: 'Australia' },
-        { code: 'FR', name: 'France' },
-        { code: 'DE', name: 'Germany' },
-        { code: 'JP', name: 'Japan' },
-        { code: 'KR', name: 'South Korea' },
-        { code: 'CN', name: 'China' },
-        { code: 'IN', name: 'India' },
-        { code: 'BR', name: 'Brazil' },
-        { code: 'MX', name: 'Mexico' },
-        { code: 'ES', name: 'Spain' },
-        { code: 'IT', name: 'Italy' },
-        { code: 'RU', name: 'Russia' },
-        { code: 'NZ', name: 'New Zealand' },
-        { code: 'SE', name: 'Sweden' },
-        { code: 'NO', name: 'Norway' },
-        { code: 'FI', name: 'Finland' },
-        { code: 'DK', name: 'Denmark' }
-      ],
-      // Common languages with their 2-letter codes
-      languages: [
-        { code: 'EN', name: 'English' },
-        { code: 'ES', name: 'Spanish' },
-        { code: 'FR', name: 'French' },
-        { code: 'DE', name: 'German' },
-        { code: 'IT', name: 'Italian' },
-        { code: 'PT', name: 'Portuguese' },
-        { code: 'RU', name: 'Russian' },
-        { code: 'JA', name: 'Japanese' },
-        { code: 'ZH', name: 'Chinese' },
-        { code: 'KO', name: 'Korean' },
-        { code: 'AR', name: 'Arabic' },
-        { code: 'HI', name: 'Hindi' },
-        { code: 'SV', name: 'Swedish' },
-        { code: 'NL', name: 'Dutch' },
-        { code: 'EL', name: 'Greek' },
-        { code: 'HE', name: 'Hebrew' }
-      ],
-      filteredCountries: [],
-      filteredLanguages: [],
-      genres: [
-        { value: 'ACTION', name: 'Action' },
-        { value: 'ADVENTURE', name: 'Adventure' },
-        { value: 'ANIMATION', name: 'Animation' },
-        { value: 'COMEDY', name: 'Comedy' },
-        { value: 'CRIME', name: 'Crime' },
-        { value: 'DOCUMENTARY', name: 'Documentary' },
-        { value: 'DRAMA', name: 'Drama' },
-        { value: 'FAMILY', name: 'Family' },
-        { value: 'FANTASY', name: 'Fantasy' },
-        { value: 'HISTORY', name: 'History' },
-        { value: 'HORROR', name: 'Horror' },
-        { value: 'MUSIC', name: 'Music' },
-        { value: 'MYSTERY', name: 'Mystery' },
-        { value: 'ROMANCE', name: 'Romance' },
-        { value: 'SCI_FI_FANTASY', name: 'Sci-Fi & Fantasy' },
-        { value: 'TV_MOVIE', name: 'TV Movie' },
-        { value: 'THRILLER', name: 'Thriller' },
-        { value: 'WAR', name: 'War' },
-        { value: 'WESTERN', name: 'Western' },
-        { value: 'ACTION_ADVENTURE', name: 'Action & Adventure' },
-        { value: 'KIDS', name: 'Kids' },
-        { value: 'NEWS', name: 'News' },
-        { value: 'REALITY', name: 'Reality' },
-        { value: 'SOAP', name: 'Soap' },
-        { value: 'TALK', name: 'Talk' },
-        { value: 'WAR_POLITICS', name: 'War & Politics' },
-        { value: 'SCIENCE_FICTION', name: 'Science Fiction' }
-      ]
+
+      // enums
+      genres: GENRES,
+      countries: COUNTRIES,
+      languages: LANGUAGES,
     };
   },
   computed: {
@@ -340,8 +277,9 @@ export default {
         releaseDate: '',
         genre: '',
         category: '',
-        sourceType: 'CUSTOM_DATA'
+        sourceType: SOURCE_TYPE.CUSTOM_DATA
       };
+
       this.countryInput = '';
       this.languageInput = '';
       this.imageError = false;
@@ -424,40 +362,38 @@ export default {
       return !this.titleError && !this.categoryError && !this.genreError;
     },
 
-    async saveContent(addRecording) {
-      if (!this.validateForm()) {
+    async saveCustomContent() {
+      if (!this.validateForm() || this.isSaving) {
         return;
       }
       try {
+        this.isSaving = true;
         const contentData = {
           title: this.formData.title.trim(),
-          otherTitle: this.formData.otherTitle.trim(),
-          country: this.formData.country.trim(),
-          language: this.formData.language.trim(),
-          description: this.formData.description.trim(),
-          image: this.formData.image.trim(),
+          otherTitle: this.formData.otherTitle.trim() || null,
+          country: this.formData.country.trim() || null,
+          language: this.formData.language.trim() || null,
+          description: this.formData.description.trim() || null,
+          image: this.formData.image.trim() || null,
           releaseDate: this.formData.releaseDate || null,
           genre: this.formData.genre,
           category: this.formData.category,
-          sourceType: 'CUSTOM_DATA'
+          sourceType: this.formData.sourceType
         };
 
-        const response = await this.$http.post('/content', contentData);
-
-        if (response && response.data.data) {
-          const newContent = response.data.data;
-
-          // keep adding a new watching recording
-          if (addRecording) {
-            this.$emit('save', newContent);
-          } else {
-            // Save only
-            this.$emit('close');
-          }
-          this.resetForm();
+        const response = await this.$http.post(`/content`, contentData);
+        if (response.data && response.data.data) {
+          const newCustomContent = response.data.data;
+          this.$emit('close');
+          this.$emit('content-added', newCustomContent);
+        } else {
+          console.error('Error creating customContent');
         }
-      } catch (error) {
-        console.error('Error saving custom content:', error);
+      } catch (e) {
+        console.error(`Error creating customContent: ${e}`);
+      } finally {
+        this.resetForm();
+        this.isSaving = false;
       }
     },
   }
@@ -770,48 +706,6 @@ textarea.form-control {
   gap: var(--spacing-md);
 }
 
-/* Buttons */
-button {
-  padding: var(--spacing-md) var(--spacing-xl);
-  font-family: var(--font-fontFamily-primary);
-  font-weight: var(--font-fontWeight-medium);
-  font-size: var(--font-fontSize-base);
-  border-radius: var(--border-radius-md);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancel-button {
-  background-color: var(--background-base);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-medium);
-}
-
-.cancel-button:hover {
-  background-color: var(--interactive-hover);
-}
-
-.save-button {
-  background-color: var(--primary);
-  color: white;
-}
-
-.save-button:hover {
-  background-color: var(--primary-dark);
-  box-shadow: var(--shadow-level2-hover);
-}
-
-.save-add-button {
-  background-color: var(--accent-info);
-  color: white;
-}
-
-.save-add-button:hover {
-  background-color: rgba(var(--accent-info-rgb), 0.85);
-  box-shadow: var(--shadow-level2-hover);
-}
-
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -827,22 +721,6 @@ button:disabled {
 
   .form-group {
     min-width: 100%;
-  }
-
-  .action-buttons {
-    flex-direction: column-reverse;
-    gap: var(--spacing-lg);
-  }
-
-  .save-buttons {
-    width: 100%;
-  }
-
-  .save-button,
-  .save-add-button,
-  .cancel-button {
-    flex: 1;
-    text-align: center;
   }
 }
 </style>

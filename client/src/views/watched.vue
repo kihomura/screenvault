@@ -142,6 +142,7 @@ export default {
       newListName: '',
       hoveredCard: null,
       deleteMessage: '',
+      isAdding: false,
       months: [
         { value: '01', label: 'January' },
         { value: '02', label: 'February' },
@@ -254,7 +255,9 @@ export default {
       }
     },
     async saveNewRecording(data)  {
+      if (this.isAdding) return;
       try {
+        this.isAdding = true;
         const recordResponse = await this.$http.post('/record', data.recordingData);
         if (recordResponse.data && recordResponse.data.data) {
           for (const tag of data.tagData.tags) {
@@ -272,6 +275,8 @@ export default {
         }
       } catch (error) {
         console.error('Error saving new record:', error);
+      } finally {
+        this.isAdding = false;
       }
     },
     goToPage(page) {

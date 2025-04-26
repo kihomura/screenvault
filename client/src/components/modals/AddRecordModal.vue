@@ -4,7 +4,7 @@
 
       <!-- header -->
       <div class="modal-header">
-        <h2 class="modal-title">Add New Recording</h2>
+        <h2 class="modal-title">{{ isEditMode ? 'Edit Record' : 'Add Record' }}</h2>
         <button class="close-button" @click="closeModal">&times;</button>
       </div>
 
@@ -13,7 +13,7 @@
         <div class="selected-content-header">
           <div class="selected-content-info">
             <img
-                :src="selectedContent.image ? imgPrefix + selectedContent.image : '/placeholder-poster.jpg'"
+                :src="getContentImagePath(selectedContent)"
                 alt="Poster"
                 class="selected-content-poster"
             />
@@ -24,8 +24,10 @@
           </div>
         </div>
 
+        <!-- record form -->
         <div class="form-container">
-          <!-- Watch Date -->
+
+          <!-- watch date -->
           <div class="form-group">
             <label for="watchDate">Watch Date</label>
             <input
@@ -37,68 +39,11 @@
             />
           </div>
 
-          <!-- Rating -->
-          <div class="form-group">
-            <label for="rating">Rating (Only whole or half values allowed, e.g. 8 or 8.5)</label>
-            <div class="rating-input">
+          <!-- rating -->
+          <rating-selector v-model="formData.rate"></rating-selector>
 
-              <!-- stars -->
-              <div class="rating-stars" @mouseleave="resetHoverRating">
-                <div
-                    v-for="i in 10"
-                    :key="i"
-                    class="star-container"
-                    @mousemove="handleStarHover($event, i)"
-                    @click="handleStarClick($event, i)"
-                >
-                  <span class="star" :class="getStarClass(i)">★</span>
-                </div>
-              </div>
-              <!-- number -->
-              <div class="rating-number">
-                <input
-                    type="number"
-                    id="rating"
-                    v-model.number="formData.rate"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    class="form-control"
-                    @input="validateRating"
-                />
-                <span class="rating-max">/10</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tag -->
-          <div class="form-group">
-            <label>Tags</label>
-            <!-- select existed tags -->
-            <div class="tags-container">
-              <div class="tags-list">
-                <div
-                    v-for="tag in availableTags"
-                    :key="tag.id"
-                    :class="['tag-item', { 'tag-selected': selectedTags.some(t => t.id === tag.id) }]"
-                    @click="toggleTag(tag)"
-                >
-                  {{ tag.tagName }}
-                </div>
-              </div>
-              <!-- or add new tag -->
-              <div class="add-tag-input">
-                <input
-                    type="text"
-                    v-model="newTagName"
-                    placeholder="Add new tag"
-                    class="form-control"
-                    @keyup.enter="createNewTag"
-                />
-                <button class="add-tag-button" @click="createNewTag" :disabled="!newTagName.trim()">+</button>
-              </div>
-            </div>
-          </div>
+          <!-- tags -->
+          <tag-selector v-model="selectedTags"></tag-selector>
 
           <!-- Review -->
           <div class="form-group">
@@ -127,7 +72,7 @@
             </p>
           </div>
 
-          <div v-if="!showMultipleReviews" class="multiple-reviews-prompt">
+          <div v-if="!showMultipleReviews && formData.reviews.length === 1" class="multiple-reviews-prompt">
             <p @click="showMultipleReviews = true" class="custom-content-link">
               Seen it more than once? Click to add more reviews...
             </p>
@@ -164,7 +109,7 @@
             </p>
           </div>
 
-          <div v-if="showMultipleReviews" class="add-another-review">
+          <div v-if="showMultipleReviews || formData.reviews.length > 1" class="add-another-review">
             <button class="add-review-button" @click="addReview">Add Another Review</button>
           </div>
         </div>
@@ -173,7 +118,7 @@
       <div class="form-actions">
         <main-btn type="secondary" @click="closeModal">Cancel</main-btn>
         <div class="save-buttons">
-          <main-btn type="highlight" @click="saveRecording(false)">Save</main-btn>
+          <main-btn type="highlight" @click="saveRecording">{{ isEditMode ? 'Update' : 'Save' }}</main-btn>
         </div>
       </div>
     </div>
@@ -182,12 +127,16 @@
 
 <script>
 import MainBtn from "../buttons/MainBtn.vue";
-import {formatYear} from "../../utils/index.js";
+import RatingSelector from "../RatingStars.vue";
+import TagSelector from "../TagSelector.vue";
+import {formatYear, getContentImagePath} from "../../utils/index.js";
 
 export default {
   name: 'AddRecordModal',
   components: {
-    MainBtn
+    MainBtn,
+    RatingSelector,
+    TagSelector
   },
   props: {
     isOpen: {
@@ -197,83 +146,111 @@ export default {
     selectedContent: {
       type: Object,
       default: null
+    },
+    existingRecord: {
+      type: Object,
+      default: null
+    },
+    existingTags: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return {
       currentDate: new Date().toISOString().split('T')[0],
-      // TODO: use imgPrefix only when content's source_type = 'OFFICIAL_DATA'
-      imgPrefix: 'https://image.tmdb.org/t/p/w1280',
       showMultipleReviews: false,
-      availableTags: [],
       selectedTags: [],
-      newTagName: '',
-      hoverRating: null,
       formData: {
         contentId: null,
         rate: null,
         status: 'WATCHED',
-        watchDate: new Date().toISOString().split('T')[0],
+        watchDate: this.currentDate,
         reviews: [
           {
             text: '',
-            date: new Date().toISOString().split('T')[0],
+            date: this.currentDate,
             useCustomDate: false
           }
         ]
-      }
+      },
+      isEditMode: false
     };
   },
   watch: {
     isOpen(newVal) {
-      if (newVal && this.selectedContent) {
-        this.formData.contentId = this.selectedContent.id;
+      if (newVal) {
+        this.initializeForm();
       }
     },
-    selectedContent(newContent) {
-      if (newContent) {
-        this.formData.contentId = newContent.id;
+    existingRecord(newRecord) {
+      if (newRecord && this.isOpen) {
+        this.initializeForm();
       }
     }
   },
-  created() {
-    this.fetchTags();
-  },
   methods: {
+    getContentImagePath,
     formatYear,
-    async fetchTags() {
-      try {
-        const response = await this.$http.get('/tag');
-        if (response && response.data && response.data.data) {
-          this.availableTags = response.data.data;
-        }
-      } catch (error) {
-        console.error('Error fetching tags:', error);
+    initializeForm() {
+      this.showMultipleReviews = false;
+
+      // set whether in edit or add mode
+      this.isEditMode = !!this.existingRecord;
+
+      if (this.selectedContent) {
+        this.formData.contentId = this.selectedContent.id;
       }
-    },
-    toggleTag(tag) {
-      const index = this.selectedTags.findIndex(t => t.id === tag.id);
-      if (index > -1) {
-        this.selectedTags.splice(index, 1);
+
+      // initialize form with existing data if in edit mode
+      if (this.isEditMode && this.existingRecord) {
+        this.formData = {
+          contentId: this.existingRecord.contentId || this.selectedContent?.id,
+          rate: this.existingRecord.rate,
+          status: this.existingRecord.status || 'WATCHED',
+          watchDate: this.existingRecord.watchDate || this.currentDate,
+          reviews: []
+        };
+
+        if (this.existingRecord.review && this.existingRecord.review.length > 0) {
+          this.formData.reviews = this.existingRecord.review.map(rev => {
+            const useCustomDate = rev.date !== this.existingRecord.watchDate;
+            return {
+              text: rev.text || '',
+              date: rev.date || this.existingRecord.watchDate,
+              useCustomDate: useCustomDate
+            };
+          });
+
+          if (this.existingRecord.review.length > 1) {
+            this.showMultipleReviews = true;
+          }
+        } else {
+          this.formData.reviews = [
+            {
+              text: '',
+              date: this.formData.watchDate,
+              useCustomDate: false
+            }
+          ];
+        }
+        this.selectedTags = [...this.existingTags];
       } else {
-        this.selectedTags.push(tag);
-      }
-    },
-    async createNewTag() {
-      if (!this.newTagName.trim()) return;
-      try {
-        const response = await this.$http.post('/tag', {
-          tagName: this.newTagName.trim()
-        });
-        if (response && response.data && response.data.data) {
-          const newTag = response.data.data;
-          this.availableTags.push(newTag);
-          this.selectedTags.push(newTag);
-          this.newTagName = '';
-        }
-      } catch (error) {
-        console.error('Error creating tag:', error);
-        alert('Failed to create tag');
+        // initialize empty form for add mode
+        this.formData = {
+          contentId: this.selectedContent ? this.selectedContent.id : null,
+          rate: null,
+          status: 'WATCHED',
+          watchDate: this.currentDate,
+          reviews: [
+            {
+              text: '',
+              date: this.currentDate,
+              useCustomDate: false
+            }
+          ]
+        };
+        this.selectedTags = [];
       }
     },
     addReview() {
@@ -287,35 +264,13 @@ export default {
       this.formData.reviews.splice(index, 1);
     },
     closeModal() {
-      this.resetForm();
       this.$emit('close');
     },
-    resetForm() {
-      this.selectedTags = [];
-      this.showMultipleReviews = false;
-      this.formData = {
-        contentId: this.selectedContent ? this.selectedContent.id : null,
-        rate: null,
-        status: 'WATCHED',
-        watchDate: new Date().toISOString().split('T')[0],
-        reviews: [
-          {
-            text: '',
-            date: new Date().toISOString().split('T')[0],
-            useCustomDate: false
-          }
-        ]
-      };
-    },
-    saveRecording(addAnother) {
-      if (!this.formData.contentId) {
-        alert('Content ID is missing');
+    saveRecording() {
+      if (!this.formData.contentId || !this.formData.watchDate) {
         return;
       }
-      if (!this.formData.watchDate) {
-        alert('Please enter a watch date');
-        return;
-      }
+
       const reviewList = this.formData.reviews
           .filter(review => review.text.trim() !== '')
           .map(review => {
@@ -342,58 +297,11 @@ export default {
 
       this.$emit('save', {
         recordingData: recordingData,
-        tagData: tagData
+        tagData: tagData,
+        isEdit: this.isEditMode
       });
 
       this.closeModal();
-    },
-    handleStarHover(event, starIndex) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const halfPoint = rect.width / 2;
-      if (mouseX < halfPoint) {
-        this.hoverRating = starIndex - 0.5;
-      } else {
-        this.hoverRating = starIndex;
-      }
-    },
-    handleStarClick(event, starIndex) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const halfPoint = rect.width / 2;
-      if (mouseX < halfPoint) {
-        this.formData.rate = starIndex - 0.5;
-      } else {
-        this.formData.rate = starIndex;
-      }
-      this.hoverRating = null;
-    },
-    resetHoverRating() {
-      this.hoverRating = null;
-    },
-    getStarClass(starIndex) {
-      const rating = this.hoverRating !== null ? this.hoverRating : this.formData.rate;
-      if (!rating) return 'empty';
-      if (starIndex <= Math.floor(rating)) {
-        return 'full';
-      } else if (starIndex === Math.ceil(rating) && rating % 1 !== 0) {
-        return 'half';
-      } else {
-        return 'empty';
-      }
-    },
-    validateRating() {
-      if (this.formData.rate !== null) {
-        const roundedValue = Math.round(this.formData.rate * 2) / 2;
-        if (roundedValue !== this.formData.rate) {
-          this.formData.rate = roundedValue;
-        }
-        if (this.formData.rate > 10) {
-          this.formData.rate = 10;
-        } else if (this.formData.rate < 0) {
-          this.formData.rate = 0;
-        }
-      }
     }
   }
 };
@@ -401,23 +309,41 @@ export default {
 
 <style scoped>
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 /* Modal base */
@@ -600,178 +526,6 @@ export default {
   box-shadow: 0 0 0 3px rgba(var(--accent-info-rgb), 0.15);
 }
 
-/* Rating stars */
-.rating-stars {
-  display: flex;
-  margin-right: 20px;
-}
-
-.star-container {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.star {
-  font-size: 28px;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--border-medium);
-  position: relative;
-}
-
-.star.full {
-  color: var(--accent-warning);
-}
-
-.star.half {
-  position: relative;
-  color: var(--border-medium);
-}
-
-.star.half::before {
-  content: '★';
-  position: absolute;
-  overflow: hidden;
-  color: var(--accent-warning);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 28px;
-  clip-path: inset(0 50% 0 0);
-}
-
-.star.half::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-/* Rating input container */
-.rating-input {
-  display: flex;
-  align-items: center;
-}
-
-.rating-number {
-  display: flex;
-  align-items: center;
-}
-
-.rating-number input {
-  width: 60px;
-  height: 40px;
-  text-align: center;
-  padding: 0 8px;
-  -moz-appearance: textfield;
-}
-
-.rating-number input::-webkit-outer-spin-button,
-.rating-number input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.rating-max {
-  color: var(--text-secondary);
-  margin-left: 4px;
-}
-
-/* Rating hint */
-.rating-hint {
-  margin: 0 0 var(--spacing-sm);
-  font-size: var(--font-fontSize-sm);
-  color: var(--text-secondary);
-}
-
-/* Ensuring only 0.5 increment for rating */
-input[type="number"].form-control {
-  step: 0.5;
-}
-
-/* Tags */
-.tags-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-}
-
-.tag-item {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background-color: var(--background-subtle);
-  border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-fontSize-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-level1-default);
-}
-
-.tag-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-level1-hover);
-}
-
-.tag-selected {
-  background-color: rgba(var(--accent-info-rgb), 0.1);
-  border-color: var(--accent-info);
-  color: var(--accent-info);
-  box-shadow: 0 0 0 2px rgba(var(--accent-info-rgb), 0.15);
-}
-
-.add-tag-input {
-  display: flex;
-  margin-top: var(--spacing-md);
-}
-
-.add-tag-input input {
-  flex: 1;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.add-tag-button {
-  background-color: var(--accent-info);
-  color: white;
-  border: none;
-  min-width: 36px;
-  height: 100%;
-  border-top-right-radius: var(--border-radius-lg);
-  border-bottom-right-radius: var(--border-radius-lg);
-  cursor: pointer;
-  font-size: var(--font-fontSize-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.add-tag-button:hover:not(:disabled) {
-  background-color: rgba(var(--accent-info-rgb), 0.8);
-}
-
-.add-tag-button:disabled {
-  background-color: var(--border-medium);
-  cursor: not-allowed;
-}
-
 /* Reviews */
 textarea.form-control {
   resize: vertical;
@@ -913,11 +667,6 @@ textarea.form-control {
   margin-top: var(--spacing-lg);
 }
 
-.save-buttons {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
 
 input[type="date"].form-control {
   display: block;
@@ -927,5 +676,4 @@ input[type="date"].form-control {
   -moz-appearance: none;
   position: relative;
 }
-
 </style>

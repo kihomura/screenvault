@@ -10,7 +10,7 @@
       @click="handleItemClick"
   >
     <div class="result-poster">
-      <img :src="imageUrl" alt="Poster" />
+      <img :src="getContentImagePath(content)" alt="Poster" />
     </div>
 
     <div class="result-details">
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { formatYear } from "../utils/index.js";
+import { formatYear, getContentImagePath } from "../utils/index.js";
 
 export default {
   name: 'ContentItem',
@@ -55,10 +55,6 @@ export default {
       type: Boolean,
       default: false
     },
-    imgPrefix: {
-      type: String,
-      default: 'https://image.tmdb.org/t/p/w1280'
-    }
   },
   computed: {
     formattedYear() {
@@ -74,15 +70,9 @@ export default {
           return '';
       }
     },
-    imageUrl() {
-      return this.content.image
-          ? (this.content.sourceType === 'OFFICIAL_DATA'
-              ? this.imgPrefix + this.content.image
-              : this.content.image)
-          : '/placeholder-poster.jpg';
-    }
   },
   methods: {
+    getContentImagePath,
     handleItemClick() {
       if (!this.selectable) return;
 

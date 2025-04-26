@@ -3,7 +3,7 @@
     <div class="poster-container">
 
       <!-- Poster -->
-      <img :src="imgPrefix + contentDetails.image || '/placeholder-poster.jpg'"
+      <img :src="getContentImagePath(contentDetails)"
            :alt="(contentDetails.title || 'Content') + ' poster'"
            class="content-poster">
 
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import {getContentImagePath} from "../../utils/index.js";
 export default {
   name: 'RecordCard',
   props: {
@@ -46,6 +47,7 @@ export default {
     }
   },
   methods: {
+    getContentImagePath,
     formatDate(date) {
       if (!date) return '';
       const d = new Date(date);

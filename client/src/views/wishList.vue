@@ -187,27 +187,9 @@ export default {
     },
     async addToWishlist(items) {
       this.loading = true;
-
       try {
-        const wishlistResponse = await this.$http.get(`/playlist/wishlist`);
-        const wishlistId = wishlistResponse.data.data.id;
-
-        if (!wishlistId) {
-          console.error('Error fetching wishlist');
-          return;
-        }
-
         const addPromises = [];
-
-        // create batch of ListContent
-        const listContents = items.map(item => ({
-          listId: wishlistId,
-          contentId: item.id,
-          addTime: new Date().toISOString()
-        }));
-        addPromises.push(this.$http.post('/list-content/batch', listContents));
-
-        // then add each item to user-content table and set their status = WANT_TO_WATCH
+        // add each item to user-content table and set their status = WANT_TO_WATCH
         for (const item of items) {
           const userContent = {
             contentId: item.id
@@ -235,7 +217,6 @@ export default {
         this.$router.push(`/content/${content.id}`);
       }
     },
-
     toggleContentSelection(content) {
       const index = this.selectedContents.findIndex(c => c.id === content.id);
       if (!this.selectionMode) {
@@ -274,41 +255,33 @@ export default {
     },
     async deleteSelected() {
       this.showDeleteModal = false;
+      this.loading = true;
 
       try {
-        const wishlistResponse = await this.$http.get(`/playlist/wishlist`);
-        const wishlistId = wishlistResponse.data.data.id;
-
-        if (wishlistId) {
-          const deletePromises = [];
-          for (const content of this.selectedContents) {
-            const listContent = {
-              listId: wishlistId,
-              contentId: content.id
-            };
-            deletePromises.push(this.$http.delete('/list-content', {data: listContent}));
-            deletePromises.push(this.$http.delete('/record/wishlist', {
-              data: content.id,
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              transformRequest: [(data) => data]
-            }));
-          }
-
-          const results = await Promise.all(deletePromises);
-          const allSuccessful = results.every(response => response.data.code === 200);
-          if (allSuccessful) {
-            console.log(`Successfully removed ${this.selectedContents.length} contents from wishlist`);
-            await this.fetchWishlist();
-            this.cancelSelectionMode();
-          } else {
-            console.error('Error deleting contents from wishlist');
-            console.log(results)
-          }
+        const deletePromises = [];
+        for (const content of this.selectedContents) {
+          deletePromises.push(this.$http.delete('/record/wishlist', {
+            data: content.id,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            transformRequest: [(data) => data]
+          }));
+        }
+        const results = await Promise.all(deletePromises);
+        const allSuccessful = results.every(response => response.data.code === 200);
+        if (allSuccessful) {
+          console.log(`Successfully removed ${this.selectedContents.length} contents from wishlist`);
+          await this.fetchWishlist();
+          this.cancelSelectionMode();
+        } else {
+          console.error('Error deleting contents from wishlist');
+          console.log(results)
         }
       } catch (error) {
         console.error('Error removing contents from wishlist');
+      } finally {
+        this.loading = false;
       }
     },
     openAddContentModal() {

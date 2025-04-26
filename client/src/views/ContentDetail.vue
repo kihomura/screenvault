@@ -2,7 +2,7 @@
   <div class="content-detail-page">
     <div class="page-header">
       <back-button aria-label="Back to previous page"/>
-      <h1 class="page-title">{{ this.content.title }}</h1>
+      <h1 class="page-title">{{ this.content?.title }}</h1>
     </div>
 
     <div v-if="loading" class="loading-state">
@@ -16,7 +16,7 @@
     <div v-else class="content-detail-content">
       <div class="content-detail-container">
         <!-- Content Detail -->
-        <content-info-card :content="content" :img-prefix="imgPrefix" />
+        <content-info-card :content="content" />
 
         <!-- User's Record Detail -->
         <recording-info-card
@@ -29,20 +29,14 @@
       </div>
     </div>
 
-    <!-- Edit modal -->
-    <!-- <edit-recording-modal
-        v-if="showEditModal"
-        :record="userContent"
-        @close="closeEditModal"
-        @save="saveUpdatedRecord"
-    /> -->
-
     <!-- Add Record Modal -->
     <add-record-modal
-        :is-open="showAddRecordModal"
+        :is-open="showAddRecordModal || showEditModal"
         :selected-content="content"
-        @close="closeAddRecordModal"
-        @save="saveNewRecord"
+        :existing-record="showEditModal? record : null"
+        :existing-tags="showEditModal? tags : []"
+        @close="closeModal"
+        @save="saveOrUpdateNewRecord"
     />
   </div>
 </template>
@@ -72,22 +66,19 @@ export default {
       error: null,
       showEditModal: false,
       showAddRecordModal: false,
-      // TODO: use imgPrefix only when content's source_type = 'OFFICIAL_DATA'
-      imgPrefix: 'https://image.tmdb.org/t/p/w1280'
+      isAdding: false,
     }
   },
   methods: {
     openEditModal() {
       this.showEditModal = true;
     },
-    closeEditModal() {
-      this.showEditModal = false;
-    },
     openAddRecordModal() {
       this.showAddRecordModal = true;
     },
-    closeAddRecordModal() {
+    closeModal() {
       this.showAddRecordModal = false;
+      this.showEditModal = false;
     },
     async fetchContentDetails() {
       this.loading = true;
@@ -155,27 +146,41 @@ export default {
         console.error("Error fetching lists:", error);
       }
     },
-    async saveUpdatedRecord(updatedData) {
-      // TODO: edit Record method
-    },
-    async saveNewRecord(recordData) {
+    async saveOrUpdateNewRecord(recordData) {
+      if(this.isAdding) return;
       try {
+        this.isAdding = true;
+        console.log(recordData)
         const recordResponse = await this.$http.post('/record', recordData.recordingData);
+        console.log(recordResponse.data)
 
         if (recordResponse.data && recordResponse.data.data) {
-          // If tags are selected, save them
-          if (recordData.tagData && recordData.tagData.tags.length > 0) {
-            await this.$http.post('/tag-content/batch', recordData.tagData);
+          const tagPromises = [];
+          for (const tag of recordData.tagData.tags) {
+            console.log("adding tag: ", tag)
+            tagPromises.push(this.$http.post('/tag-content', tag));
           }
 
-          // Refresh record data
-          await this.fetchRecordDetails();
-          await this.fetchTags(this.contentId);
-          await this.fetchLists(this.contentId);
+          const results = await Promise.all(tagPromises);
+          const allSuccessful = results.every(response => response.data.code === 200);
+
+          if (allSuccessful) {
+            console.log(`Successfully added ${recordData.tagData.tags.length} tags to ${this.content.title}`);
+            await Promise.all([
+              this.fetchRecordDetails(),
+              this.fetchTags(this.contentId),
+              this.fetchLists(this.contentId)
+            ]);
+          } else {
+            console.error(`Error adding tags`, results);
+          }
+
+          this.closeModal();
         }
       } catch (error) {
         console.error("Error saving new record:", error);
-        alert("Failed to save your recording. Please try again.");
+      } finally {
+        this.isAdding = false;
       }
     }
   },
@@ -184,6 +189,8 @@ export default {
     if (this.contentId) {
       this.fetchContentDetails();
       this.fetchRecordDetails();
+      this.fetchTags();
+      this.fetchLists();
     } else {
       this.error = "Invalid content ID";
       this.loading = false;

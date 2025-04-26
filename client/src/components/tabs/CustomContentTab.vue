@@ -1,5 +1,12 @@
 <template>
   <div class="custom-content-tab">
+    <!-- Add More button -->
+    <div class="add-button-container">
+      <main-btn type="text" class="add-content-button" @click="openAddContentModal">
+        Add More Custom Content
+      </main-btn>
+    </div>
+
     <!-- Empty state -->
     <div v-if="!customContents || customContents.length === 0" class="empty-state">
       <div class="empty-icon">📺</div>
@@ -22,16 +29,27 @@
         />
       </div>
     </div>
+
+    <!-- Add Custom Content Modal -->
+    <add-custom-content-modal
+        :isOpen="isAddModalOpen"
+        @close="closeAddContentModal"
+        @content-added="refreshTab"
+    />
   </div>
 </template>
 
 <script>
 import ContentItem from '../ContentItem.vue';
+import MainBtn from '../buttons/MainBtn.vue';
+import AddCustomContentModal from '../modals/AddCustomContentModal.vue';
 
 export default {
-  name: 'WishlistTab',
+  name: 'CustomContentTab',
   components: {
-    ContentItem
+    ContentItem,
+    MainBtn,
+    AddCustomContentModal
   },
   props: {
     customContents: {
@@ -57,7 +75,8 @@ export default {
   },
   data() {
     return {
-      listsData: {}
+      listsData: {},
+      isAddModalOpen: false
     };
   },
   watch: {
@@ -120,6 +139,15 @@ export default {
     toggleSelection(content) {
       this.$emit('toggle-selection', content);
     },
+    openAddContentModal() {
+      this.isAddModalOpen = true;
+    },
+    closeAddContentModal() {
+      this.isAddModalOpen = false;
+    },
+    refreshTab() {
+      this.$emit('refresh');
+    }
   }
 };
 </script>
@@ -127,6 +155,29 @@ export default {
 <style scoped>
 .custom-content-tab {
   padding: var(--spacing-md) 0;
+}
+
+.add-button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-xl);
+  padding: 0 var(--spacing-md);
+}
+
+.add-content-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: transform 0.2s ease;
+}
+
+.add-content-button:hover {
+  transform: translateY(-2px);
+}
+
+.add-icon {
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
 .content-list {

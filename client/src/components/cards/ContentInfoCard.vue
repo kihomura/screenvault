@@ -7,7 +7,7 @@
 
     <div class="content-info-container">
       <div class="content-image-container">
-        <img :src="imgPrefix + content.image" :alt="content.title" class="content-image" />
+        <img :src="getContentImagePath(content)" :alt="content.title" class="content-image" />
       </div>
 
       <div class="content-info">
@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import {getContentImagePath} from "../../utils/index.js";
 export default {
   name: 'ContentInfoCard',
   props: {
@@ -57,6 +58,7 @@ export default {
     }
   },
   methods: {
+    getContentImagePath,
     formatDate(dateString) {
       if (!dateString) return 'N/A';
       const date = new Date(dateString);

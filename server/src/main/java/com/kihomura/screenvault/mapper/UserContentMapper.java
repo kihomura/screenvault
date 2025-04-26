@@ -26,6 +26,6 @@ public interface UserContentMapper extends BaseMapper<UserContent> {
     @Insert("INSERT INTO user_content (user_id, content_id, status) VALUES (#{userId}, #{contentId}, 'WANT_TO_WATCH')")
     boolean addToWishList(int contentId, int userId);
 
-    @Delete("DELETE FROM user_content WHERE content_id = #{contentId} AND status = 'WANT_TO_WATCH'")
-    boolean removeFromWishList(int contentId);
+    @Delete("DELETE FROM user_content WHERE content_id = #{contentId} AND user_id = #{userId} AND status = 'WANT_TO_WATCH'")
+    int removeFromWishList(int contentId, int userId);
 }
