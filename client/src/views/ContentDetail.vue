@@ -150,29 +150,39 @@ export default {
       if(this.isAdding) return;
       try {
         this.isAdding = true;
-        console.log(recordData)
         const recordResponse = await this.$http.post('/record', recordData.recordingData);
-        console.log(recordResponse.data)
 
         if (recordResponse.data && recordResponse.data.data) {
-          const tagPromises = [];
-          for (const tag of recordData.tagData.tags) {
-            console.log("adding tag: ", tag)
-            tagPromises.push(this.$http.post('/tag-content', tag));
-          }
+          const originalTagIds = recordData.originalTags.map(tag => tag.tagId);
+          const newTagIds = recordData.newTags.map(tag => tag.tagId);
 
-          const results = await Promise.all(tagPromises);
+          // find tags to add (in new but not in original)
+          const tagsToAdd = recordData.newTags.filter(tag =>
+              !originalTagIds.includes(tag.tagId)
+          );
+
+          // find tags to remove (in original but not in new)
+          const tagsToRemove = recordData.originalTags.filter(tag =>
+              !newTagIds.includes(tag.tagId)
+          );
+
+          const apiCalls = [
+            ...tagsToAdd.map(tag => this.$http.post('/tag-content', tag)),
+            ...tagsToRemove.map(tag => this.$http.delete('/tag-content', { data: tag }))
+          ];
+
+          const results = await Promise.all(apiCalls);
           const allSuccessful = results.every(response => response.data.code === 200);
 
           if (allSuccessful) {
-            console.log(`Successfully added ${recordData.tagData.tags.length} tags to ${this.content.title}`);
+            console.log(`Successfully updated tags for ${this.content.title}`);
             await Promise.all([
               this.fetchRecordDetails(),
               this.fetchTags(this.contentId),
               this.fetchLists(this.contentId)
             ]);
           } else {
-            console.error(`Error adding tags`, results);
+            console.error(`Error updating tags`, results);
           }
 
           this.closeModal();

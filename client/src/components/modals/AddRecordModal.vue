@@ -288,16 +288,19 @@ export default {
         review: reviewList,
       };
 
-      const tagData = {
-        tags: this.selectedTags.map(tag => ({
-          tagId: tag.id,
-          contentId: this.formData.contentId
-        }))
-      };
+      const originalTags = this.isEditMode ? this.existingTags.map(t => ({
+        tagId: t.id,
+        contentId: this.formData.contentId,
+      })) : [];
+      const newTags = this.selectedTags.map(t => ({
+        tagId: t.id,
+        contentId: this.formData.contentId,
+      }));
 
       this.$emit('save', {
         recordingData: recordingData,
-        tagData: tagData,
+        originalTags: originalTags,
+        newTags: newTags,
         isEdit: this.isEditMode
       });
 
