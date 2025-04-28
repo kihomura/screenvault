@@ -10,19 +10,16 @@
             placeholder="Search tags..."
             class="search-input"
         />
-        <span class="search-icon">🔍</span>
       </div>
       <div class="inline-create-container">
-        <input
-            type="text"
+        <input-with-btn
+            id="new-tag-input"
             v-model="newTagName"
-            placeholder="Tag name"
-            class="create-input"
-            @keyup.enter="createTag"
+            placeholder="tag name"
+            buttonLabel="ADD NEW"
+            successText="Added!"
+            @button-click="createTag"
         />
-        <main-btn type="highlight" @click="createTag" :disabled="!newTagName.trim()">
-          Add New
-        </main-btn>
       </div>
     </div>
 
@@ -42,7 +39,6 @@
            :key="tag.id"
            class="tag-card"
       >
-
         <button class="delete-icon" @click="confirmDeleteTag(tag)">×</button>
 
         <!-- edit tagName -->
@@ -68,15 +64,15 @@
             <h3 class="tag-name">{{ tag.tagName }}</h3>
           </template>
 
-          <!-- related content number -->
-          <div class="tag-count">
-            <span class="count-number">{{ tagContentCounts[tag.id] || 0 }}</span>
-            <span class="count-label">content items</span>
+          <!-- related content number with edit button -->
+          <div class="tag-footer">
+            <div class="tag-count">
+              <span class="count-label">Related to </span>
+              <span class="count-number">{{ tagContentCounts[tag.id] || 0 }}</span>
+              <span class="count-label">Contents</span>
+            </div>
+            <main-btn v-if="editingTagId !== tag.id" type="text" class="edit-btn" @click="startEdit(tag)">Edit</main-btn>
           </div>
-        </div>
-
-        <div v-if="editingTagId !== tag.id" class="tag-card-actions">
-          <main-btn type="text" @click="startEdit(tag)">Edit</main-btn>
         </div>
       </div>
     </div>
@@ -101,12 +97,14 @@
 <script>
 import MainBtn from "./buttons/MainBtn.vue";
 import ConfirmModal from "./modals/ConfirmModal.vue";
+import InputWithBtn from "../components/form/InputWithBtn.vue";
 
 export default {
   name: 'TagManagement',
   components: {
     MainBtn,
-    ConfirmModal
+    ConfirmModal,
+    InputWithBtn
   },
   data() {
     return {
@@ -213,11 +211,12 @@ export default {
         this.isCreating = false;
       }
     },
-    async createTag() {
-      if (!this.newTagName.trim()) return;
+    async createTag(tagName) {
+      if (!tagName.trim()) return;
+
       try {
         const response = await this.$http.post('/tag', {
-          tagName: this.newTagName.trim()
+          tagName: tagName.trim()
         });
 
         if (response && response.data && response.data.data) {
@@ -227,7 +226,6 @@ export default {
             ...this.tagContentCounts,
             [newTag.id]: 0
           };
-          this.newTagName = '';
         }
       } catch (error) {
         console.error('Error creating tag:', error);
@@ -260,26 +258,14 @@ export default {
   }
 };
 </script>
-<style>
-.tag-management {
-  font-family: var(--font-fontFamily-primary);
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--spacing-xl);
-  color: var(--text-primary);
-  background-color: var(--background-subtle);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-level1-default);
-}
 
-/* Header styling with search and create */
+<style>
 .tag-management-header {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
   padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
 }
 
 .search-container {
@@ -290,11 +276,11 @@ export default {
 
 .search-input {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-xl);
-  font-size: var(--font-fontSize-base);
+  height: 100%;
   border: 2px solid var(--border-light);
-  border-radius: var(--border-radius-full);
+  border-radius: var(--border-radius-md);
   background-color: var(--background-base);
+  padding: 8px 120px 8px 16px;
   transition: all 0.3s ease;
 }
 
@@ -304,36 +290,11 @@ export default {
   box-shadow: 0 0 0 3px rgba(174, 202, 95, 0.2);
 }
 
-.search-icon {
-  position: absolute;
-  right: var(--spacing-lg);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none;
-}
-
 .inline-create-container {
   display: flex;
-  gap: var(--spacing-md);
   flex: 1;
   min-width: 250px;
-}
-
-.create-input {
-  flex: 1;
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--font-fontSize-base);
-  border: 2px solid var(--border-light);
-  border-radius: var(--border-radius-md);
-  background-color: var(--background-base);
-  transition: all 0.3s ease;
-}
-
-.create-input:focus {
-  outline: none;
-  border-color: var(--highlight);
-  box-shadow: 0 0 0 3px rgba(174, 202, 95, 0.2);
+  min-height: 50px;
 }
 
 /* Tags grid layout */
@@ -343,10 +304,9 @@ export default {
   gap: var(--spacing-xl);
 }
 
-/* Tag card styling */
 .tag-card {
   position: relative;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg);
   background-color: var(--background-base);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-level1-default);
@@ -363,7 +323,7 @@ export default {
   left: 0;
   width: 100%;
   height: 4px;
-  background-color: var(--highlight);
+  background-color: var(--tertiary);
   opacity: 0.7;
   transition: height 0.3s ease;
 }
@@ -374,14 +334,15 @@ export default {
 }
 
 .tag-card:hover::before {
-  height: 6px;
+  height: 5px;
 }
 
 .tag-card-header {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 0;
+  padding-top: var(--spacing-lg);
 }
 
 .tag-name {
@@ -392,6 +353,16 @@ export default {
   margin: 0;
   line-height: var(--font-lineHeight-tight);
   word-break: break-word;
+}
+
+/* New footer with count and edit button */
+.tag-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
 }
 
 .tag-count {
@@ -411,9 +382,8 @@ export default {
   color: var(--text-muted);
 }
 
-.tag-card-actions {
-  margin-top: auto;
-  padding-top: var(--spacing-md);
+.edit-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 /* Delete button */
@@ -434,6 +404,7 @@ export default {
   opacity: 0.6;
   cursor: pointer;
   transition: all 0.2s ease;
+  z-index: 2;
 }
 
 .delete-icon:hover {
@@ -445,6 +416,7 @@ export default {
 /* Edit mode styling */
 .edit-name-container {
   width: 100%;
+  margin-top: var(--spacing-md);
 }
 
 .edit-tag-input {
@@ -503,9 +475,6 @@ export default {
   justify-content: center;
   padding: var(--spacing-xxl);
   color: var(--text-secondary);
-  background-color: var(--background-base);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-level1-default);
   min-height: 150px;
 }
 
@@ -522,6 +491,16 @@ export default {
 
   .tags-grid {
     grid-template-columns: 1fr;
+  }
+
+  .tag-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .edit-btn {
+    align-self: flex-end;
   }
 }
 

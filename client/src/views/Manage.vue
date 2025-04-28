@@ -11,19 +11,17 @@
 
     <!-- custom content management -->
     <div v-else-if="section === 'custom-content'">
-      <div class="placeholder-message">
-        <h3>Custom Content Management</h3>
-        <p>This section is under development.</p>
-      </div>
+      <CustomContentManagement />
     </div>
 
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import {computed} from 'vue';
+import {useRoute} from 'vue-router';
 import TagManagement from '../components/tagManagement.vue';
+import CustomContentManagement from '../components/CustomContentManagement.vue';
 
 const route = useRoute();
 const section = computed(() => route.params.section);

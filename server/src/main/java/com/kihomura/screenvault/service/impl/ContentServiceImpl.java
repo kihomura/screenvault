@@ -58,7 +58,7 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
         content.setSourceType(SourceType.CUSTOM_DATA);
         content.setCreatorId(userService.getCurrentUserId());
 
-        return this.saveOrUpdateContent(content);
+        return this.saveOrUpdate(content);
     }
 
     @Override

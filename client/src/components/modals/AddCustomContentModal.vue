@@ -382,6 +382,7 @@ export default {
         };
 
         const response = await this.$http.post(`/content`, contentData);
+        console.log(response)
         if (response.data && response.data.data) {
           const newCustomContent = response.data.data;
           this.$emit('close');
