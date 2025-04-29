@@ -62,9 +62,8 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
         playList.setCreatorId(userService.getCurrentUserId());
         playList.setIsDefault(false);
         playList.setCreateDate(Date.valueOf(LocalDate.now()));
-        return this.saveOrUpdateList(playList);
+        return this.saveOrUpdate(playList);
     }
-
 
     @Override
     public boolean deletePlayList(int id) {

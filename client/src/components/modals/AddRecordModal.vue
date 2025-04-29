@@ -523,6 +523,11 @@ export default {
   box-shadow: var(--shadow-level1-default);
 }
 
+.form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
 .form-control:focus {
   outline: none;
   border-color: var(--accent-info);

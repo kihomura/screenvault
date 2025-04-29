@@ -6,13 +6,21 @@
         <h1 class="page-title">Play Lists</h1>
       </div>
       <div class="header-actions">
-        <main-btn type="highlight" @click="showAddModal = true">
-          Create
-        </main-btn>
         <main-btn type="secondary" @click="toggleManageMode">
           {{ isManageMode ? 'Complete' : 'Manage' }}
         </main-btn>
       </div>
+    </div>
+
+    <!-- Inline InputButton for creating new lists -->
+    <div class="create-list-container">
+      <input-button
+          id="create-list-input"
+          placeholder="Enter list name"
+          buttonLabel="Create"
+          successText="Created!"
+          @button-click="addNewList"
+      />
     </div>
 
     <div class="lists-container">
@@ -37,13 +45,6 @@
       </div>
     </div>
 
-    <!-- create new list -->
-    <add-list-modal
-        :show="showAddModal"
-        @close="showAddModal = false"
-        @create="addNewList"
-    />
-
     <!-- confirm delete modal -->
     <confirm-modal
         :visible="deleteModalVisible"
@@ -60,7 +61,7 @@
 
 <script>
 import ListItem from '../components/ui/list/ListItem.vue';
-import AddListModal from "../components/modals/AddListModal.vue";
+import InputButton from "../components/form/InputWithBtn.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 
@@ -69,13 +70,12 @@ export default {
   components: {
     MainBtn,
     ListItem,
-    AddListModal,
+    InputButton,
     ConfirmModal
   },
   data() {
     return {
       isManageMode: false,
-      showAddModal: false,
       isToggling: false,
       lists: [],
       // store the custom order of lists
@@ -96,9 +96,12 @@ export default {
         this.isToggling = false;
       }, 300);
     },
-    async addNewList(newList) {
+    async addNewList(listName) {
       try {
+        // create new list with the name from input
+        const newList = { listName };
         const response = await this.$http.post(`/playlist`, newList);
+        console.log(response)
         if (response.data && response.data.data) {
           this.lists.unshift(response.data.data);
           this.saveListOrderToLocalStorage();
@@ -210,7 +213,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-lg);
   border-bottom: 1px solid var(--border-light);
 }
@@ -235,6 +238,10 @@ export default {
 .header-actions {
   display: flex;
   gap: var(--spacing-md);
+}
+
+.create-list-container {
+  margin-bottom: var(--spacing-xl);
 }
 
 .lists-container {

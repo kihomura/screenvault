@@ -13,7 +13,6 @@
               <span class="empty-list-icon">📋</span>
               <p>No lists created yet</p>
             </div>
-            <!-- 如果你已有列表数据，可循环渲染 -->
           </div>
 
           <div class="create-new-list">
@@ -54,7 +53,6 @@ export default {
       this.$emit('cancel');
     },
     create() {
-      // 触发创建事件，同时把新列表名称传递出去
       this.$emit('create', this.newListName);
       this.newListName = '';
     }

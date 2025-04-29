@@ -583,6 +583,7 @@ label.required::after {
 
 .form-control:focus {
   outline: none;
+  color: var(--text-primary);
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
 }

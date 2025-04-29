@@ -191,17 +191,25 @@ export default {
 }
 
 .form-control {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-lg);
+  width: 100%;
+  padding: var(--spacing-md);
+  font-family: var(--font-fontFamily-primary);
   font-size: var(--font-fontSize-base);
-  transition: all 0.2s ease;
+  color: var(--text-primary);
   background-color: var(--background-base);
-  box-shadow: var(--shadow-level1-default);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s ease;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 .form-control:focus {
   outline: none;
+  color: var(--text-primary);
   border-color: var(--accent-info);
   box-shadow: 0 0 0 3px rgba(var(--accent-info-rgb), 0.15);
 }
