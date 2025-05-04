@@ -260,7 +260,7 @@ export default {
         this.isAdding = true;
         const recordResponse = await this.$http.post('/record', data.recordingData);
         if (recordResponse.data && recordResponse.data.data) {
-          for (const tag of data.newTags.tags) {
+          for (const tag of data.newTags) {
             try {
               const tagResponse = await this.$http.post('/tag-content', tag);
               console.log('Tag added successfully:', tagResponse.data);

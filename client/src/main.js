@@ -8,12 +8,14 @@ import { createPinia } from 'pinia';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.js'
 import './assets/css/custom-colors.css'
+import * as echarts from 'echarts'
 
 axios.defaults.baseURL = 'http://localhost:5555'
 axios.defaults.withCredentials = true
 
 const app = createApp(App)
 app.config.globalProperties.$http = axios
+app.config.globalProperties.$echarts = echarts
 
 const pinia = createPinia();
 
