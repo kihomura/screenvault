@@ -182,12 +182,18 @@ export default {
     const isEditMode = ref(false);
 
     const availableWidgets = computed(() => {
-      return Object.keys(WIDGET_CONFIG)
+      const allWidgets = Object.keys(WIDGET_CONFIG)
           .filter(key => WIDGET_CONFIG[key].component !== null)
           .map(key => ({
             id: key,
             name: WIDGET_CONFIG[key].name
           }));
+
+      return allWidgets.filter(widget => {
+        // check if this widget type already exists in the layout
+        const alreadyExists = layout.value.some(item => item.type === widget.id);
+        return !alreadyExists;
+      });
     });
 
     const getAvailableSizes = computed(() => {
@@ -308,6 +314,7 @@ export default {
         size: selectedWidgetSize.value
       });
 
+      selectedWidgetType.value = '';
       selectedWidgetSize.value = '';
 
       nextTick(() => {
@@ -319,6 +326,9 @@ export default {
       const index = layout.value.findIndex(item => item.i === id);
       if (index !== -1) {
         layout.value.splice(index, 1);
+
+        selectedWidgetType.value = '';
+        selectedWidgetSize.value = '';
       }
     };
 
