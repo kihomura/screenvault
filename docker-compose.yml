@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  mysql:
+    build: ./mysql
+    container_name: screenvault-mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: screen_vault
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./server
+    container_name: screenvault-backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "5555:5555"
+    environment:
+      # when first run and need to import csv to db
+      #- SPRING_PROFILES_ACTIVE=prod,csv-import
+      - SPRING_PROFILES_ACTIVE=prod
+      - APP_DOMAIN=${APP_DOMAIN:-localhost:80}
+    volumes:
+      - ./logs:/app/logs
+      - ./metadata:/app/metadata
+    networks:
+      - app-network
+
+  frontend:
+    build: ./client
+    container_name: screenvault-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

@@ -10,6 +10,7 @@ export default defineConfig({
     }
   },
   server: {
+    host: '0.0.0.0',
     proxy: {
       '/auth': {
         target: 'http://localhost:5555',
