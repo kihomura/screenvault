@@ -15,12 +15,14 @@ COPY --from=build /app/target/*.jar app.jar
 
 # Create logs directory
 RUN mkdir -p logs
+RUN mkdir -p metadata
 
 # Set environment variables
 ENV SPRING_PROFILES_ACTIVE=prod
+ENV JAVA_OPTS="-Xms512m -Xmx1g"
 
 # Expose the port
 EXPOSE 5555
 
-# Command to run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Command to run the application with schema initialization
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
