@@ -1,43 +1,48 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
-  base: '/',
-  build: {
-    outDir: 'dist',
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd())
+  const apiUrl = env.API_URL || 'http://localhost:5555'
+
+  return {
+    plugins: [
+      vue(),
+      vueDevTools(),
+    ],
+    base: '/',
+    build: {
+      outDir: 'dist',
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+        }
       }
-    }
-  },
-  server: {
-    host: '0.0.0.0',
-    port: process.env.PORT || 5173,
-    proxy: {
-      '/auth': {
-        target: 'http://localhost:5555',
-        changeOrigin: true
-      },
-      '/user': {
-        target: 'http://localhost:5555',
-        changeOrigin: true
-      },
-      '/oauth2': {
-        target: 'http://localhost:5555',
-        changeOrigin: true,
-        secure: false
+    },
+    server: {
+      host: '0.0.0.0',
+      port: parseInt(process.env.PORT || '5173'),
+      proxy: {
+        '/auth': {
+          target: apiUrl,
+          changeOrigin: true
+        },
+        '/user': {
+          target: apiUrl,
+          changeOrigin: true
+        },
+        '/oauth2': {
+          target: apiUrl,
+          changeOrigin: true,
+          secure: false
+        }
       }
+    },
+    preview: {
+      port: parseInt(process.env.PORT || '5173'),
+      host: '0.0.0.0',
     }
-  },
-  preview: {
-    port: process.env.PORT || 5173,
-    host: '0.0.0.0',
   }
 })

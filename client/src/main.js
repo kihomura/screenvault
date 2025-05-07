@@ -10,7 +10,7 @@ import 'bootstrap/dist/js/bootstrap.js'
 import './assets/css/custom-colors.css'
 import * as echarts from 'echarts'
 
-axios.defaults.baseURL = 'http://localhost:5555'
+axios.defaults.baseURL = import.meta.env.API_URL || 'http://localhost:5555'
 axios.defaults.withCredentials = true
 
 const app = createApp(App)
