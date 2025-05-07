@@ -17,6 +17,13 @@ const backendUrl = import.meta.env.DEV ?
 axios.defaults.baseURL = backendUrl;
 axios.defaults.withCredentials = true;
 
+axios.interceptors.request.use(function (config) {
+    config.withCredentials = true;
+    return config;
+}, function (error) {
+    return Promise.reject(error);
+});
+
 const app = createApp(App)
 app.config.globalProperties.$http = axios
 app.config.globalProperties.$echarts = echarts
