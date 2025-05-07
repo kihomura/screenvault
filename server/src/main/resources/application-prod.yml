@@ -1,0 +1,41 @@
+server:
+  port: ${PORT:5555}
+  servlet:
+    context-path: /
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      continue-on-error: true
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+
+app:
+  domain: ${APP_DOMAIN}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000 # 24 hours
+
+logging:
+  level:
+    root: INFO
+    com.kihomura: DEBUG
+    org.springframework.jdbc.datasource.init: DEBUG
+  file:
+    name: /app/logs/application.log 
