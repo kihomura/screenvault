@@ -113,6 +113,7 @@ import SelectionActionsBar from "../components/ui/SelectionBar.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'WatchedPage',
@@ -163,8 +164,12 @@ export default {
         { value: '10', label: 'October' },
         { value: '11', label: 'November' },
         { value: '12', label: 'December' }
-      ]
+      ],
+      toastStore: null
     }
+  },
+  created() {
+    this.toastStore = useToastStore();
   },
   computed: {
     availableYears() {
@@ -277,11 +282,14 @@ export default {
           }
           await this.getRecords();
           this.closeRecordDetailsModal();
+          this.toastStore.success('New recording added successfully!');
         } else {
           console.error('Invalid response format when saving record:', recordResponse);
+          this.toastStore.error('Failed to add new recording. Please try again.');
         }
       } catch (error) {
         console.error('Error saving new record:', error);
+        this.toastStore.error('Failed to add new recording. Please try again.');
       } finally {
         this.isAdding = false;
       }
@@ -357,9 +365,18 @@ export default {
         this.showDeleteModal = false;
         await this.getRecords();
         this.cancelSelectionMode();
+        
+        if (successCount > 0 && failureCount === 0) {
+          this.toastStore.success(`Successfully deleted ${successCount} recording${successCount > 1 ? 's' : ''}.`);
+        } else if (successCount > 0 && failureCount > 0) {
+          this.toastStore.info(`Deleted ${successCount} recording${successCount > 1 ? 's' : ''}, but failed to delete ${failureCount}.`);
+        } else {
+          this.toastStore.error('Failed to delete recordings. Please try again.');
+        }
       } catch (error) {
         console.error("Error during batch delete:", error);
         this.showDeleteModal = false;
+        this.toastStore.error('An error occurred while deleting recordings.');
       }
     },
     addToList() {

@@ -51,6 +51,7 @@ import BackButton from "../components/buttons/BackButton.vue";
 import ContentInfoCard from "../components/cards/ContentInfoCard.vue";
 import RecordingInfoCard from "../components/cards/RecordInfoCard.vue";
 import AddRecordModal from "../components/modals/AddRecordModal.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'ContentDetailPage',
@@ -72,6 +73,20 @@ export default {
       showEditModal: false,
       showAddRecordModal: false,
       isAdding: false,
+      toastStore: null
+    }
+  },
+  created() {
+    this.toastStore = useToastStore();
+    this.contentId = this.$route.params.id;
+    if (this.contentId) {
+      this.fetchContentDetails();
+      this.fetchRecordDetails();
+      this.fetchTags();
+      this.fetchLists();
+    } else {
+      this.error = "Invalid content ID";
+      this.loading = false;
     }
   },
   methods: {
@@ -96,10 +111,12 @@ export default {
           await this.fetchLists(this.contentId)
         } else {
           this.error = "Failed to load content details";
+          this.toastStore.error("Failed to load content details");
         }
       } catch (error) {
         console.error("Error fetching content details:", error);
         this.error = "Error loading content details. Please try again.";
+        this.toastStore.error("Error loading content details. Please try again.");
       } finally {
         this.loading = false;
       }
@@ -186,29 +203,20 @@ export default {
               this.fetchTags(this.contentId),
               this.fetchLists(this.contentId)
             ]);
+            this.toastStore.success(this.showEditModal ? "Record updated successfully" : "New record added successfully");
           } else {
             console.error(`Error updating tags`, results);
+            this.toastStore.error("Error updating tags");
           }
 
           this.closeModal();
         }
       } catch (error) {
         console.error("Error saving new record:", error);
+        this.toastStore.error(this.showEditModal ? "Failed to update record" : "Failed to add new record");
       } finally {
         this.isAdding = false;
       }
-    }
-  },
-  created() {
-    this.contentId = this.$route.params.id;
-    if (this.contentId) {
-      this.fetchContentDetails();
-      this.fetchRecordDetails();
-      this.fetchTags();
-      this.fetchLists();
-    } else {
-      this.error = "Invalid content ID";
-      this.loading = false;
     }
   }
 }

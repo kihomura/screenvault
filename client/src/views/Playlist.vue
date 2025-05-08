@@ -65,6 +65,7 @@ import ListItem from '../components/ui/list/ListItem.vue';
 import InputButton from "../components/form/InputWithBtn.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'playlist',
@@ -84,8 +85,12 @@ export default {
       deleteModalVisible: false,
       listToDelete: null,
       deleteMessage: '',
-      isDeleting: null
+      isDeleting: null,
+      toastStore: null
     }
+  },
+  created() {
+    this.toastStore = useToastStore();
   },
   methods: {
     toggleManageMode() {
@@ -102,13 +107,14 @@ export default {
         // create new list with the name from input
         const newList = { listName };
         const response = await this.$http.post(`/playlist`, newList);
-        console.log(response)
         if (response.data && response.data.data) {
           this.lists.unshift(response.data.data);
           this.saveListOrderToLocalStorage();
+          this.toastStore.success(`List "${listName}" created successfully`);
         }
       } catch (error) {
         console.log('Error adding new list: ',error);
+        this.toastStore.error('Failed to create list. Please try again.');
       }
     },
     showConfirmModal(list) {
@@ -120,17 +126,21 @@ export default {
       if (!this.listToDelete || this.isDeleting) return;
       try {
         const listToDeleteId = this.listToDelete.id;
+        const listName = this.listToDelete.listName;
         this.isDeleting = true;
         const response = await this.$http.delete(`/playlist/id/${listToDeleteId}`);
 
         if (response.data && response.data.code === 200) {
           this.lists = this.lists.filter(list => list.id !== listToDeleteId);
           this.saveListOrderToLocalStorage();
+          this.toastStore.success(`List "${listName}" deleted successfully`);
         } else {
           console.error('Server returned error:', response.data);
+          this.toastStore.error('Failed to delete list. Please try again.');
         }
       } catch (error) {
         console.log('Error deleting list: ', error);
+        this.toastStore.error('Failed to delete list. Please try again.');
       } finally {
         this.deleteModalVisible = false;
         this.listToDelete = null;
@@ -152,6 +162,7 @@ export default {
         this.saveListOrderToLocalStorage();
       } catch (error) {
         console.error(`Error getting lists: `, error);
+        this.toastStore.error('Failed to load your lists. Please refresh the page.');
       }
     },
     reorderListsBasedOnSavedOrder(fetchedLists, savedOrder) {

@@ -63,6 +63,7 @@ import MainBtn from "../components/buttons/MainBtn.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 import AddCustomContentModal from "./modals/AddCustomContentModal.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'CustomContentManagement',
@@ -83,8 +84,13 @@ export default {
       selectedContents: [],
       showDeleteModal: false,
       isAddModalOpen: false,
-      deleteMessage: ''
+      deleteMessage: '',
+      toastStore: null
     }
+  },
+  created() {
+    this.toastStore = useToastStore();
+    this.fetchCustomContents();
   },
   methods: {
     async fetchCustomContents() {
@@ -100,6 +106,7 @@ export default {
       } catch (error) {
         console.error('Error fetching custom contents: ', error);
         this.customContents = [];
+        this.toastStore.error('Failed to load custom contents');
       } finally {
         this.loading = false;
       }
@@ -109,8 +116,10 @@ export default {
       this.loading = true;
       try {
         await this.fetchCustomContents();
+        this.toastStore.success('Custom content added successfully');
       } catch (e) {
         console.error('Error adding custom content', e);
+        this.toastStore.error('Failed to add custom content');
       } finally {
         this.loading = false;
         this.closeAddContentModal();
@@ -171,6 +180,8 @@ export default {
 
       try {
         const deletePromises = [];
+        const selectedCount = this.selectedContents.length;
+        
         for (const content of this.selectedContents) {
           deletePromises.push(this.$http.delete(`/content/id/${content.id}`));
         }
@@ -179,15 +190,18 @@ export default {
         const allSuccessful = results.every(response => response.data.code === 200);
 
         if (allSuccessful) {
-          console.log(`Successfully deleted ${this.selectedContents.length} custom contents`);
+          console.log(`Successfully deleted ${selectedCount} custom contents`);
           await this.fetchCustomContents();
           this.cancelSelectionMode();
+          this.toastStore.success(`Deleted ${selectedCount} custom content${selectedCount > 1 ? 's' : ''}`);
         } else {
           console.error('Error deleting custom contents');
           console.log(results);
+          this.toastStore.error('Failed to delete some custom contents');
         }
       } catch (error) {
         console.error('Error deleting custom contents', error);
+        this.toastStore.error('Failed to delete custom contents');
       } finally {
         this.loading = false;
       }
@@ -200,9 +214,6 @@ export default {
     closeAddContentModal() {
       this.isAddModalOpen = false;
     }
-  },
-  created() {
-    this.fetchCustomContents();
   }
 }
 </script>

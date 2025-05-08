@@ -8,7 +8,7 @@
       @dragenter.prevent
       @drop="onDrop"
   >
-    <div class="list-content" @click="isManageMode ? (isEditing ? null : toggleEditMode()) : navigateToList">
+    <div class="list-content" @click="handleItemClick">
       <div class="list-thumbnail">
         <img
             v-if="listThumbnail"
@@ -149,6 +149,15 @@ export default {
       const content = response.data.data;
 
       return content && content.image ? content.image : null;
+    },
+    handleItemClick() {
+      if (this.isManageMode) {
+        if (!this.isEditing) {
+          this.toggleEditMode();
+        }
+      } else {
+        this.navigateToList();
+      }
     },
     navigateToList() {
       if (!this.isManageMode) {

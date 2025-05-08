@@ -164,20 +164,17 @@
       <div class="loading-spinner"></div>
       <p>Loading your profile...</p>
     </div>
-
-    <Toast :show="toast.show" :message="toast.message" :type="toast.type" />
   </div>
 </template>
 
 <script>
 import { reactive } from 'vue';
-import Toast from '../components/ui/Toast.vue';
 import MainBtn from '../components/buttons/MainBtn.vue';
+import { useToastStore } from '../store/toastStore.js';
 
 export default {
   name: 'ProfileView',
   components: { 
-    Toast,
     MainBtn
   },
   data() {
@@ -210,13 +207,11 @@ export default {
         password: false,
         confirmPassword: false
       }),
-      toast: {
-        show: false,
-        message: '',
-        type: 'info',
-        timeout: null
-      }
+      toastStore: null
     };
+  },
+  created() {
+    this.toastStore = useToastStore();
   },
   methods: {
     async fetchUserProfile() {
@@ -226,7 +221,7 @@ export default {
         this.profileForm.nickname = this.userProfile.nickname || '';
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        this.showToast('Failed to load profile data. Please try again.', 'error');
+        this.toastStore.error('Failed to load profile data. Please try again.');
       }
     },
     toggleEditMode() {
@@ -245,34 +240,31 @@ export default {
         if (response.data) {
           this.userProfile = response.data.data;
           this.isEditing = false;
-          this.showToast('Profile updated successfully!', 'success');
+          this.toastStore.success('Profile updated successfully!');
         }
       } catch (error) {
         console.error('Error updating profile:', error);
-        this.showToast('Failed to update profile. Please try again.', 'error');
+        this.toastStore.error('Failed to update profile. Please try again.');
       }
     },
     async changePassword() {
       if (!this.passwordValidation.isValid || !this.confirmPasswordValidation.isMatch) {
         return;
       }
+
       try {
-        await this.$http.put('/user/change-password', {
+        await this.$http.put('/user/update-password', {
           newPassword: this.passwordForm.newPassword
         });
-        this.passwordForm = {
-          newPassword: '',
-          confirmPassword: ''
-        };
+
+        this.passwordForm.newPassword = '';
+        this.passwordForm.confirmPassword = '';
         this.showPasswordForm = false;
-        this.showToast('Password changed successfully!', 'success');
+        
+        this.toastStore.success('Password updated successfully!');
       } catch (error) {
         console.error('Error changing password:', error);
-        if (error.response && error.response.status === 401) {
-          this.showToast('Current password is incorrect.', 'error');
-        } else {
-          this.showToast('Failed to update password. Please try again.', 'error');
-        }
+        this.toastStore.error('Failed to update password. Please try again.');
       }
     },
     formatDate(dateString) {
@@ -325,15 +317,13 @@ export default {
           this.passwordForm.confirmPassword === this.passwordForm.newPassword;
     },
     showToast(message, type = 'info') {
-      if (this.toast.timeout) {
-        clearTimeout(this.toast.timeout);
+      if (type === 'success') {
+        this.toastStore.success(message);
+      } else if (type === 'error') {
+        this.toastStore.error(message);
+      } else {
+        this.toastStore.info(message);
       }
-      this.toast.message = message;
-      this.toast.type = type;
-      this.toast.show = true;
-      this.toast.timeout = setTimeout(() => {
-        this.toast.show = false;
-      }, 3000);
     }
   },
   mounted() {

@@ -87,6 +87,7 @@ import BackButton from "../components/buttons/BackButton.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 import SortControls from "../components/controls/SortControls.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'ListDetail',
@@ -114,7 +115,8 @@ export default {
       showDeleteModal: false,
       isAddModalOpen: false,
       deleteMessage: '',
-      isDeleting: false
+      isDeleting: false,
+      toastStore: null
     };
   },
   computed: {
@@ -184,6 +186,7 @@ export default {
         this.list = response.data.data;
       } catch (error) {
         console.error('Error fetching list details:', error);
+        this.toastStore.error('Failed to load playlist details');
       }
     },
     async fetchListContents() {
@@ -197,6 +200,7 @@ export default {
         console.error('Error fetching list contents:', error);
         this.listContents = [];
         this.contentCount = 0;
+        this.toastStore.error('Failed to load playlist contents');
       } finally {
         this.loading = false;
       }
@@ -264,6 +268,9 @@ export default {
 
       try {
         this.isDeleting = true;
+        // 保存选中项的数量，以便在清空选择后仍能正确显示
+        const selectedCount = this.selectedContents.length;
+        
         const deletePromises = this.selectedContents.map(content => {
           const listContent = {
             listId: this.listId,
@@ -276,14 +283,17 @@ export default {
         const allSuccessful = results.every(response => response.data.code === 200);
 
         if (allSuccessful) {
-          console.log(`Successfully removed ${this.selectedContents.length} contents from list ${this.list.listName}`);
+          console.log(`Successfully removed ${selectedCount} contents from list ${this.list.listName}`);
           await this.fetchListContents();
           this.cancelSelectionMode();
+          this.toastStore.success(`Removed ${selectedCount} item${selectedCount > 1 ? 's' : ''} from playlist`);
         } else {
           console.error('Some items failed to be removed from the list');
+          this.toastStore.error('Failed to remove some items from playlist');
         }
       } catch (error) {
         console.error('Error removing contents from list:', error);
+        this.toastStore.error('Failed to remove items from playlist');
       } finally {
         this.isDeleting = false;
       }
@@ -297,13 +307,16 @@ export default {
         }));
         const response = await this.$http.post(`/list-content/batch`, listContents);
         if (response.data.code === 200) {
-          console.log(`Successfully add ${items.length}items to list ${this.list.listName}`);
+          console.log(`Successfully add ${items.length} items to list ${this.list.listName}`);
           await this.fetchListContents();
+          this.toastStore.success(`Added ${items.length} item${items.length > 1 ? 's' : ''} to playlist`);
         } else {
           console.log('Failed to add to list:', response.data.code, response.data.message);
+          this.toastStore.error('Failed to add items to playlist');
         }
       } catch (e) {
         console.error('Error adding content to list:', e);
+        this.toastStore.error('Failed to add items to playlist');
       }
     },
     openAddContentModal() {
@@ -314,6 +327,7 @@ export default {
     }
   },
   created() {
+    this.toastStore = useToastStore();
     this.fetchListDetails();
     this.fetchListContents();
   }

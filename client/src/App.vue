@@ -7,6 +7,7 @@
     <main class="content-area">
       <router-view />
     </main>
+    <toast-manager />
   </div>
 </template>
 
@@ -15,6 +16,7 @@ import { useThemeStore } from './store/themeStore.js';
 import { computed, onMounted, watch, ref } from 'vue';
 import { useStore } from 'vuex';
 import SidebarNav from "./components/ui/Sidebar.vue";
+import ToastManager from "./components/ui/ToastManager.vue";
 import { 
   CyberpunkBackground, 
   LightBackground, 

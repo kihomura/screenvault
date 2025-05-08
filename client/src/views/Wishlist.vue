@@ -84,6 +84,7 @@ import SelectionActionsBar from "../components/ui/SelectionBar.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'WishlistPage',
@@ -111,7 +112,8 @@ export default {
       selectedContents: [],
       showDeleteModal: false,
       isAddModalOpen: false,
-      deleteMessage: ''
+      deleteMessage: '',
+      toastStore: null
     }
   },
   computed: {
@@ -184,6 +186,7 @@ export default {
         console.error('Error fetching wishlist: ', error);
         this.listContents = [];
         this.contentCount = 0;
+        this.toastStore.error('Failed to load wishlist. Please try again.');
       } finally {
         this.loading = false;
       }
@@ -221,9 +224,13 @@ export default {
         if (allSuccessful) {
           console.log(`Successfully added ${items.length} items to wishlist`);
           await this.fetchWishlist();
+          this.toastStore.success(`Added ${items.length} item${items.length > 1 ? 's' : ''} to wishlist`);
+        } else {
+          this.toastStore.error('Failed to add some items to wishlist');
         }
       } catch (e) {
-        console.error(`Error adding items to wishlist`, e)
+        console.error(`Error adding items to wishlist`, e);
+        this.toastStore.error('Failed to add items to wishlist');
       } finally {
         this.loading = false;
       }
@@ -276,6 +283,9 @@ export default {
 
       try {
         const deletePromises = [];
+        // 保存选中项的数量，以便在清空选择后仍能正确显示
+        const selectedCount = this.selectedContents.length;
+        
         for (const content of this.selectedContents) {
           deletePromises.push(this.$http.delete('/record/wishlist', {
             data: content.id,
@@ -288,15 +298,18 @@ export default {
         const results = await Promise.all(deletePromises);
         const allSuccessful = results.every(response => response.data.code === 200);
         if (allSuccessful) {
-          console.log(`Successfully removed ${this.selectedContents.length} contents from wishlist`);
+          console.log(`Successfully removed ${selectedCount} contents from wishlist`);
           await this.fetchWishlist();
           this.cancelSelectionMode();
+          this.toastStore.success(`Removed ${selectedCount} item${selectedCount > 1 ? 's' : ''} from wishlist`);
         } else {
           console.error('Error deleting contents from wishlist');
-          console.log(results)
+          console.log(results);
+          this.toastStore.error('Failed to remove some items from wishlist');
         }
       } catch (error) {
         console.error('Error removing contents from wishlist');
+        this.toastStore.error('Failed to remove items from wishlist');
       } finally {
         this.loading = false;
       }
@@ -309,6 +322,7 @@ export default {
     }
   },
   created() {
+    this.toastStore = useToastStore();
     this.fetchWishlist();
     this.fetchContentDetails();
   }

@@ -116,6 +116,7 @@ import Favorite from "../components/widgets/Favorite.vue";
 import Wishlist from "../components/widgets/Wishlist.vue";
 import Playlists from "../components/widgets/Playlists.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 const WIDGET_SIZES = {
   small: { value: 'small', label: 'Small (1×1)', w: 1, h: 1 },
@@ -180,6 +181,7 @@ export default {
     const selectedWidgetType = ref('');
     const selectedWidgetSize = ref('');
     const isEditMode = ref(false);
+    const toastStore = useToastStore();
 
     const availableWidgets = computed(() => {
       const allWidgets = Object.keys(WIDGET_CONFIG)
@@ -297,7 +299,7 @@ export default {
 
       const position = findAvailablePosition(sizeConfig.w, sizeConfig.h);
       if (!position) {
-        alert('Not enough space to add this widget!');
+        toastStore.error('Not enough space to add this widget!');
         return;
       }
 
@@ -334,7 +336,7 @@ export default {
 
     const saveLayout = () => {
       localStorage.setItem('dashboard-layout', JSON.stringify(layout.value));
-      alert('Layout saved successfully!');
+      toastStore.success('Layout saved successfully!');
     };
 
     const getComponentType = (type) => {

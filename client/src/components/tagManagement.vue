@@ -98,6 +98,7 @@
 import MainBtn from "./buttons/MainBtn.vue";
 import ConfirmModal from "./modals/ConfirmModal.vue";
 import InputWithBtn from "../components/form/InputWithBtn.vue";
+import { useToastStore } from "../store/toastStore.js";
 
 export default {
   name: 'TagManagement',
@@ -120,7 +121,8 @@ export default {
         tagName: ''
       },
       showDeleteModal: false,
-      isCreating: false
+      isCreating: false,
+      toastStore: null
     };
   },
   computed: {
@@ -136,6 +138,7 @@ export default {
     }
   },
   created() {
+    this.toastStore = useToastStore();
     this.fetchTags();
   },
   methods: {
@@ -204,9 +207,11 @@ export default {
           }
           this.editingTagId = null;
           this.editingTagName = '';
+          this.toastStore.success(`Tag "${updatedTag.tagName}" updated successfully`);
         }
       } catch (error) {
         console.error('Error updating tag:', error);
+        this.toastStore.error('Failed to update tag');
       } finally {
         this.isCreating = false;
       }
@@ -226,9 +231,11 @@ export default {
             ...this.tagContentCounts,
             [newTag.id]: 0
           };
+          this.toastStore.success(`Tag "${newTag.tagName}" created successfully`);
         }
       } catch (error) {
         console.error('Error creating tag:', error);
+        this.toastStore.error('Failed to create tag');
       }
     },
     confirmDeleteTag(tag) {
@@ -250,9 +257,11 @@ export default {
         }
 
         this.showDeleteModal = false;
-        this.currentTag = { id: null, tagName: '' };
+        this.toastStore.success(`Tag "${this.currentTag.tagName}" deleted successfully`);
       } catch (error) {
         console.error('Error deleting tag:', error);
+        this.showDeleteModal = false;
+        this.toastStore.error('Failed to delete tag');
       }
     }
   }
