@@ -2,11 +2,13 @@
   <div class="list-detail-page">
     <!-- header -->
     <div class="page-header" v-if="!selectionMode">
-      <back-button
-          :to="{ name: 'playlist' }"
-          aria-label="Back to playlist"
-      />
-      <h1 class="page-title">{{ list.listName }}</h1>
+      <div class="header-content">
+        <back-button
+            :to="{ name: 'playlist' }"
+            aria-label="Back to playlist"
+        />
+        <h2>{{ list.listName }}</h2>
+      </div>
 
       <!-- sort section -->
       <div class="header-actions">
@@ -326,32 +328,6 @@ export default {
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xxl);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.page-title {
-  font-family: var(--font-fontFamily-secondary);
-  font-weight: var(--font-fontWeight-bold);
-  font-size: var(--font-fontSize-xxl);
-  color: var(--text-primary);
-  margin: 0;
-}
-
-@media (min-width: 768px) {
-  .page-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
 }
 
 .header-actions {

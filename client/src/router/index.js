@@ -10,7 +10,7 @@ import watched from '../views/Watched.vue';
 import playlists from '../views/Playlist.vue';
 import wishlists from '../views/Wishlist.vue';
 import statistics from '../views/Statistics.vue';
-import profile from '../views/profile.vue';
+import profile from '../views/Profile.vue';
 import contentDetail from "../views/ContentDetail.vue";
 import playlistDetail from "../views/PlaylistDetail.vue";
 import Manage from "../views/Manage.vue";

@@ -1,12 +1,16 @@
 <template>
   <div class="statistics-page">
     <div class="page-header">
-      <h1 class="page-title">Statistics</h1>
-      <YearFilter
-          :availableYears="availableYears"
-          :selectedYear="selectedYear"
-          @year-change="handleYearChange"
-      />
+      <div class="header-content">
+        <h2>Statistics</h2>
+      </div>
+      <div class="header-actions">
+        <YearFilter
+            :availableYears="availableYears"
+            :selectedYear="selectedYear"
+            @year-change="handleYearChange"
+        />
+      </div>
     </div>
 
     <div class="loading-container" v-if="loading">
@@ -145,21 +149,6 @@ export default {
   font-family: var(--font-fontFamily-primary);
   color: var(--text-primary);
   padding: var(--spacing-lg);
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-xl);
-}
-
-.page-title {
-  font-family: var(--font-fontFamily-secondary);
-  font-size: var(--font-fontSize-xxl);
-  font-weight: var(--font-fontWeight-bold);
-  color: var(--primary);
-  margin: 0;
 }
 
 .loading-container {

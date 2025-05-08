@@ -1,8 +1,13 @@
 <template>
   <div class="content-detail-page">
     <div class="page-header">
-      <back-button aria-label="Back to previous page"/>
-      <h1 class="page-title">{{ this.content?.title }}</h1>
+      <div class="header-content">
+        <back-button aria-label="Back to previous page"/>
+        <h2>{{ this.content?.title }}</h2>
+      </div>
+      <div class="header-actions">
+        <!-- Actions can be added here if needed -->
+      </div>
     </div>
 
     <div v-if="loading" class="loading-state">
@@ -219,22 +224,7 @@ export default {
   position: relative;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xxl);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.page-title {
-  font-family: var(--font-fontFamily-secondary);
-  font-weight: var(--font-fontWeight-bold);
-  font-size: var(--font-fontSize-xxl);
-  color: var(--text-primary);
-  margin: 0;
-}
+/* Remove local header styles as they're defined globally now */
 
 /* Loading and error states */
 .loading-state, .error-state {

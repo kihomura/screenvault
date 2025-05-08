@@ -1,72 +1,97 @@
 <template>
-  <div class="profile-container">
-    <div class="profile-header">
-      <h1>Your Profile</h1>
-      <p>Manage your personal information and security settings</p>
+  <div class="watch-page">
+    <div class="page-header">
+      <div class="header-content">
+        <h2>Profile</h2>
+      </div>
+      <div class="header-actions">
+        <main-btn 
+            :type="isEditing ? 'danger' : 'secondary'" 
+            @click="toggleEditMode"
+        >
+          {{ isEditing ? 'Cancel' : 'Edit Profile' }}
+        </main-btn>
+      </div>
     </div>
 
-    <div class="profile-content" v-if="userProfile">
-      <div class="profile-section">
-        <div class="section-header">
-          <h2>Account Information</h2>
-          <button
-              class="edit-button"
-              @click="toggleEditMode"
-              :class="{ 'active': isEditing }"
-          >
-            {{ isEditing ? 'Cancel' : 'Edit Profile' }}
-          </button>
+    <div class="profile-container" v-if="userProfile">
+      <div class="profile-card">
+        <div class="card-header">
+          <h2 class="card-title">Account Information</h2>
         </div>
 
         <div class="profile-info" v-if="!isEditing">
-          <div class="info-group">
-            <label>Username</label>
-            <p>{{ userProfile.username }}</p>
+          <div class="info-column personal-info">
+            <div class="info-group">
+              <label>Username</label>
+              <p>{{ userProfile.username }}</p>
+            </div>
+            <div class="info-group">
+              <label>Email</label>
+              <p>{{ userProfile.email || "Not bound" }}</p>
+            </div>
+            <div class="info-group">
+              <label>Nickname</label>
+              <p>{{ userProfile.nickname || 'Not set' }}</p>
+            </div>
           </div>
-          <div class="info-group">
-            <label>Email</label>
-            <p>{{ userProfile.email || "Not bound" }}</p>
-          </div>
-          <div class="info-group">
-            <label>Nickname</label>
-            <p>{{ userProfile.nickname || 'Not set' }}</p>
-          </div>
-          <div class="info-group">
-            <label>Account Created</label>
-            <p>{{ formatDate(userProfile.createdAt) }}</p>
-          </div>
-          <div class="info-group">
-            <label>Last Updated</label>
-            <p>{{ formatDate(userProfile.updatedAt) }}</p>
+          <div class="info-column date-info">
+            <div class="info-group">
+              <label>Account Created</label>
+              <p>{{ formatDate(userProfile.createdAt) }}</p>
+            </div>
+            <div class="info-group">
+              <label>Last Updated</label>
+              <p>{{ formatDate(userProfile.updatedAt) }}</p>
+            </div>
           </div>
         </div>
 
         <form @submit.prevent="updateProfile" v-else class="edit-form">
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" v-model="userProfile.username" disabled class="disabled-input" />
-            <small>Username cannot be changed</small>
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" v-model="userProfile.email" disabled class="disabled-input" />
-            <small>Not support</small>
-          </div>
-          <div class="form-group">
-            <label for="nickname">Nickname</label>
-            <input type="text" id="nickname" v-model="profileForm.nickname" />
+          <div class="form-columns">
+            <div class="form-column">
+              <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" v-model="userProfile.username" disabled class="disabled-input" />
+                <small>Username cannot be changed</small>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" v-model="userProfile.email" disabled class="disabled-input" />
+                <small>Not support</small>
+              </div>
+              <div class="form-group">
+                <label for="nickname">Nickname</label>
+                <input type="text" id="nickname" v-model="profileForm.nickname" />
+              </div>
+            </div>
+            <div class="form-column date-column">
+              <div class="info-group">
+                <label>Account Created</label>
+                <p>{{ formatDate(userProfile.createdAt) }}</p>
+              </div>
+              <div class="info-group">
+                <label>Last Updated</label>
+                <p>{{ formatDate(userProfile.updatedAt) }}</p>
+              </div>
+            </div>
           </div>
           <div class="form-actions">
-            <button type="submit" class="save-button">Save Changes</button>
+            <main-btn type="primary" @click="updateProfile">Save Changes</main-btn>
           </div>
         </form>
       </div>
 
-      <div class="profile-section">
-        <h2>Security</h2>
-        <button class="change-password-button" @click="showPasswordForm = !showPasswordForm">
-          {{ showPasswordForm ? 'Cancel' : 'Change Password' }}
-        </button>
+      <div class="profile-card">
+        <div class="card-header">
+          <h2 class="card-title">Security</h2>
+          <main-btn 
+              :type="showPasswordForm ? 'danger' : 'info'"
+              @click="showPasswordForm = !showPasswordForm"
+          >
+            {{ showPasswordForm ? 'Cancel' : 'Change Password' }}
+          </main-btn>
+        </div>
 
         <transition name="fade">
           <form @submit.prevent="changePassword" v-if="showPasswordForm" class="password-form">
@@ -83,7 +108,7 @@
               />
               <transition name="fade">
                 <div class="password-validation-container" v-show="shouldShowValidation('password')">
-                  <ul>
+                  <ul class="validation-list">
                     <li :class="{ 'is_valid': passwordValidation.containsEightCharacters }">8 Characters</li>
                     <li :class="{ 'is_valid': passwordValidation.containsNumber }">Contains Number</li>
                     <li :class="{ 'is_valid': passwordValidation.containsUppercase }">Contains Uppercase</li>
@@ -110,7 +135,7 @@
               />
               <transition name="fade">
                 <div class="confirm-password-validation-container" v-show="shouldShowValidation('confirmPassword')">
-                  <ul>
+                  <ul class="validation-list">
                     <li :class="{ 'is_valid': confirmPasswordValidation.isMatch }">Passwords match</li>
                   </ul>
                   <div class="checkmark_container" :class="{ 'show_checkmark': confirmPasswordValidation.isMatch }">
@@ -122,13 +147,13 @@
               </transition>
             </div>
             <div class="form-actions">
-              <button
-                  type="submit"
-                  class="save-button"
+              <main-btn 
+                  type="primary"
                   :disabled="!passwordValidation.isValid || !confirmPasswordValidation.isMatch"
+                  @click="changePassword"
               >
                 Update Password
-              </button>
+              </main-btn>
             </div>
           </form>
         </transition>
@@ -147,10 +172,14 @@
 <script>
 import { reactive } from 'vue';
 import Toast from '../components/ui/Toast.vue';
+import MainBtn from '../components/buttons/MainBtn.vue';
 
 export default {
   name: 'ProfileView',
-  components: { Toast },
+  components: { 
+    Toast,
+    MainBtn
+  },
   data() {
     return {
       userProfile: null,
@@ -314,109 +343,120 @@ export default {
 </script>
 
 <style scoped>
-.profile-container {
-  padding: var(--spacing-xl);
-  max-width: 800px;
+.watch-page {
+  max-width: 1400px;
   margin: 0 auto;
+  padding: var(--spacing-lg);
+  font-family: var(--font-fontFamily-primary);
   color: var(--text-primary);
 }
 
-.profile-header {
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.profile-header h1 {
-  font-family: var(--font-family-secondary);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.profile-header p {
+.page-subtitle {
   color: var(--text-secondary);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-fontSize-base);
+  margin: 0;
 }
 
-.profile-section {
-  background-color: var(--background-subtle);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-xl);
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
+}
+
+.profile-card {
+  background-color: var(--background-base);
+  border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-level1-default);
+  overflow: hidden;
   transition: box-shadow 0.3s ease;
 }
 
-.profile-section:hover {
+.profile-card:hover {
   box-shadow: var(--shadow-level1-hover);
 }
 
-.section-header {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--background-subtle);
 }
 
-.section-header h2 {
-  font-family: var(--font-family-secondary);
-  font-weight: var(--font-weight-semibold);
+.card-title {
+  font-family: var(--font-fontFamily-secondary);
+  font-weight: var(--font-fontWeight-semibold);
   color: var(--text-primary);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-fontSize-xl);
+  margin: 0;
 }
 
 .profile-info {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-lg);
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.personal-info {
+  border-right: 1px solid var(--border-light);
+  padding-right: var(--spacing-lg);
+}
+
+.date-info {
+  padding-left: var(--spacing-md);
 }
 
 .info-group {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .info-group label {
   display: block;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-fontSize-sm);
   color: var(--text-secondary);
   margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-fontWeight-medium);
 }
 
 .info-group p {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-fontSize-base);
   color: var(--text-primary);
   padding: var(--spacing-md);
-  background-color: var(--background-muted);
+  background-color: var(--background-subtle);
   border-radius: var(--border-radius-md);
   word-break: break-word;
+  margin: 0;
 }
 
-.edit-button,
-.change-password-button {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-  background-color: var(--background-muted);
-  color: var(--text-primary);
+.edit-form,
+.password-form {
+  padding: var(--spacing-lg);
 }
 
-.edit-button:hover,
-.change-password-button:hover {
-  background-color: var(--interactive-hover);
+.form-columns {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--spacing-xl);
 }
 
-.edit-button.active {
-  background-color: var(--accent-error);
-  color: white;
+.form-column {
+  display: flex;
+  flex-direction: column;
 }
 
-.change-password-button {
-  margin-top: var(--spacing-md);
-  background-color: var(--interactive-hover);
+.date-column {
+  padding-left: var(--spacing-md);
+  border-left: 1px solid var(--border-light);
 }
 
 .form-group {
@@ -427,8 +467,9 @@ export default {
 .form-group label {
   display: block;
   margin-bottom: var(--spacing-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-fontWeight-medium);
   color: var(--text-secondary);
+  font-size: var(--font-fontSize-sm);
 }
 
 .form-group input {
@@ -438,7 +479,7 @@ export default {
   border-radius: var(--border-radius-md);
   background-color: var(--background-base);
   color: var(--text-primary);
-  font-size: var(--font-size-base);
+  font-size: var(--font-fontSize-base);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -458,34 +499,13 @@ export default {
   display: block;
   margin-top: var(--spacing-xs);
   color: var(--text-muted);
-  font-size: var(--font-size-xs);
-}
-
-.save-button {
-  padding: var(--spacing-md) var(--spacing-xl);
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.save-button:hover {
-  background-color: var(--primary-dark, #2563eb);
-}
-
-.save-button:disabled {
-  background-color: var(--background-muted);
-  color: var(--text-muted);
-  cursor: not-allowed;
+  font-size: var(--font-fontSize-xs);
 }
 
 .form-actions {
-  margin-top: var(--spacing-xl);
   display: flex;
   justify-content: flex-end;
+  margin-top: var(--spacing-lg);
 }
 
 /* Password validation styles */
@@ -494,18 +514,19 @@ export default {
   position: relative;
   width: 100%;
   margin-top: var(--spacing-md);
-  background-color: var(--background-base);
+  background-color: var(--background-subtle);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-md);
   border: 1px solid var(--border-light);
 }
 
-ul {
+.validation-list {
   padding-left: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
+  margin: 0;
 }
 
 li {
@@ -615,26 +636,55 @@ li:before {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .profile-container {
+  .watch-page {
     padding: var(--spacing-md);
   }
 
-  .profile-section {
-    padding: var(--spacing-lg);
-  }
-
-  .profile-info {
-    grid-template-columns: 1fr;
-  }
-
-  .section-header {
+  .page-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--spacing-md);
   }
 
-  .edit-button,
-  .change-password-button {
+  .header-actions {
+    width: 100%;
     margin-top: var(--spacing-md);
+  }
+
+  .profile-info,
+  .form-columns {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .personal-info {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .date-info {
+    padding-left: 0;
+    padding-top: var(--spacing-md);
+  }
+
+  .date-column {
+    padding-left: 0;
+    border-left: none;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-light);
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .card-header button {
+    width: 100%;
+    margin-top: var(--spacing-xs);
   }
 }
 </style>

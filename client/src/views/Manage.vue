@@ -1,7 +1,12 @@
 <template>
   <div class="manage-page">
     <div class="page-header">
-      <h1 class="page-title">Manage {{ displayName }}</h1>
+      <div class="header-content">
+        <h2>Manage {{ displayName }}</h2>
+      </div>
+      <div class="header-actions">
+        <!-- Actions can be added here if needed -->
+      </div>
     </div>
 
     <!-- tag management -->
@@ -40,24 +45,7 @@ const displayName = computed(() => {
   position: relative;
 }
 
-.page-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-}
-
-@media (min-width: 768px) {
-  .page-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-}
+/* Removing redundant page-header styles since they're defined globally now */
 
 .page-title {
   font-family: var(--font-fontFamily-secondary);
