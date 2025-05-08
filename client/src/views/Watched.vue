@@ -5,18 +5,23 @@
       <div class="header-content">
         <h1 class="page-title">Watching Recordings</h1>
       </div>
-      <filter-controls
-          :ratingFilter="ratingFilter"
-          :yearFilter="yearFilter"
-          :monthFilter="monthFilter"
-          :sortBy="sortBy"
-          :availableYears="availableYears"
-          :months="months"
-          @update:ratingFilter="ratingFilter = $event"
-          @update:yearFilter="yearFilter = $event"
-          @update:monthFilter="monthFilter = $event"
-          @update:sortBy="sortBy = $event"
-      />
+      <div class="header-controls">
+        <filter-controls
+            :ratingFilter="ratingFilter"
+            :yearFilter="yearFilter"
+            :monthFilter="monthFilter"
+            :availableYears="availableYears"
+            :months="months"
+            @update:ratingFilter="ratingFilter = $event"
+            @update:yearFilter="yearFilter = $event"
+            @update:monthFilter="monthFilter = $event"
+        />
+        <sort-controls
+            :sortBy="sortBy"
+            sortType="record"
+            @update:sortBy="sortBy = $event"
+        />
+      </div>
     </div>
 
     <!-- Selection Actions Bar (replaces filters when in selection mode) -->
@@ -102,7 +107,8 @@ import ContentGrid from "../components/ui/CardGrid.vue";
 import AddRecordingModal from "../components/modals/AddRecordModal.vue";
 import AddToListModal from "../components/modals/AddToListModal.vue";
 import Pagination from "../components/ui/Pagination.vue";
-import FilterControls from "../components/FilterContols.vue";
+import FilterControls from "../components/controls/FilterControls.vue";
+import SortControls from "../components/controls/SortControls.vue";
 import SelectionActionsBar from "../components/ui/SelectionBar.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
@@ -119,6 +125,7 @@ export default {
     AddToListModal,
     Pagination,
     FilterControls,
+    SortControls,
     SelectionActionsBar
   },
   data() {
@@ -415,6 +422,13 @@ export default {
     align-items: center;
     flex-wrap: wrap;
   }
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
 .page-title {

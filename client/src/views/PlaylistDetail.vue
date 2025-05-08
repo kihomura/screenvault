@@ -10,14 +10,11 @@
 
       <!-- sort section -->
       <div class="header-actions">
-        <div class="sort-controls">
-          <select v-model="sortBy" class="sort-select">
-            <option value="added-desc">Recently Added</option>
-            <option value="added-asc">Oldest Added</option>
-            <option value="release-desc">Newest Released</option>
-            <option value="release-asc">Oldest Released</option>
-          </select>
-        </div>
+        <sort-controls
+          :sortBy="sortBy"
+          sortType="content"
+          @update:sortBy="sortBy = $event"
+        />
       </div>
     </div>
 
@@ -87,6 +84,7 @@ import AddToListModal from "../components/modals/AddToListModal.vue";
 import BackButton from "../components/buttons/BackButton.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
+import SortControls from "../components/controls/SortControls.vue";
 
 export default {
   name: 'ListDetail',
@@ -98,6 +96,7 @@ export default {
     ContentGrid,
     SelectionActionsBar,
     AddToListModal,
+    SortControls,
   },
   data() {
     return {
@@ -123,38 +122,57 @@ export default {
     sortedContents() {
       if (!this.contents.length) return [];
 
-      // Create a map of contentId to addTime from listContents
       const addTimeMap = {};
       this.listContents.forEach(item => {
         addTimeMap[item.contentId] = item.addTime || new Date().toISOString();
       });
 
       // Make a copy of contents to sort and add type property
-      let sorted = this.contents.map(content => ({
-        ...content,
-        type: 'content' // Add type property for ContentGrid component
-      }));
+      let sorted = this.contents.map(content => {
+        const addTime = addTimeMap[content.id];
+        console.log(`Debug - Content ${content.id}, addTime:`, addTime);
+        return {
+          ...content,
+          type: 'content',
+          addTime: addTime
+        };
+      });
 
+      let result;
       switch (this.sortBy) {
         case 'added-desc':
-          return sorted.sort((a, b) => {
-            return new Date(addTimeMap[b.id] || 0) - new Date(addTimeMap[a.id] || 0);
+          result = sorted.sort((a, b) => {
+            const dateA = a.addTime ? new Date(a.addTime).getTime() : 0;
+            const dateB = b.addTime ? new Date(b.addTime).getTime() : 0;
+            return dateB - dateA;
           });
+          break;
         case 'added-asc':
-          return sorted.sort((a, b) => {
-            return new Date(addTimeMap[a.id] || 0) - new Date(addTimeMap[b.id] || 0);
+          result = sorted.sort((a, b) => {
+            const dateA = a.addTime ? new Date(a.addTime).getTime() : 0;
+            const dateB = b.addTime ? new Date(b.addTime).getTime() : 0;
+            return dateA - dateB;
           });
+          break;
         case 'release-desc':
-          return sorted.sort((a, b) => {
-            return new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0);
+          result = sorted.sort((a, b) => {
+            const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+            const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+            return dateB - dateA;
           });
+          break;
         case 'release-asc':
-          return sorted.sort((a, b) => {
-            return new Date(a.releaseDate || 0) - new Date(b.releaseDate || 0);
+          result = sorted.sort((a, b) => {
+            const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+            const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+            return dateA - dateB;
           });
+          break;
         default:
-          return sorted;
+          result = sorted;
       }
+
+      return result;
     }
   },
   methods: {
@@ -339,21 +357,6 @@ export default {
 .header-actions {
   display: flex;
   gap: var(--spacing-md);
-}
-
-.sort-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.sort-select {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--border-light);
-  background-color: var(--background-subtle);
-  color: var(--text-primary);
-  font-size: var(--font-fontSize-sm);
 }
 
 .loading-state {

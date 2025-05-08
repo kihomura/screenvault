@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import YearFilter from '../components/filter/YearFilter.vue';
+import YearFilter from '../components/controls/YearFilter.vue';
 import CountryChart from '../components/charts/CountryChart.vue';
 import GenreChart from '../components/charts/GenreChart.vue';
 import CategoryChart from '../components/charts/CategoryChart.vue';

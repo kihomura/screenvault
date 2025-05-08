@@ -63,25 +63,6 @@
         <div class="select-arrow">▼</div>
       </div>
     </div>
-
-    <!-- Sort dropdown -->
-    <div class="filter-dropdown">
-      <label for="sort-by">Sort by:</label>
-      <div class="custom-select">
-        <select
-            id="sort-by"
-            :value="sortBy"
-            @change="$emit('update:sortBy', $event.target.value)"
-            class="filter-select"
-        >
-          <option value="date-desc">Date (Newest First)</option>
-          <option value="date-asc">Date (Oldest First)</option>
-          <option value="rating-desc">Rating (High to Low)</option>
-          <option value="rating-asc">Rating (Low to High)</option>
-        </select>
-        <div class="select-arrow">▼</div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -98,10 +79,6 @@ export default {
       required: true
     },
     monthFilter: {
-      type: String,
-      required: true
-    },
-    sortBy: {
       type: String,
       required: true
     },
