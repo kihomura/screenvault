@@ -340,6 +340,37 @@ onMounted(() => {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
+  filter: invert(var(--icon-invert, 0.5));
+  opacity: 0.9;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-item:hover .nav-icon {
+  filter: invert(var(--icon-invert-hover, 0.7));
+  opacity: 1;
+}
+
+.nav-item.router-link-active .nav-icon {
+  filter: invert(var(--icon-invert-active, 0.9));
+  opacity: 1;
+}
+
+:root .theme-light {
+  --icon-invert: 0.4;
+  --icon-invert-hover: 0.6;
+  --icon-invert-active: 0.2;
+}
+
+:root .theme-dark {
+  --icon-invert: 0.7;
+  --icon-invert-hover: 0.8;
+  --icon-invert-active: 1;
+}
+
+:root .theme-cyberpunk {
+  --icon-invert: 0.8;
+  --icon-invert-hover: 0.9;
+  --icon-invert-active: 1;
 }
 
 .dashboard-icon {
