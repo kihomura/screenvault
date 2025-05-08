@@ -8,7 +8,7 @@
       @dragenter.prevent
       @drop="onDrop"
   >
-    <div class="list-content" @click="navigateToList">
+    <div class="list-content" @click="isManageMode ? (isEditing ? null : toggleEditMode()) : navigateToList">
       <div class="list-thumbnail">
         <img
             v-if="listThumbnail"
@@ -22,13 +22,32 @@
       </div>
 
       <div class="list-info">
-        <h3 class="list-name">{{ list.listName }}</h3>
+        <!-- Edit mode input field -->
+        <div v-if="isEditing && isManageMode" class="list-name-edit-container" @click.stop>
+          <input
+              type="text"
+              v-model="editedListName"
+              class="list-name-edit-input"
+              ref="editInput"
+              @keyup.enter="saveListName"
+              @keyup.esc="cancelEdit"
+          />
+          <div class="edit-actions">
+            <button class="edit-action-btn save-btn" @click="saveListName">Save</button>
+            <button class="edit-action-btn cancel-btn" @click="cancelEdit">Cancel</button>
+          </div>
+        </div>
+        <!-- Regular display mode -->
+        <h3 v-else class="list-name">{{ list.listName }}</h3>
         <p class="list-meta">{{ contentCount }} contents</p>
       </div>
     </div>
 
     <!-- manage controls -->
     <div v-if="isManageMode" class="list-actions">
+      <button v-if="!isEditing" class="edit-btn" @click.stop="toggleEditMode" aria-label="Edit list name">
+        <i class="edit-icon">✎</i>
+      </button>
       <button class="drag-handle" aria-label="drag to order">
         <i class="drag-icon">≡</i>
       </button>
@@ -51,7 +70,9 @@ export default {
       contentCount: 0,
       listContents: [],
       thumbnailUrl: null,
-      imgPrefix: 'https://image.tmdb.org/t/p/w1280'
+      imgPrefix: 'https://image.tmdb.org/t/p/w1280',
+      isEditing: false,
+      editedListName: ''
     };
   },
   props: {
@@ -71,6 +92,13 @@ export default {
   computed: {
     listThumbnail() {
       return this.thumbnailUrl;
+    }
+  },
+  watch: {
+    isManageMode(newVal) {
+      if (!newVal && this.isEditing) {
+        this.isEditing = false;
+      }
     }
   },
   methods: {
@@ -141,6 +169,46 @@ export default {
         const fromIndex = parseInt(event.dataTransfer.getData('text/plain'));
         this.$emit('reorder', {fromIndex, toIndex: this.index});
       }
+    },
+    toggleEditMode() {
+      if (this.isManageMode && !this.list.isDefault) {
+        this.isEditing = true;
+        this.editedListName = this.list.listName;
+        this.$nextTick(() => {
+          if (this.$refs.editInput) {
+            this.$refs.editInput.focus();
+          }
+        });
+      }
+    },
+    async saveListName() {
+      if (!this.editedListName.trim()) {
+        this.cancelEdit();
+        return;
+      }
+      
+      if (this.editedListName !== this.list.listName) {
+        try {
+          const updatedList = { ...this.list, listName: this.editedListName };
+          const response = await this.$http.post('/playlist', updatedList);
+          
+          if (response.data && response.data.code === 200) {
+            this.$emit('list-updated', response.data.data);
+            // Update the local list name
+            this.list.listName = this.editedListName;
+          } else {
+            console.error('Error updating list name:', response.data);
+          }
+        } catch (error) {
+          console.error('Error updating list name:', error);
+        }
+      }
+      
+      this.isEditing = false;
+    },
+    cancelEdit() {
+      this.isEditing = false;
+      this.editedListName = this.list.listName;
     }
   },
   created() {
@@ -248,22 +316,111 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 40px;
-  width: 40px;
-  background: transparent;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--border-radius-full);
+  background-color: transparent;
   border: none;
   cursor: grab;
-  color: var(--text-muted);
   margin-right: var(--spacing-sm);
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
-.drag-handle:active {
-  cursor: grabbing;
+.drag-handle:hover {
+  opacity: 1;
+  background-color: var(--background-muted);
 }
 
 .drag-icon {
   font-style: normal;
-  font-size: 1.5rem;
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* Edit mode styles */
+.list-name-edit-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--spacing-sm);
+}
+
+.list-name-edit-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  font-size: var(--font-fontSize-lg);
+  font-family: var(--font-fontFamily-secondary);
+  font-weight: var(--font-fontWeight-semibold);
+  border: 2px solid var(--highlight);
+  border-radius: var(--border-radius-md);
+  background-color: var(--background-base);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.list-name-edit-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(174, 202, 95, 0.2);
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.edit-action-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-fontSize-sm);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background-color: var(--highlight);
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: var(--primary);
+}
+
+.cancel-btn {
+  background-color: var(--background-subtle);
+  color: var(--text-secondary);
+}
+
+.cancel-btn:hover {
+  background-color: var(--background-muted);
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--border-radius-full);
+  background-color: var(--background-muted);
+  border: none;
+  cursor: pointer;
+  margin-right: var(--spacing-sm);
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.edit-btn:hover {
+  background-color: var(--highlight);
+  color: white;
+}
+
+.edit-icon {
+  font-style: normal;
+  font-size: 16px;
 }
 
 @media (max-width: 640px) {

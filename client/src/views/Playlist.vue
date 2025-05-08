@@ -41,6 +41,7 @@
             :isManageMode="isManageMode"
             @reorder="handleReorder"
             @show-delete-confirm="showConfirmModal"
+            @list-updated="handleListUpdated"
         />
       </div>
     </div>
@@ -192,6 +193,13 @@ export default {
     getListOrderFromLocalStorage() {
       const savedOrder = localStorage.getItem(this.storageKey);
       return savedOrder ? JSON.parse(savedOrder) : null;
+    },
+    handleListUpdated(updatedList) {
+      // Find the list in the array and update it
+      const index = this.lists.findIndex(list => list.id === updatedList.id);
+      if (index !== -1) {
+        this.lists[index] = { ...this.lists[index], ...updatedList };
+      }
     }
   },
   mounted() {
