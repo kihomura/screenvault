@@ -143,7 +143,7 @@ export default {
     const openSelectModal = () => {
       openContentModal({
         callback: handleContentSelected,
-        mode: 'addRecord',
+        mode: 'selectFavorite',
         multiSelect: false,
         visibleTabs: ['search', 'custom', 'watched', 'wishlist']
       });

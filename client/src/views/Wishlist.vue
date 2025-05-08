@@ -55,7 +55,7 @@
         :is-open="isAddModalOpen"
         :visibleTabs="['search', 'custom']"
         mode="addToWishlist"
-        :multiSelect="true"
+        v-model:multiSelect="isMultiSelectEnabled"
         @close="closeAddContentModal"
         @items-selected="addToWishlist"
     />
@@ -113,7 +113,8 @@ export default {
       showDeleteModal: false,
       isAddModalOpen: false,
       deleteMessage: '',
-      toastStore: null
+      toastStore: null,
+      isMultiSelectEnabled: false
     }
   },
   computed: {

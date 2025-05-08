@@ -56,6 +56,7 @@
               :selectedItems="selectedItems"
               :mode="mode"
               :targetListId="targetListId"
+              :userRecordings="userRecordings"
               @content-selected="handleContentSelected"
               @toggle-selection="handleToggleSelection"
               @refresh="fetchCustomContent"
@@ -113,6 +114,7 @@ export default {
     WatchedTab,
     WishlistTab
   },
+  emits: ['close', 'content-selected', 'items-selected', 'update:multiSelect', 'update:visibleTabs'],
   props: {
     isOpen: {
       type: Boolean,
@@ -126,7 +128,7 @@ export default {
       // this modal is triggered in three scenarios
       type: String,
       default: 'addRecord',
-      validator: value => ['addRecord', 'addToList', 'addToWishlist'].includes(value)
+      validator: value => ['addRecord', 'addToList', 'addToWishlist', 'selectFavorite'].includes(value)
     },
     targetListId: {
       type: [String, Number],
@@ -186,55 +188,51 @@ export default {
           this.activeTab = newTabs[0];
         }
       },
+      immediate: true,
+      deep: true
+    },
+    mode: {
+      handler(newMode) {
+        // in addToList and addToWishlist modes, multiple contents can be selected
+        if (newMode === 'addToList' || newMode === 'addToWishlist') {
+          this.$emit('update:multiSelect', true);
+        }
+
+        // in addRecord mode, watched content should not be displayed
+        if (newMode === 'addRecord') {
+          this.$emit('update:visibleTabs', ['search', 'custom', 'wishlist']);
+        }
+        // content has already been added should not be displayed
+        else if (newMode === 'addToWishlist') {
+          this.$emit('update:visibleTabs', ['search', 'custom', 'watched']);
+        }
+        // for selecting favorite, show all tabs
+        else if (newMode === 'selectFavorite') {
+          this.$emit('update:visibleTabs', ['search', 'custom', 'watched', 'wishlist']);
+        }
+
+        this.selectedItems = []; //reset when mode change
+      },
       immediate: true
     }
   },
-  mode: {
-    handler(newMode) {
-
-      // in addToList and addToWishlist modes, multiple contents can be selected
-      if (newMode === 'addToList' || newMode === 'addToWishlist') {
-        this.multiSelect = true;
-      }
-
-      // in addRecord mode, watched content should not be displayed
-      // since records cannot be added repeatedly
-      if (newMode === 'addRecord') {
-        this.$emit('update:visibleTabs', ['search', 'custom', 'wishlist']);
-      }
-
-      // content has already been added should not be displayed
-      else if (newMode === 'addToWishlist') {
-        this.$emit('update:visibleTabs', ['search', 'custom', 'watched']);
-      }
-
-      this.selectedItems = []; //reset when mode change
-    },
-    immediate: true
-  },
   methods: {
     isTabVisible(tabId) {
-      return this.visibleTabs.includes(tabId);
+      return Array.isArray(this.visibleTabs) && this.visibleTabs.includes(tabId);
     },
 
     async fetchAllData() {
       this.isLoading = true;
       this.error = null;
+      
       try {
-        const dataFetchPromises = [];
-        if (this.isTabVisible('watched') || this.isTabVisible('search')) {
-          dataFetchPromises.push(this.fetchWatchedContent());
-        }
-
-        if (this.isTabVisible('wishlist') || this.isTabVisible('search')) {
-          dataFetchPromises.push(this.fetchWishlistContent());
-        }
-
-        if (this.isTabVisible('custom') || this.isTabVisible('search')) {
-          dataFetchPromises.push(this.fetchCustomContent());
-        }
-
-        await Promise.all(dataFetchPromises);
+        const promises = [
+          this.fetchWatchedContent(),
+          this.fetchWishlistContent(),
+          this.fetchCustomContent()
+        ];
+        
+        await Promise.all(promises);
         this.userRecordings = [...this.watchedContents, ...this.wishedContents];
       } catch (err) {
         this.error = `Failed to load content: ${err.message || 'Unknown error'}`;
@@ -288,7 +286,7 @@ export default {
 
     handleContentSelected(content) {
       if (!this.multiSelect) {
-        // only for addRecord mode
+        // for addRecord and selectFavorite modes
         this.$emit('content-selected', content);
         this.closeModal();
       }
@@ -310,6 +308,12 @@ export default {
       } else {
         this.selectedItems.splice(index, 1);
       }
+    }
+  },
+  mounted() {
+    // Fetch data if modal is initially open
+    if (this.isOpen) {
+      this.fetchAllData();
     }
   }
 };

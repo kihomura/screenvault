@@ -71,6 +71,10 @@ export default {
     targetListId: {
       type: [String, Number],
       default: null
+    },
+    userRecordings: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -108,16 +112,20 @@ export default {
       }
       // For addToWishlist mode
       else if (this.mode === 'addToWishlist') {
-        // Check if it's already in wishlist
-        const isInWishlist = this.customContents.some(
-            recording => recording.contentId === content.id && recording.status === 'WANT_TO_WATCH'
-        );
-        const isWatched = this.customContents.some(
-            recording => recording.contentId === content.id && recording.status === 'WATCHED'
-        );
-        if (isInWishlist || isWatched) {
-          return false;
+        // Check if content is already in the wishlist or watched list
+        if (this.userRecordings && this.userRecordings.length > 0) {
+          // Check if content is already in wishlist or already watched
+          if (this.userRecordings.some(item => 
+              item.contentId === content.id && 
+              (item.status === 'WANT_TO_WATCH' || item.status === 'WATCHED')
+          )) {
+            return false;
+          }
         }
+      }
+      // For selectFavorite mode - all content should be selectable
+      else if (this.mode === 'selectFavorite') {
+        return true;
       }
       return true;
     },

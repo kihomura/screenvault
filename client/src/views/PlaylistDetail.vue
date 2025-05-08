@@ -60,7 +60,7 @@
         :visibleTabs="['search', 'custom', 'watched', 'wishlist']"
         mode="addToList"
         :targetListId="list.id"
-        :multiSelect="true"
+        v-model:multiSelect="isMultiSelectEnabled"
         @close="closeAddContentModal"
         @items-selected="addContentToList"
     />
@@ -116,7 +116,8 @@ export default {
       isAddModalOpen: false,
       deleteMessage: '',
       isDeleting: false,
-      toastStore: null
+      toastStore: null,
+      isMultiSelectEnabled: false
     };
   },
   computed: {

@@ -70,7 +70,7 @@
         :isOpen="isAddModalOpen"
         :visibleTabs="['search', 'custom', 'wishlist']"
         mode="addRecord"
-        :multiSelect="false"
+        v-model:multiSelect="isMultiSelectEnabled"
         @close="closeAddRecordingModal"
         @content-selected="handleContentSelected"
     />
@@ -165,7 +165,8 @@ export default {
         { value: '11', label: 'November' },
         { value: '12', label: 'December' }
       ],
-      toastStore: null
+      toastStore: null,
+      isMultiSelectEnabled: false
     }
   },
   created() {

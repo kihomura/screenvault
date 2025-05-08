@@ -98,9 +98,9 @@
   <content-tab-modal
     v-if="contentModalConfig.isOpen"
     :isOpen="contentModalConfig.isOpen"
-    :visibleTabs="contentModalConfig.visibleTabs"
+    v-model:visibleTabs="contentModalConfig.visibleTabs"
     :mode="contentModalConfig.mode"
-    :multiSelect="contentModalConfig.multiSelect"
+    v-model:multiSelect="contentModalConfig.multiSelect"
     :targetListId="contentModalConfig.targetListId"
     @close="closeContentModal"
     @content-selected="handleContentSelected"

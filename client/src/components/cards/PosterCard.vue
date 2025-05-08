@@ -48,6 +48,8 @@ export default {
   transition: transform 0.2s;
   align-items: center;
   min-width: 0;
+  max-width: 150px;
+  margin: 0 auto;
 }
 
 .poster-card:hover {
@@ -55,14 +57,13 @@ export default {
 }
 
 .poster-wrapper {
-  max-width: 150px;
   width: 100%;
 }
 
 .poster-container {
   position: relative;
   width: 100%;
-  padding-top: 150%;
+  padding-top: 150%; /* 2:3 aspect ratio */
   overflow: hidden;
   border-radius: 8px;
   background-color: #f0f0f0;
@@ -88,6 +89,5 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0 4px;
-  max-width: 150px;
 }
 </style>

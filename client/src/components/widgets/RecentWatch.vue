@@ -179,12 +179,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 var(--spacing-md);
 }
 
 .poster-grid {
   display: grid;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   width: 100%;
+  justify-content: center;
 }
 
 .poster-card-wrapper {
@@ -195,11 +197,13 @@ export default {
 
 /* Grid layout based on component size */
 .grid-size-mediumHorizontal {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  max-width: 600px;
 }
 
 .grid-size-large1 {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  max-width: 900px;
 }
 
 /* Adjust grid columns for smaller screens */

@@ -62,7 +62,7 @@ export default {
     };
   },
   watch: {
-    wishlistContents: {
+    wishlistContent: {
       immediate: true,
       handler() {
         this.fetchContents();
@@ -96,16 +96,12 @@ export default {
       }
       // For addToWishlist mode
       else if (this.mode === 'addToWishlist') {
-        // Check if it's already in wishlist
-        const isInWishlist = this.wishlistContent.some(
-            recording => recording.contentId === content.id && recording.status === 'WANT_TO_WATCH',
-        );
-        const isWatched = this.wishlistContent.some(
-            recording => recording.contentId === content.id && recording.status === 'WATCHED'
-        );
-        if (isInWishlist || isWatched) {
-          return false;
-        }
+        // already in wishlist should not be selectable
+        return false;
+      }
+      // For selectFavorite mode - all content should be selectable
+      else if (this.mode === 'selectFavorite') {
+        return true;
       }
       return true;
     },
@@ -119,14 +115,22 @@ export default {
     },
     async fetchContents() {
       try {
-        if (this.wishlistContent) {
+        this.contents = []; // Clear contents first
+        if (this.wishlistContent && this.wishlistContent.length > 0) {
           for (let i = 0; i < this.wishlistContent.length; i++) {
-            const response = await this.$http.get(`content/id/${this.wishlistContent[i].contentId}`);
-            this.contents.push(response.data.data);
+            const item = this.wishlistContent[i];
+            try {
+              const response = await this.$http.get(`content/id/${item.contentId}`);
+              if (response.data && response.data.data) {
+                this.contents.push(response.data.data);
+              }
+            } catch (err) {
+              console.error(`Error fetching content id ${item.contentId}:`, err);
+            }
           }
         }
       } catch (error) {
-        console.error('Error fetching contents', error);
+        console.error('Error in fetchContents:', error);
       }
     },
     async fetchListContent(listId) {

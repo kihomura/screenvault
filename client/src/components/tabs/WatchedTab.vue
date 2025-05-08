@@ -94,18 +94,13 @@ export default {
           return false;
         }
       }
-      // For addToWishlist mode
+      // For addToWishlist mode - watched content should be selectable
       else if (this.mode === 'addToWishlist') {
-        // Check if it's already in wishlist
-        const isInWishlist = this.watchedContents.some(
-            recording => recording.contentId === content.id && recording.status === 'WISHLIST'
-        );
-        const isWatched = this.watchedContents.some(
-            recording => recording.contentId === content.id && recording.status === 'WATCHED'
-        );
-        if (isInWishlist || isWatched) {
-          return false;
-        }
+        return true;
+      }
+      // For selectFavorite mode - all content should be selectable
+      else if (this.mode === 'selectFavorite') {
+        return true;
       }
       return true;
     },
@@ -135,16 +130,20 @@ export default {
           for (let i = 0; i < this.watchedContents.length; i++) {
             const watchedItem = this.watchedContents[i];
             if (watchedItem.status === 'WATCHED') { // Only include actually watched content
-              const response = await this.$http.get(`content/id/${watchedItem.contentId}`);
-              if (response.data.data) {
-                const content = response.data.data;
-                content.status = 'WATCHED'; // Mark with status
-                this.contents.push(content);
+              try {
+                const response = await this.$http.get(`content/id/${watchedItem.contentId}`);
+                if (response.data.data) {
+                  const content = response.data.data;
+                  content.status = 'WATCHED'; // Mark with status
+                  this.contents.push(content);
+                }
+              } catch (err) {
+                console.error(`Error fetching content id ${watchedItem.contentId}:`, err);
               }
             }
           }
         } catch (error) {
-          console.error("Error fetching content details:", error);
+          console.error("Error in fetchContents:", error);
         }
       }
     }
