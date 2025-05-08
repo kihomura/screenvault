@@ -1,0 +1,195 @@
+/* Light Theme Specific Styles - Apple iOS inspired */
+:root .theme-light {
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* Global light theme styles */
+.theme-light body {
+  background: var(--background-base);
+  color: var(--text-primary);
+}
+
+/* Card styles with glass morphism */
+.theme-light .card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.theme-light .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.theme-light .card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: transparent;
+}
+
+.theme-light .card-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: transparent;
+}
+
+/* Buttons with iOS style */
+.theme-light .btn {
+  border-radius: 10px;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.theme-light .btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.theme-light .btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
+}
+
+.theme-light .btn-outline-primary {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.theme-light .btn-outline-primary:hover {
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+/* Form elements with iOS style */
+.theme-light input,
+.theme-light select,
+.theme-light textarea {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1rem;
+  background: rgba(248, 249, 250, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+}
+
+.theme-light input:focus,
+.theme-light select:focus,
+.theme-light textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+}
+
+/* Navigation elements */
+.theme-light .nav-item {
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.theme-light .nav-item:hover {
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.theme-light .router-link-active {
+  background: rgba(var(--primary-rgb), 0.1) !important;
+  color: var(--primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Modal/dialog with glass effect */
+.theme-light .modal,
+.theme-light .dialog {
+  background: var(--glass-bg);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.theme-light .modal-header,
+.theme-light .dialog-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: transparent;
+}
+
+.theme-light .modal-footer,
+.theme-light .dialog-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: transparent;
+}
+
+/* Tables with clean design */
+.theme-light table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+}
+
+.theme-light th {
+  background: rgba(var(--primary-rgb), 0.05);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.theme-light tr:hover {
+  background: rgba(var(--primary-rgb), 0.02);
+}
+
+/* Dropdown menus */
+.theme-light .dropdown-menu {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  box-shadow: var(--glass-shadow);
+}
+
+.theme-light .dropdown-item:hover {
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+/* Sidebar */
+.theme-light .sidebar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  border-right: 1px solid var(--glass-border);
+}
+
+.theme-light .sidebar-title {
+  color: var(--primary);
+}
+
+.theme-light .sidebar-footer {
+  background: transparent;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Alerts/notifications */
+.theme-light .alert {
+  border-radius: 10px;
+  border: none;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--glass-shadow);
+}
+
+.theme-light .badge {
+  font-weight: 500;
+  border-radius: 6px;
+} 

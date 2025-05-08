@@ -10,6 +10,7 @@
 </template>
 
 <script setup>
+// No props or logic needed for this component
 </script>
 
 <style scoped>

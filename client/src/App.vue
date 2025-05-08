@@ -1,6 +1,8 @@
 <template>
   <div class="app-container">
     <cyberpunk-background v-if="currentTheme === 'cyberpunk'"></cyberpunk-background>
+    <light-background v-if="currentTheme === 'light'"></light-background>
+    <dark-background v-if="currentTheme === 'dark'"></dark-background>
     <sidebar-nav v-if="isAuthenticated"></sidebar-nav>
     <main class="content-area">
       <router-view />
@@ -13,7 +15,11 @@ import { useThemeStore } from './store/themeStore.js';
 import { computed, onMounted, watch, ref } from 'vue';
 import { useStore } from 'vuex';
 import SidebarNav from "./components/ui/Sidebar.vue";
-import { CyberpunkBackground } from './components/theme/cyberpunk';
+import { 
+  CyberpunkBackground, 
+  LightBackground, 
+  DarkBackground 
+} from './components/theme';
 
 const themeStore = useThemeStore();
 const store = useStore();
