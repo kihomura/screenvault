@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <cyberpunk-background v-if="currentTheme === 'cyberpunk'"></cyberpunk-background>
     <sidebar-nav v-if="isAuthenticated"></sidebar-nav>
     <main class="content-area">
       <router-view />
@@ -9,19 +10,26 @@
 
 <script setup>
 import { useThemeStore } from './store/themeStore.js';
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch, ref } from 'vue';
 import { useStore } from 'vuex';
 import SidebarNav from "./components/ui/Sidebar.vue";
+import { CyberpunkBackground } from './components/theme/cyberpunk';
 
 const themeStore = useThemeStore();
 const store = useStore();
+const currentTheme = ref(themeStore.currentTheme);
 
 const isAuthenticated = computed(() => {
   return store.getters.isAuthenticated;
 });
 
+watch(() => themeStore.currentTheme, (newTheme) => {
+  currentTheme.value = newTheme;
+});
+
 onMounted(() => {
   themeStore.applyTheme();
+  currentTheme.value = themeStore.currentTheme;
 });
 </script>
 
@@ -35,12 +43,15 @@ html, body {
   width: 100%;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 .content-area {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Unified Header Styles for all pages */
@@ -64,6 +75,13 @@ html, body {
   font-size: var(--font-fontSize-xxl);
   margin: 0;
   color: var(--primary);
+}
+
+.theme-cyberpunk .page-title h2,
+.theme-cyberpunk .page-header h1,
+.theme-cyberpunk .page-header h2,
+.theme-cyberpunk .dashboard-title h2 {
+  font-family: var(--title-font);
 }
 
 /* Left side structure */

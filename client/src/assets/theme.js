@@ -208,22 +208,22 @@ export const themeConfig = {
     cyberpunk: {
         name: 'cyberpunk',
         colors: {
-            primary: '#fe1b7c',
-            secondary: '#21f8f6',
+            primary: '#ff2a6d',
+            secondary: '#05d9e8',
             tertiary: '#ffd900',
-            highlight: '#05D9E8FF',
+            highlight: '#01012b',
             'primary-dark': '#d60062',
-            'primary-rgb': '254, 27, 124',
+            'primary-rgb': '255, 42, 109',
 
             background: {
-                base: '#181828',
-                subtle: '#232334',
-                muted: '#2f2f44'
+                base: '#0c1016',
+                subtle: '#141824',
+                muted: '#1c2030'
             },
 
             text: {
                 primary: '#f8f8ff',
-                secondary: '#21f8f6',
+                secondary: '#05d9e8',
                 muted: '#b0e6ff'
             },
 
@@ -235,23 +235,25 @@ export const themeConfig = {
             },
 
             interactive: {
-                hover: 'rgba(33, 248, 246, 0.15)',
-                active: 'rgba(254, 27, 124, 0.15)',
+                hover: 'rgba(5, 217, 232, 0.15)',
+                active: 'rgba(255, 42, 109, 0.15)',
                 focus: 'rgba(255, 217, 0, 0.15)'
             },
 
             border: {
-                light: '#21f8f6',
-                medium: '#fe1b7c',
+                light: '#05d9e8',
+                medium: '#ff2a6d',
                 dark: '#ffd900'
             }
         },
 
         typography: {
             fontFamily: {
-                primary: "'Orbitron', sans-serif",
+                primary: "'Inter', 'Helvetica Neue', Arial, sans-serif",
                 secondary: "'Rajdhani', sans-serif",
-                mono: "'VT323', monospace"
+                title: "'Orbitron', sans-serif",
+                button: "'Rajdhani', sans-serif",
+                mono: "'Fira Code', monospace"
             },
             fontSize: {
                 xs: '0.75rem',
@@ -259,7 +261,7 @@ export const themeConfig = {
                 base: '1rem',
                 lg: '1.125rem',
                 xl: '1.25rem',
-                xxl: '1.5rem'
+                xxl: '1.75rem'
             },
             fontWeight: {
                 light: 300,
@@ -277,24 +279,24 @@ export const themeConfig = {
 
         shadows: {
             level1: {
-                default: '0 0 5px rgba(33, 248, 246, 0.6)',
-                hover: '0 0 8px rgba(33, 248, 246, 0.8)'
+                default: '0 0 5px rgba(5, 217, 232, 0.5)',
+                hover: '0 0 10px rgba(5, 217, 232, 0.8)'
             },
             level2: {
-                default: '0 0 10px rgba(254, 27, 124, 0.6), 0 0 5px rgba(33, 248, 246, 0.4)',
-                hover: '0 0 15px rgba(254, 27, 124, 0.8), 0 0 10px rgba(33, 248, 246, 0.6)'
+                default: '0 0 10px rgba(255, 42, 109, 0.5), 0 0 5px rgba(5, 217, 232, 0.3)',
+                hover: '0 0 15px rgba(255, 42, 109, 0.7), 0 0 10px rgba(5, 217, 232, 0.5)'
             },
             level3: {
-                default: '0 0 15px rgba(254, 27, 124, 0.7), 0 0 10px rgba(33, 248, 246, 0.5), 0 0 5px rgba(255, 217, 0, 0.3)',
-                hover: '0 0 20px rgba(254, 27, 124, 0.9), 0 0 15px rgba(33, 248, 246, 0.7), 0 0 10px rgba(255, 217, 0, 0.5)'
+                default: '0 0 15px rgba(255, 42, 109, 0.6), 0 0 10px rgba(5, 217, 232, 0.4), 0 0 5px rgba(255, 217, 0, 0.2)',
+                hover: '0 0 20px rgba(255, 42, 109, 0.8), 0 0 15px rgba(5, 217, 232, 0.6), 0 0 10px rgba(255, 217, 0, 0.4)'
             }
         },
 
         borderRadius: {
             sm: '0',
-            md: '0.25rem',
-            lg: '0.25rem',
-            xl: '0.5rem',
+            md: '0',
+            lg: '0',
+            xl: '0.25rem',
             full: '9999px'
         },
 
@@ -305,6 +307,14 @@ export const themeConfig = {
             lg: '1rem',
             xl: '1.5rem',
             xxl: '2rem'
+        },
+
+        effects: {
+            glitch: true,
+            scanlines: true,
+            neon: true,
+            noise: true,
+            clipPath: 'polygon(0 0, 100% 0, 100% 85%, 98% 100%, 0 100%)'
         }
     }
 };

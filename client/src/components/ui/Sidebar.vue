@@ -190,13 +190,159 @@ onMounted(() => {
 }
 
 :root .theme-cyberpunk .sidebar-title {
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--title-font);
   color: var(--primary);
   text-shadow: 0 0 5px var(--primary), 0 0 10px var(--secondary);
   text-transform: uppercase;
   letter-spacing: 2px;
   border-left: 3px solid var(--secondary);
   padding-left: var(--spacing-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+:root .theme-cyberpunk .sidebar-title::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(5, 217, 232, 0.2), transparent);
+  animation: titleGlow 3s linear infinite;
+}
+
+:root .theme-cyberpunk .sidebar {
+  background: rgba(12, 16, 22, 0.9);
+  border-right: 1px solid var(--secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+:root .theme-cyberpunk .sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--secondary);
+  box-shadow: 0 0 10px var(--secondary);
+  z-index: 10;
+}
+
+:root .theme-cyberpunk .nav-item {
+  border-left: 2px solid transparent;
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+  background: transparent;
+  clip-path: polygon(0 0, 97% 0, 100% 100%, 0% 100%);
+  font-family: var(--body-font);
+}
+
+:root .theme-cyberpunk .nav-item:hover {
+  background: rgba(5, 217, 232, 0.1);
+  border-left-color: var(--secondary);
+  color: var(--secondary);
+  text-shadow: 0 0 5px var(--secondary);
+  box-shadow: inset 0 0 10px rgba(5, 217, 232, 0.1);
+}
+
+:root .theme-cyberpunk .router-link-active {
+  background: rgba(255, 42, 109, 0.1) !important;
+  border-left: 2px solid var(--primary) !important;
+  color: var(--primary) !important;
+  text-shadow: 0 0 5px var(--primary) !important;
+  box-shadow: inset 0 0 15px rgba(255, 42, 109, 0.2) !important;
+}
+
+:root .theme-cyberpunk .sidebar-footer {
+  border-top: 1px solid rgba(5, 217, 232, 0.3);
+  background: rgba(12, 16, 22, 0.8);
+}
+
+:root .theme-cyberpunk .theme-select {
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--secondary);
+  border: 1px solid var(--secondary);
+  font-family: var(--font-fontFamily-mono);
+  letter-spacing: 1px;
+  text-shadow: 0 0 3px var(--secondary);
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+
+:root .theme-cyberpunk .theme-select:focus {
+  box-shadow: 0 0 0 2px rgba(5, 217, 232, 0.5);
+  border-color: var(--secondary);
+}
+
+:root .theme-cyberpunk .theme-selector label {
+  color: var(--text-primary);
+  font-family: var(--body-font);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+:root .theme-cyberpunk .logout-btn {
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  font-family: var(--button-font);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 3px var(--primary);
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  transition: all 0.3s ease;
+}
+
+:root .theme-cyberpunk .logout-btn:hover {
+  background: rgba(255, 42, 109, 0.2);
+  box-shadow: 0 0 10px rgba(255, 42, 109, 0.5);
+}
+
+:root .theme-cyberpunk .user-profile {
+  background: rgba(12, 16, 22, 0.8);
+  border-bottom: 1px solid rgba(5, 217, 232, 0.3);
+}
+
+:root .theme-cyberpunk .user-profile:hover {
+  background: rgba(5, 217, 232, 0.05);
+}
+
+:root .theme-cyberpunk .avatar {
+  border: 2px solid var(--secondary);
+  box-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
+  overflow: hidden;
+  position: relative;
+}
+
+:root .theme-cyberpunk .avatar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(5, 217, 232, 0.4), transparent);
+  animation: avatarGlow 3s infinite;
+}
+
+:root .theme-cyberpunk .user-name {
+  color: var(--primary);
+  font-family: var(--body-font);
+  text-shadow: 0 0 5px rgba(255, 42, 109, 0.5);
+  letter-spacing: 1px;
+}
+
+@keyframes avatarGlow {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+@keyframes titleGlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 .user-profile {

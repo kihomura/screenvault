@@ -8,6 +8,8 @@ import { createPinia } from 'pinia';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.js'
 import './assets/css/custom-colors.css'
+import './assets/css/cyberpunk-theme.css'
+import CyberpunkComponents from './components/theme/cyberpunk'
 import * as echarts from 'echarts'
 
 const backendUrl = import.meta.env.DEV ? 
@@ -42,5 +44,12 @@ app.use(pinia);
 app.use(router)
 app.use(store)
 app.use(utilsPlugin)
+app.use(CyberpunkComponents)
+
+// Add link to Google Fonts for cyberpunk theme
+const linkElement = document.createElement('link');
+linkElement.rel = 'stylesheet';
+linkElement.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&family=VT323&display=swap';
+document.head.appendChild(linkElement);
 
 app.mount('#app')
