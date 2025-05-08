@@ -37,7 +37,8 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-library.add(faGoogle, faGithub);
+import { faStar, faHeart, faList, faHistory, faFilm, faEye } from "@fortawesome/free-solid-svg-icons";
+library.add(faGoogle, faGithub, faStar, faHeart, faList, faHistory, faFilm, faEye);
 app.component("font-awesome-icon", FontAwesomeIcon);
 
 app.use(pinia);

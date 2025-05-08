@@ -2,7 +2,6 @@
   <BaseWidget
       :id="id"
       :title="title"
-      :icon="icon"
       :size="size"
       :refreshable="true"
       :loading="loading"
@@ -13,6 +12,13 @@
       @refresh="fetchRecentWatches"
       class="recent-watch-widget"
   >
+    <!-- Add icon slot -->
+    <template #icon>
+      <div class="recent-watch-widget-icon">
+        <font-awesome-icon :icon="['fas', 'eye']" />
+      </div>
+    </template>
+
     <!-- content -->
     <div class="recent-watches-container">
       <div class="poster-grid" :class="sizeClass">
@@ -55,10 +61,6 @@ export default {
     title: {
       type: String,
       default: 'Recent Watches'
-    },
-    icon: {
-      type: String,
-      default: 'icon-film'
     },
     size: {
       type: String,
@@ -170,6 +172,14 @@ export default {
 .recent-watch-widget {
   width: 100%;
   height: 100%;
+}
+
+.recent-watch-widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 1.2rem;
 }
 
 .recent-watches-container {

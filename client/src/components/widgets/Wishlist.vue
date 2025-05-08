@@ -2,7 +2,6 @@
   <BaseWidget
       :id="id"
       :title="title"
-      :icon="icon"
       :size="size"
       :refreshable="true"
       :loading="loading"
@@ -13,6 +12,13 @@
       @refresh="fetchWishlistItems"
       class="wishlist-widget"
   >
+    <!-- Add icon slot -->
+    <template #icon>
+      <div class="wishlist-widget-icon">
+        <font-awesome-icon :icon="['fas', 'heart']" />
+      </div>
+    </template>
+
     <!-- content -->
     <div class="wishlist-container">
       <div class="poster-grid" :class="sizeClass">
@@ -55,10 +61,6 @@ export default {
     title: {
       type: String,
       default: 'Wishlist'
-    },
-    icon: {
-      type: String,
-      default: 'icon-heart'
     },
     size: {
       type: String,
@@ -169,6 +171,14 @@ export default {
 .wishlist-widget {
   width: 100%;
   height: 100%;
+}
+
+.wishlist-widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 1.2rem;
 }
 
 .wishlist-container {

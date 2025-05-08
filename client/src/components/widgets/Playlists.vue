@@ -2,7 +2,6 @@
   <BaseWidget
       :id="id"
       :title="title"
-      :icon="icon"
       :size="size"
       :refreshable="true"
       :loading="loading"
@@ -13,6 +12,13 @@
       @refresh="fetchPlaylists"
       class="playlist-widget"
   >
+    <!-- Add icon slot -->
+    <template #icon>
+      <div class="playlist-widget-icon">
+        <font-awesome-icon :icon="['fas', 'list']" />
+      </div>
+    </template>
+
     <!-- content -->
     <div class="playlists-container">
       <div class="list-vertical-container" :class="sizeClass">
@@ -59,10 +65,6 @@ export default {
     title: {
       type: String,
       default: 'My Playlists'
-    },
-    icon: {
-      type: String,
-      default: 'icon-list'
     },
     size: {
       type: String,
@@ -125,6 +127,14 @@ export default {
 .playlist-widget {
   width: 100%;
   height: 100%;
+}
+
+.playlist-widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 1.2rem;
 }
 
 .playlists-container {

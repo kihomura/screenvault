@@ -2,7 +2,6 @@
   <BaseWidget
       :id="id"
       :title="title"
-      :icon="icon"
       :size="size"
       :refreshable="true"
       :loading="loading"
@@ -13,15 +12,25 @@
       class="favorite-widget"
       @refresh="loadFavoriteContent"
   >
+    <!-- 使用命名插槽提供自定义图标 -->
+    <template #icon>
+      <div class="favorite-widget-icon">
+        <font-awesome-icon :icon="['fas', 'star']" />
+      </div>
+    </template>
+    
     <!-- content -->
     <div class="favorite-container">
-      <div v-if="favoriteContent" class="poster-container">
-        <poster-card
-            :content="favoriteContent"
-            @card-click="handleCardClick"
-        />
+      <div v-if="favoriteContent" class="poster-container" @click="handleCardClick(favoriteContent)">
+        <img :src="getContentImagePath(favoriteContent)" 
+             :alt="favoriteContent.title" 
+             class="poster-image" />
+        <div class="content-overlay">
+          <div class="content-title">{{ favoriteContent.title || favoriteContent.name }}</div>
+        </div>
       </div>
       <div v-else class="empty-state">
+        <div class="empty-icon"><i class="icon-heart-outline"></i></div>
         <p>Select your favorite content</p>
       </div>
     </div>
@@ -41,14 +50,13 @@
 import { ref, inject, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseWidget from './BaseWidget.vue';
-import PosterCard from '../cards/PosterCard.vue';
 import axios from 'axios';
+import { getContentImagePath } from "../../utils/index.js";
 
 export default {
-  name: 'Favorite',
+  name: 'FavoriteWidget',
   components: {
-    BaseWidget,
-    PosterCard
+    BaseWidget
   },
   props: {
     id: {
@@ -59,14 +67,10 @@ export default {
       type: String,
       default: 'My Favorite'
     },
-    icon: {
-      type: String,
-      default: 'icon-heart'
-    },
     size: {
       type: String,
       default: 'small',
-      validator: (value) => ['small', 'mediumHorizontal'].includes(value)
+      validator: (value) => ['small', 'medium', 'large'].includes(value)
     }
   },
   setup(props) {
@@ -183,7 +187,8 @@ export default {
       openSelectModal,
       handleContentSelected,
       handleCardClick,
-      loadFavoriteContent
+      loadFavoriteContent,
+      getContentImagePath
     };
   }
 };
@@ -193,9 +198,36 @@ export default {
 .favorite-widget {
   width: 100%;
   height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.favorite-widget::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 0;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.favorite-widget::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 .favorite-container {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   display: flex;
@@ -204,23 +236,128 @@ export default {
 }
 
 .poster-container {
+  position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* 控制容器内容不溢出 */
   overflow: hidden;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  box-shadow: var(--shadow-level1-default);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* Add a accent border */
+  border: 2px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.poster-container:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: var(--shadow-level2-hover);
+  border: 2px solid rgba(var(--primary-rgb), 0.7);
+}
+
+.poster-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  z-index: 1;
+}
+
+.poster-container:hover::before {
+  transform: scaleX(1);
+}
+
+/* Add star effect on the top-right corner */
+.poster-container::after {
+  content: '★';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--primary);
+  font-size: 20px;
+  text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.7);
+  z-index: 3;
+  opacity: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.poster-container:hover::after {
+  transform: rotate(72deg) scale(1.3);
+}
+
+.poster-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+  /* Add slight filter to make content pop */
+  filter: contrast(1.05) saturate(1.1);
+}
+
+.poster-container:hover .poster-image {
+  transform: scale(1.1);
+}
+
+.content-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    transparent 100%
+  );
+  padding: var(--spacing-md);
+  z-index: 2;
+  /* Add shine effect */
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.content-title {
+  font-family: var(--font-fontFamily-secondary);
+  font-size: var(--font-fontSize-base);
+  font-weight: var(--font-fontWeight-semibold);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .empty-state {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   height: 100%;
-  color: var(--text-muted);
-  font-size: var(--font-fontSize-sm);
   text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.7;
+  color: var(--primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.empty-state p {
+  font-weight: var(--font-fontWeight-medium);
+  color: var(--text-secondary);
 }
 
 .widget-footer-actions {
@@ -243,5 +380,34 @@ export default {
 .select-content-button:hover {
   text-decoration: underline;
   color: var(--accent-info-hover);
+}
+
+/* Animated favorite icon */
+.favorite-widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-warning);
+  position: relative;
+  font-size: 1.3rem;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+}
+
+.favorite-widget-icon svg {
+  color: inherit;
+  animation: heartbeat 1.5s infinite;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  5% { transform: scale(1.2); }
+  10% { transform: scale(1.1); }
+  15% { transform: scale(1.2); }
+  50% { transform: scale(1); }
+  100% { transform: scale(1); }
 }
 </style>

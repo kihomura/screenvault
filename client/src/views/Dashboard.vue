@@ -5,18 +5,20 @@
         <h2>Dashboard</h2>
       </div>
       <div class="dashboard-actions">
-        <button
-            class="edit-mode-btn"
+        <main-btn
+            v-if="!isEditMode"
+            type="text"
+            size="medium"
             @click="toggleEditMode"
-            :class="{ 'active': isEditMode }"
         >
-          {{ isEditMode ? 'Exit Edit Mode' : 'Edit Dashboard' }}
-        </button>
+          Edit
+        </main-btn>
 
         <div class="widget-selector" v-if="isEditMode">
           <label for="widget-type">Add Widget:</label>
           <select id="widget-type" v-model="selectedWidgetType" class="select-input">
             <option disabled value="">Select widget type</option>
+            <option v-if="availableWidgets.length === 0" disabled class="no-widgets-option">All widgets are already on dashboard</option>
             <option v-for="type in availableWidgets" :key="type.id" :value="type.id">
               {{ type.name }}
             </option>
@@ -26,15 +28,16 @@
               {{ size.label }}
             </option>
           </select>
-          <button
-              class="add-widget-btn"
+          <main-btn
+              type="primary"
+              size="small"
               @click="addWidget"
               :disabled="!selectedWidgetType || getAvailableSizes.length === 0 || !canAddMoreWidgets"
           >
             Add
-          </button>
+          </main-btn>
         </div>
-        <button class="save-layout-btn" @click="saveLayout" v-if="isEditMode">Save Layout</button>
+        <main-btn type="highlight" size="medium" @click="saveLayout" v-if="isEditMode">Save Layout</main-btn>
       </div>
     </div>
 
@@ -74,7 +77,8 @@
             :title="item.title"
             :size="item.size"
             :key="item.i"
-        />
+            :prepend-icon="getWidgetIcon(item.type).html"
+          />
           <button v-if="isEditMode" class="remove-widget-btn" @click="removeWidget(item.i)" title="Remove widget">×</button>
         </grid-item>
       </grid-layout>
@@ -117,6 +121,7 @@ import Wishlist from "../components/widgets/Wishlist.vue";
 import Playlists from "../components/widgets/Playlists.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import { useToastStore } from "../store/toastStore.js";
+import MainBtn from '../components/buttons/MainBtn.vue';
 
 const WIDGET_SIZES = {
   small: { value: 'small', label: 'Small (1×1)', w: 1, h: 1 },
@@ -172,7 +177,8 @@ export default {
     Wishlist,
     Playlists,
     GridLayout,
-    GridItem
+    GridItem,
+    MainBtn
   },
   setup() {
     const layout = ref([]);
@@ -337,10 +343,43 @@ export default {
     const saveLayout = () => {
       localStorage.setItem('dashboard-layout', JSON.stringify(layout.value));
       toastStore.success('Layout saved successfully!');
+      isEditMode.value = false;
+      selectedWidgetType.value = '';
+      selectedWidgetSize.value = '';
     };
 
     const getComponentType = (type) => {
       return WIDGET_CONFIG[type]?.component || null;
+    };
+
+    const getWidgetIcon = (type) => {
+      switch(type) {
+        case 'Favorite':
+          return {
+            html: `<div class="widget-icon favorite-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>`,
+            class: 'favorite-icon'
+          };
+        case 'Wishlist':
+          return {
+            html: `<svg viewBox="0 0 24 24" class="wishlist-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
+            class: 'wishlist-icon'
+          };
+        case 'Playlists':
+          return {
+            html: `<svg viewBox="0 0 24 24" class="playlists-icon"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`,
+            class: 'playlists-icon'
+          };
+        case 'RecentWatch':
+          return {
+            html: `<svg viewBox="0 0 24 24" class="recentwatch-icon"><path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"></path></svg>`,
+            class: 'recentwatch-icon'
+          };
+        default:
+          return {
+            html: '',
+            class: ''
+          };
+      }
     };
 
     const toggleEditMode = () => {
@@ -520,6 +559,7 @@ export default {
       removeWidget,
       saveLayout,
       getComponentType,
+      getWidgetIcon,
       onLayoutUpdated,
       isEditMode,
       toggleEditMode,
@@ -595,59 +635,6 @@ export default {
 .select-input:focus {
   border-color: var(--accent-info);
   box-shadow: 0 0 0 2px rgba(var(--accent-info-rgb), 0.2);
-}
-
-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xs) var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-fontSize-sm);
-  font-weight: var(--font-fontWeight-medium);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  outline: none;
-}
-
-.add-widget-btn {
-  background-color: var(--accent-info);
-  color: white;
-}
-
-.add-widget-btn:hover:not(:disabled) {
-  background-color: rgba(var(--accent-info-rgb), 0.9);
-}
-
-.add-widget-btn:disabled {
-  background-color: var(--tertiary);
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.edit-mode-btn {
-  background-color: var(--background-muted);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-medium);
-}
-
-.edit-mode-btn:hover {
-  background-color: var(--interactive-hover);
-}
-
-.edit-mode-btn.active {
-  background-color: var(--primary);
-  color: white;
-}
-
-.save-layout-btn {
-  background-color: var(--accent-success);
-  color: white;
-}
-
-.save-layout-btn:hover {
-  background-color: rgba(var(--accent-success-rgb), 0.9);
 }
 
 .dashboard-content {
@@ -783,6 +770,11 @@ button {
   color: var(--text-secondary);
 }
 
+.no-widgets-option {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .dashboard-header {
     flex-direction: column;
@@ -800,14 +792,61 @@ button {
     flex-wrap: wrap;
     width: 100%;
   }
+}
 
-  .select-input {
-    flex: 1;
-    min-width: 120px;
-  }
+/* Widget icon styles */
+.widget-icon {
+  margin-right: var(--spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
 
-  button {
-    width: 100%;
-  }
+.widget-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.favorite-icon {
+  color: var(--accent-warning);
+}
+
+.favorite-icon svg {
+  fill: currentColor;
+}
+
+.wishlist-icon {
+  color: var(--accent-error);
+}
+
+.wishlist-icon svg {
+  fill: currentColor;
+}
+
+.playlists-icon {
+  color: var(--accent-info);
+}
+
+.playlists-icon svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.recentwatch-icon {
+  color: var(--primary);
+}
+
+.recentwatch-icon svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 </style>
