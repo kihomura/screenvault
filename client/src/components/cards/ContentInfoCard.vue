@@ -1,8 +1,11 @@
 <template>
   <div class="content-info-card">
     <div class="content-header">
-      <h2 class="content-title">{{ content.title }}</h2>
-      <h3 v-if="content.otherTitle" class="content-subtitle">{{ content.otherTitle }}</h3>
+      <div>
+        <h2 class="content-title">{{ content.title }}</h2>
+        <h3 v-if="content.otherTitle" class="content-subtitle">{{ content.otherTitle }}</h3>
+      </div>
+      <main-btn type="text" v-if="content.sourceType === 'CUSTOM_DATA'" @click="$emit('edit')">Edit</main-btn>
     </div>
 
     <div class="content-info-container">
@@ -45,8 +48,11 @@
 
 <script>
 import {getContentImagePath} from "../../utils/index.js";
+import MainBtn from "../buttons/MainBtn.vue";
+
 export default {
   name: 'ContentInfoCard',
+  components: {MainBtn},
   props: {
     content: {
       type: Object,
@@ -86,6 +92,11 @@ export default {
 
 .content-header {
   margin-bottom: var(--spacing-lg);
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .content-title {

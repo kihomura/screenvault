@@ -2,7 +2,7 @@
   <div class="modal-backdrop" v-if="isOpen" @click.self="closeModal">
     <div class="modal-container">
       <div class="modal-header">
-        <h2 class="modal-title">Add Custom Content</h2>
+        <h2 class="modal-title">{{ isEditing ? 'Edit Custom Content' : 'Add Custom Content' }}</h2>
         <button class="close-button" @click="closeModal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -190,7 +190,7 @@
           <main-btn type="secondary" @click="closeModal">Cancel</main-btn>
           <div class="save-buttons">
             <main-btn type="highlight" @click="saveCustomContent" :disabled="!isFormValid">
-              Save
+              {{ isEditing ? 'Update' : 'Save' }}
             </main-btn>
           </div>
         </div>
@@ -210,6 +210,25 @@ export default {
     isOpen: {
       type: Boolean,
       default: false
+    },
+    existingContent: {
+      type: Object,
+      default: null
+    }
+  },
+  computed: {
+    isFormValid() {
+      this.titleError = !this.formData.title;
+      this.categoryError = !this.formData.category;
+      this.genreError = !this.formData.genre;
+
+      return this.formData.title &&
+          this.formData.category &&
+          this.formData.genre &&
+          !this.imageError;
+    },
+    isEditing() {
+      return this.existingContent !== null;
     }
   },
   data() {
@@ -230,6 +249,7 @@ export default {
       filteredLanguages: [],
 
       formData: {
+        id: null,
         title: '',
         otherTitle: '',
         country: '',
@@ -248,16 +268,13 @@ export default {
       languages: LANGUAGES,
     };
   },
-  computed: {
-    isFormValid() {
-      this.titleError = !this.formData.title;
-      this.categoryError = !this.formData.category;
-      this.genreError = !this.formData.genre;
-
-      return this.formData.title &&
-          this.formData.category &&
-          this.formData.genre &&
-          !this.imageError;
+  watch: {
+    isOpen(newValue) {
+      if (newValue && this.existingContent) {
+        this.populateFormWithExistingContent();
+      } else if (!newValue) {
+        this.resetForm();
+      }
     }
   },
   methods: {
@@ -266,8 +283,35 @@ export default {
       this.$emit('close');
     },
 
+    populateFormWithExistingContent() {
+      if (!this.existingContent) return;
+      
+      this.formData = {
+        id: this.existingContent.id,
+        title: this.existingContent.title || '',
+        otherTitle: this.existingContent.otherTitle || '',
+        country: this.existingContent.country || '',
+        language: this.existingContent.language || '',
+        description: this.existingContent.description || '',
+        image: this.existingContent.image || '',
+        releaseDate: this.existingContent.releaseDate ? this.existingContent.releaseDate.split('T')[0] : '',
+        genre: this.existingContent.genre || '',
+        category: this.existingContent.category || '',
+        sourceType: SOURCE_TYPE.CUSTOM_DATA
+      };
+      
+      if (this.formData.country) {
+        this.countryInput = this.formData.country;
+      }
+      
+      if (this.formData.language) {
+        this.languageInput = this.formData.language;
+      }
+    },
+
     resetForm() {
       this.formData = {
+        id: null,
         title: '',
         otherTitle: '',
         country: '',
@@ -369,6 +413,7 @@ export default {
       try {
         this.isSaving = true;
         const contentData = {
+          id: this.formData.id,
           title: this.formData.title.trim(),
           otherTitle: this.formData.otherTitle.trim() || null,
           country: this.formData.country.trim() || null,
@@ -384,14 +429,14 @@ export default {
         const response = await this.$http.post(`/content`, contentData);
         console.log(response)
         if (response.data && response.data.data) {
-          const newCustomContent = response.data.data;
+          const savedContent = response.data.data;
           this.$emit('close');
-          this.$emit('content-added', newCustomContent);
+          this.$emit('content-added', savedContent);
         } else {
-          console.error('Error creating customContent');
+          console.error('Error saving content');
         }
       } catch (e) {
-        console.error(`Error creating customContent: ${e}`);
+        console.error(`Error saving content: ${e}`);
       } finally {
         this.resetForm();
         this.isSaving = false;

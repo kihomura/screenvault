@@ -21,7 +21,7 @@
     <div v-else class="content-detail-content">
       <div class="content-detail-container">
         <!-- Content Detail -->
-        <content-info-card :content="content" />
+        <content-info-card :content="content" @edit="openEditCustomContentModal" />
 
         <!-- User's Record Detail -->
         <recording-info-card
@@ -43,6 +43,14 @@
         @close="closeModal"
         @save="saveOrUpdateNewRecord"
     />
+
+    <!-- Add/Edit Custom Content Modal -->
+    <add-custom-content-modal
+        :is-open="showCustomContentModal"
+        :existing-content="editingCustomContent"
+        @close="closeCustomContentModal"
+        @content-added="handleCustomContentSaved"
+    />
   </div>
 </template>
 
@@ -51,6 +59,7 @@ import BackButton from "../components/buttons/BackButton.vue";
 import ContentInfoCard from "../components/cards/ContentInfoCard.vue";
 import RecordingInfoCard from "../components/cards/RecordInfoCard.vue";
 import AddRecordModal from "../components/modals/AddRecordModal.vue";
+import AddCustomContentModal from "../components/modals/AddCustomContentModal.vue";
 import { useToastStore } from "../store/toastStore.js";
 
 export default {
@@ -59,7 +68,8 @@ export default {
     BackButton,
     ContentInfoCard,
     RecordingInfoCard,
-    AddRecordModal
+    AddRecordModal,
+    AddCustomContentModal
   },
   data() {
     return {
@@ -72,6 +82,8 @@ export default {
       error: null,
       showEditModal: false,
       showAddRecordModal: false,
+      showCustomContentModal: false,
+      editingCustomContent: null,
       isAdding: false,
       toastStore: null
     }
@@ -99,6 +111,20 @@ export default {
     closeModal() {
       this.showAddRecordModal = false;
       this.showEditModal = false;
+    },
+    openEditCustomContentModal() {
+      this.editingCustomContent = this.content;
+      this.showCustomContentModal = true;
+    },
+    closeCustomContentModal() {
+      this.showCustomContentModal = false;
+      this.editingCustomContent = null;
+    },
+    async handleCustomContentSaved(updatedContent) {
+      if (updatedContent) {
+        await this.fetchContentDetails();
+        this.toastStore.success("Content updated successfully");
+      }
     },
     async fetchContentDetails() {
       this.loading = true;
