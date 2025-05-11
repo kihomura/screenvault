@@ -9,6 +9,7 @@
       :errorMessage="errorMessage"
       :empty="!playlists || playlists.length === 0"
       :emptyMessage="'No playlists found'"
+      :isEditMode="isEditMode"
       @refresh="fetchPlaylists"
       class="playlist-widget"
   >
@@ -31,6 +32,7 @@
               :list="playlist"
               :is-manage-mode="false"
               :index="index"
+              :disabled="isEditMode"
           />
         </div>
       </div>
@@ -39,7 +41,7 @@
     <!-- footer -->
     <template #footer>
       <div class="widget-footer-actions">
-        <button class="view-all-button" @click="viewAllPlaylists">
+        <button class="view-all-button" @click="isEditMode ? undefined : viewAllPlaylists">
           View All Playlists
         </button>
       </div>
@@ -70,6 +72,10 @@ export default {
       type: String,
       default: 'mediumVertical',
       validator: (value) => ['mediumVertical', 'largeVertical'].includes(value)
+    },
+    isEditMode: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -225,5 +231,10 @@ export default {
   .container-size-largeVertical {
     max-height: 300px;
   }
+}
+
+.playlist-widget.widget-drag-handle .view-all-button,
+.playlist-widget.widget-drag-handle .list-item-wrapper * {
+  pointer-events: none !important;
 }
 </style>

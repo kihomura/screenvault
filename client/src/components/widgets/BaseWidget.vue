@@ -1,11 +1,11 @@
 <template>
   <div
       class="widget"
-      :class="[`widget-${size}`, { 'widget-loading': loading }]"
+      :class="[`widget-${size}`, { 'widget-loading': loading, 'widget-drag-handle': isEditMode }]"
       :style="customStyle"
   >
     <!-- header -->
-    <div class="widget-header widget-drag-handle">
+    <div class="widget-header">
       <div class="widget-title">
         <slot name="icon">
           <div v-if="icon" class="widget-icon">
@@ -102,6 +102,10 @@ export default {
     emptyMessage: {
       type: String,
       default: ''
+    },
+    isEditMode: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -155,17 +159,27 @@ export default {
 }
 
 .widget-drag-handle {
-  cursor: move;
-  cursor: grab;
+  cursor: move !important;
+  cursor: grab !important;
 }
 
 .widget-drag-handle:active {
-  cursor: grabbing;
+  cursor: grabbing !important;
+}
+
+.widget-drag-handle * {
+  cursor: inherit !important;
+}
+
+.widget-drag-handle .widget-content,
+.widget-drag-handle .widget-footer {
+  pointer-events: none !important;
 }
 
 /* 确保操作按钮不触发拖拽 */
 .widget-actions {
   cursor: default;
+  pointer-events: auto !important;
 }
 
 /* Widget sizes */

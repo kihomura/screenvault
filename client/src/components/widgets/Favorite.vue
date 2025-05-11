@@ -9,6 +9,7 @@
       :errorMessage="errorMessage"
       :empty="!favoriteContent"
       :emptyMessage="'No favorite content selected'"
+      :isEditMode="isEditMode"
       class="favorite-widget"
       @refresh="loadFavoriteContent"
   >
@@ -21,7 +22,7 @@
     
     <!-- content -->
     <div class="favorite-container">
-      <div v-if="favoriteContent" class="poster-container" @click="handleCardClick(favoriteContent)">
+      <div v-if="favoriteContent" class="poster-container" @click="isEditMode ? undefined : handleCardClick(favoriteContent)">
         <img :src="getContentImagePath(favoriteContent)" 
              :alt="favoriteContent.title" 
              class="poster-image" />
@@ -38,7 +39,7 @@
     <!-- footer: Select content button -->
     <template #footer>
       <div class="widget-footer-actions">
-        <button class="select-content-button" @click="openSelectModal">
+        <button class="select-content-button" @click="isEditMode ? undefined : openSelectModal">
           {{ favoriteContent ? 'Change Content' : 'Select Content' }}
         </button>
       </div>
@@ -71,6 +72,10 @@ export default {
       type: String,
       default: 'small',
       validator: (value) => ['small', 'medium', 'large'].includes(value)
+    },
+    isEditMode: {
+      type: Boolean,
+      default: false
     }
   },
   setup(props) {
@@ -409,5 +414,11 @@ export default {
   15% { transform: scale(1.2); }
   50% { transform: scale(1); }
   100% { transform: scale(1); }
+}
+
+.favorite-widget.widget-drag-handle .select-content-button,
+.favorite-widget.widget-drag-handle .poster-container,
+.favorite-widget.widget-drag-handle .poster-container * {
+  pointer-events: none !important;
 }
 </style>

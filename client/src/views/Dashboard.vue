@@ -66,7 +66,7 @@
             :w="item.w"
             :h="item.h"
             :i="item.i"
-            drag-allow-from=".widget-header"
+            drag-allow-from=".widget"
             drag-ignore-from=".remove-widget-btn, .widget-action-button"
             class="grid-item"
             :class="{ 'edit-mode': isEditMode }"
@@ -78,6 +78,7 @@
             :size="item.size"
             :key="item.i"
             :prepend-icon="getWidgetIcon(item.type).html"
+            :isEditMode="isEditMode"
           />
           <button v-if="isEditMode" class="remove-widget-btn" @click="removeWidget(item.i)" title="Remove widget">×</button>
         </grid-item>
@@ -660,6 +661,16 @@ export default {
 
 .grid-item.edit-mode {
   border: 2px dashed transparent;
+  cursor: move !important;
+  cursor: grab !important;
+}
+
+.grid-item.edit-mode * {
+  cursor: inherit !important;
+}
+
+.grid-item.edit-mode:active {
+  cursor: grabbing !important;
 }
 
 .grid-item.edit-mode:hover {

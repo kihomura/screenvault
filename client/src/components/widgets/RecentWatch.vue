@@ -9,6 +9,7 @@
       :errorMessage="errorMessage"
       :empty="!records || records.length === 0"
       :emptyMessage="'No watch history'"
+      :isEditMode="isEditMode"
       @refresh="fetchRecentWatches"
       class="recent-watch-widget"
   >
@@ -25,7 +26,7 @@
         <div class="poster-card-wrapper" v-for="record in displayedRecords" :key="record.id">
           <poster-card
               :content="record.contentDetails || record"
-              @card-click="handleCardClick"
+              @card-click="isEditMode ? undefined : handleCardClick"
           />
         </div>
       </div>
@@ -35,7 +36,7 @@
     <template #footer>
       <div class="widget-footer-actions">
         <span>Showing {{ displayedRecords.length }} / {{ records.length }}</span>
-        <button class="view-all-button" @click="viewAllRecords">
+        <button class="view-all-button" @click="isEditMode ? undefined : viewAllRecords">
           View All
         </button>
       </div>
@@ -66,6 +67,10 @@ export default {
       type: String,
       default: 'mediumHorizontal',
       validator: (value) => ['mediumHorizontal', 'large1'].includes(value)
+    },
+    isEditMode: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -273,5 +278,10 @@ export default {
   text-decoration: underline;
   color: var(--accent-info);
   background-color: var(--interactive-hover);
+}
+
+.recent-watch-widget.widget-drag-handle .view-all-button,
+.recent-watch-widget.widget-drag-handle .poster-card-wrapper * {
+  pointer-events: none !important;
 }
 </style>
