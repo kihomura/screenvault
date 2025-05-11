@@ -16,17 +16,8 @@
 
 USE `screen_vault`;
 
-DROP TABLE IF EXISTS `tag_content`;
-DROP TABLE IF EXISTS `list_content`;
-DROP TABLE IF EXISTS `user_content`;
-DROP TABLE IF EXISTS `user_preference`;
-DROP TABLE IF EXISTS `tags`;
-DROP TABLE IF EXISTS `lists`;
-DROP TABLE IF EXISTS `contents`;
-DROP TABLE IF EXISTS `users`;
-
 -- 1. 主表：users
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
                          `id` int NOT NULL AUTO_INCREMENT,
                          `email` varchar(255) DEFAULT NULL,
                          `password` varchar(255) DEFAULT NULL,
@@ -41,7 +32,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 2. 主表：contents (依赖 users)
-CREATE TABLE `contents` (
+CREATE TABLE IF NOT EXISTS `contents` (
                             `id` int NOT NULL AUTO_INCREMENT,
                             `category` enum('MOVIE','TV_SHOW') DEFAULT NULL,
                             `country` varchar(2) DEFAULT NULL,
@@ -66,7 +57,7 @@ CREATE TABLE `contents` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1298927 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 3. 主表：lists (依赖 users)
-CREATE TABLE `lists` (
+CREATE TABLE IF NOT EXISTS `lists` (
                          `id` int NOT NULL AUTO_INCREMENT,
                          `create_date` date DEFAULT NULL,
                          `is_default` bit(1) DEFAULT NULL,
@@ -78,7 +69,7 @@ CREATE TABLE `lists` (
 ) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 4. 主表：tags (依赖 users)
-CREATE TABLE `tags` (
+CREATE TABLE IF NOT EXISTS `tags` (
                         `id` int NOT NULL AUTO_INCREMENT,
                         `tag_name` varchar(50) DEFAULT NULL,
                         `creator_id` int NOT NULL,
@@ -88,7 +79,7 @@ CREATE TABLE `tags` (
 ) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 5. 主表：user_preference (依赖 users)
-CREATE TABLE `user_preference` (
+CREATE TABLE IF NOT EXISTS `user_preference` (
                                    `user_id` int NOT NULL,
                                    `bg_image` varchar(255) DEFAULT NULL,
                                    `layout` json DEFAULT NULL,
@@ -99,7 +90,7 @@ CREATE TABLE `user_preference` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 6. 子表：user_content (依赖 users, contents)
-CREATE TABLE `user_content` (
+CREATE TABLE IF NOT EXISTS `user_content` (
                                 `id` int NOT NULL AUTO_INCREMENT,
                                 `rate` decimal(3,1) DEFAULT NULL,
                                 `review` json DEFAULT NULL,
@@ -115,7 +106,7 @@ CREATE TABLE `user_content` (
 ) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 7. 子表：list_content (依赖 contents, lists)
-CREATE TABLE `list_content` (
+CREATE TABLE IF NOT EXISTS `list_content` (
                                 `add_time` datetime(6) DEFAULT NULL,
                                 `content_id` int NOT NULL,
                                 `list_id` int NOT NULL,
@@ -126,7 +117,7 @@ CREATE TABLE `list_content` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 8. 子表：tag_content (依赖 contents, tags)
-CREATE TABLE `tag_content` (
+CREATE TABLE IF NOT EXISTS `tag_content` (
                                `content_id` int NOT NULL,
                                `tag_id` int NOT NULL,
                                PRIMARY KEY (`content_id`,`tag_id`),
