@@ -43,20 +43,24 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import AnimatedGrid from '../components/animatedGrid.vue';
 import AppHeader from '../components/ui/Header.vue';
 import CyberButton from '../components/buttons/cyberButton.vue';
 
 onMounted(() => {
-  document.body.style.backgroundColor = '#252525'
-
+  document.body.classList.add('auth-page');
+  
   document.querySelectorAll('.glitch-text').forEach(element => {
     element.addEventListener('mouseover', () => {
       element.classList.add('active');
       setTimeout(() => element.classList.remove('active'), 1000);
     });
   });
+});
+
+onUnmounted(() => {
+  document.body.classList.remove('auth-page');
 });
 </script>
 

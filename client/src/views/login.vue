@@ -28,15 +28,18 @@ import MessageDisplay from "../components/form/message.vue";
 
 export default {
   name: "Login",
-  mounted() {
-    document.body.style.backgroundColor = '#252525'
-  },
   components: {
     AuthContainer,
     AnimatedGrid,
     AppHeader,
     Wrapper,
     MessageDisplay,
+  },
+  mounted() {
+    document.body.classList.add('auth-page');
+  },
+  unmounted() {
+    document.body.classList.remove('auth-page');
   },
   data() {
     return {
@@ -64,9 +67,7 @@ export default {
           this.message = response.data.message;
           this.error = false;
 
-          setTimeout(() => {
-            this.$router.push("/dashboard");
-          }, 1000);
+          this.$router.push("/dashboard");
         } else {
           this.message = "Incorrect username or password";
           this.error = true;
@@ -84,8 +85,13 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+.auth-page {
+  background-color: #252525 !important;
+}
+</style>
 
+<style scoped>
 h2 {
   text-align: center;
   margin-bottom: 50px;

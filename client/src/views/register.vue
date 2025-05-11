@@ -28,15 +28,18 @@ import MessageDisplay from "../components/form/message.vue";
 
 export default {
   name: "Register",
-  mounted() {
-    document.body.style.backgroundColor = '#252525'
-  },
   components: {
     AuthContainer,
     AnimatedGrid,
     AppHeader,
     Wrapper,
     MessageDisplay,
+  },
+  mounted() {
+    document.body.classList.add('auth-page');
+  },
+  unmounted() {
+    document.body.classList.remove('auth-page');
   },
   data() {
     return {

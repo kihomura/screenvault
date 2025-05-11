@@ -13,8 +13,9 @@
 
 <script setup>
 import { useThemeStore } from './store/themeStore.js';
-import { computed, onMounted, watch, ref } from 'vue';
+import { computed, onMounted, watch, ref, nextTick } from 'vue';
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import SidebarNav from "./components/ui/Sidebar.vue";
 import ToastManager from "./components/ui/ToastManager.vue";
 import { 
@@ -25,17 +26,44 @@ import {
 
 const themeStore = useThemeStore();
 const store = useStore();
+const route = useRoute();
 const currentTheme = ref(themeStore.currentTheme);
 
 const isAuthenticated = computed(() => {
   return store.getters.isAuthenticated;
 });
 
+// Watch for authentication changes
+watch(() => isAuthenticated.value, (newValue) => {
+  nextTick(() => {
+    // When authentication state changes, ensure theme is properly applied
+    document.body.style.removeProperty('backgroundColor');
+    document.body.classList.remove('auth-page');
+    themeStore.applyTheme();
+  });
+});
+
+// Watch for theme changes
 watch(() => themeStore.currentTheme, (newTheme) => {
   currentTheme.value = newTheme;
 });
 
+// Watch for route changes to ensure theme is properly applied
+watch(() => route.path, () => {
+  nextTick(() => {
+    // Remove any inline background color style that might have been set by other components
+    if (document.body.style.backgroundColor) {
+      document.body.style.removeProperty('backgroundColor');
+    }
+    // Re-apply the theme
+    themeStore.applyTheme();
+  });
+});
+
 onMounted(() => {
+  // Clear any inline styles that might interfere with theme
+  document.body.style.removeProperty('backgroundColor');
+  // Apply the theme
   themeStore.applyTheme();
   currentTheme.value = themeStore.currentTheme;
 });
@@ -44,6 +72,10 @@ onMounted(() => {
 <style>
 html, body {
   background-color: var(--background-muted);
+}
+
+.auth-page {
+  background-color: #252525 !important;
 }
 
 .app-container {
