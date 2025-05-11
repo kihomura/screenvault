@@ -1,10 +1,10 @@
 <template>
-  <div class="app-container">
-    <cyberpunk-background v-if="currentTheme === 'cyberpunk'"></cyberpunk-background>
-    <light-background v-if="currentTheme === 'light'"></light-background>
-    <dark-background v-if="currentTheme === 'dark'"></dark-background>
-    <sidebar-nav v-if="isAuthenticated"></sidebar-nav>
-    <main class="content-area">
+  <div class="app-container" :class="{ 'no-theme': isNoThemePage }">
+    <cyberpunk-background v-if="currentTheme === 'cyberpunk' && !isNoThemePage"></cyberpunk-background>
+    <light-background v-if="currentTheme === 'light' && !isNoThemePage"></light-background>
+    <dark-background v-if="currentTheme === 'dark' && !isNoThemePage"></dark-background>
+    <sidebar-nav v-if="isAuthenticated && !isNoThemePage"></sidebar-nav>
+    <main class="content-area" :class="{ 'full-width': isNoThemePage }">
       <router-view />
     </main>
     <toast-manager />
@@ -33,45 +33,68 @@ const isAuthenticated = computed(() => {
   return store.getters.isAuthenticated;
 });
 
+const isNoThemePage = computed(() => {
+  return route.meta.noTheme === true;
+});
+
 // Watch for authentication changes
 watch(() => isAuthenticated.value, (newValue) => {
   nextTick(() => {
     // When authentication state changes, ensure theme is properly applied
-    document.body.style.removeProperty('backgroundColor');
-    document.body.classList.remove('auth-page');
-    themeStore.applyTheme();
+    if (!isNoThemePage.value) {
+      document.body.style.removeProperty('backgroundColor');
+      document.body.classList.remove('auth-page');
+      themeStore.applyTheme();
+    }
   });
 });
 
 // Watch for theme changes
 watch(() => themeStore.currentTheme, (newTheme) => {
-  currentTheme.value = newTheme;
+  if (!isNoThemePage.value) {
+    currentTheme.value = newTheme;
+  }
 });
 
 // Watch for route changes to ensure theme is properly applied
 watch(() => route.path, () => {
   nextTick(() => {
-    // Remove any inline background color style that might have been set by other components
-    if (document.body.style.backgroundColor) {
+    if (isNoThemePage.value) {
+      // No theme pages should not have theme styles
+      document.body.classList.add('no-theme-page');
+      document.body.classList.remove(`theme-${themeStore.currentTheme}`);
+    } else {
+      // Remove any inline background color style that might have been set by other components
       document.body.style.removeProperty('backgroundColor');
+      document.body.classList.remove('no-theme-page');
+      // Re-apply the theme
+      themeStore.applyTheme();
     }
-    // Re-apply the theme
-    themeStore.applyTheme();
   });
 });
 
 onMounted(() => {
-  // Clear any inline styles that might interfere with theme
-  document.body.style.removeProperty('backgroundColor');
-  // Apply the theme
-  themeStore.applyTheme();
-  currentTheme.value = themeStore.currentTheme;
+  if (isNoThemePage.value) {
+    // For no-theme pages
+    document.body.classList.add('no-theme-page');
+    document.body.classList.remove(`theme-${themeStore.currentTheme}`);
+  } else {
+    // Clear any inline styles that might interfere with theme
+    document.body.style.removeProperty('backgroundColor');
+    // Apply the theme
+    themeStore.applyTheme();
+    currentTheme.value = themeStore.currentTheme;
+  }
 });
 </script>
 
 <style>
 html, body {
   background-color: var(--background-muted);
+}
+
+.no-theme-page {
+  background-color: #252525 !important;
 }
 
 .auth-page {
@@ -86,12 +109,19 @@ html, body {
   position: relative;
 }
 
+.app-container.no-theme {
+  background-color: #252525;
+}
+
 .content-area {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
   position: relative;
   z-index: 1;
+}
+
+.content-area.full-width {
+  width: 100%;
 }
 
 /* Unified Header Styles for all pages */

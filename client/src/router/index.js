@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store/store.js';
 
 // views
-import intro from '../views/introduce.vue';
-import login from '../views/login.vue';
-import register from '../views/register.vue';
+import intro from '../views/Introduce.vue';
+import login from '../views/Login.vue';
+import register from '../views/Register.vue';
 import dashboard from '../views/Dashboard.vue';
 import watched from '../views/Watched.vue';
 import playlists from '../views/Playlist.vue';
@@ -20,19 +20,19 @@ const routes = [
     path: '/',
     name: 'intro',
     component: intro,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false, noTheme: true }
   },
   {
     path: '/login',
     name: 'login',
     component: login,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false, noTheme: true }
   },
   {
     path: '/register',
     name: 'register',
     component: register,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false, noTheme: true }
   },
   {
     path: '/dashboard',
