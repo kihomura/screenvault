@@ -22,6 +22,13 @@
 
         <div class="profile-info" v-if="!isEditing">
           <div class="info-column personal-info">
+            <div class="avatar-section">
+              <label>Avatar</label>
+              <div class="avatar-container">
+                <img :src="avatarUrl" alt="User avatar" class="profile-avatar" />
+                <button class="change-avatar-btn" @click="openAvatarModal">Change</button>
+              </div>
+            </div>
             <div class="info-group">
               <label>Username</label>
               <p>{{ userProfile.username }}</p>
@@ -50,6 +57,13 @@
         <form @submit.prevent="updateProfile" v-else class="edit-form">
           <div class="form-columns">
             <div class="form-column">
+              <div class="avatar-section">
+                <label>Avatar</label>
+                <div class="avatar-container">
+                  <img :src="avatarUrl" alt="User avatar" class="profile-avatar" />
+                  <button type="button" class="change-avatar-btn" @click="openAvatarModal">Change Avatar</button>
+                </div>
+              </div>
               <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" v-model="userProfile.username" disabled class="disabled-input" />
@@ -164,18 +178,27 @@
       <div class="loading-spinner"></div>
       <p>Loading your profile...</p>
     </div>
+    
+    <avatar-selection-modal
+      :is-open="showAvatarModal"
+      @close="closeAvatarModal"
+      @avatar-updated="handleAvatarUpdated"
+    />
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import MainBtn from '../components/buttons/MainBtn.vue';
+import AvatarSelectionModal from '../components/modals/AvatarSelectionModal.vue';
 import { useToastStore } from '../store/toastStore.js';
+import { useStore } from 'vuex';
 
 export default {
   name: 'ProfileView',
   components: { 
-    MainBtn
+    MainBtn,
+    AvatarSelectionModal
   },
   data() {
     return {
@@ -207,11 +230,20 @@ export default {
         password: false,
         confirmPassword: false
       }),
-      toastStore: null
+      showAvatarModal: false,
+      toastStore: null,
+      store: null
     };
   },
   created() {
     this.toastStore = useToastStore();
+    this.store = useStore();
+  },
+  computed: {
+    avatarUrl() {
+      const avatar = this.store.getters.getUserAvatar || 'George';
+      return `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${avatar}`;
+    }
   },
   methods: {
     async fetchUserProfile() {
@@ -324,6 +356,16 @@ export default {
       } else {
         this.toastStore.info(message);
       }
+    },
+    openAvatarModal() {
+      this.showAvatarModal = true;
+    },
+    closeAvatarModal() {
+      this.showAvatarModal = false;
+    },
+    async handleAvatarUpdated(avatar) {
+      // The avatar is already updated in the store by the modal component
+      this.toastStore.success('Avatar updated successfully!');
     }
   },
   mounted() {
@@ -676,5 +718,41 @@ li:before {
     width: 100%;
     margin-top: var(--spacing-xs);
   }
+}
+
+/* Add avatar-related styles */
+.avatar-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.avatar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--border-radius-md);
+  border: 2px solid var(--border-medium);
+  background-color: var(--background-subtle);
+}
+
+.change-avatar-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-fontSize-sm);
+}
+
+.change-avatar-btn:hover {
+  background-color: var(--background-muted);
+  border-color: var(--primary);
 }
 </style>

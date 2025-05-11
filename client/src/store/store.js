@@ -9,7 +9,16 @@ export default createStore({
     //mutations负责修改state，必须是同步操作
     mutations: {
         setUser(state, user) {
+            if (user && !user.avatar) {
+                user.avatar = localStorage.getItem('user-avatar') || "George"; // Default avatar is George
+            }
             state.user = user;
+        },
+        updateUserAvatar(state, avatarName) {
+            if (state.user) {
+                state.user.avatar = avatarName;
+                localStorage.setItem('user-avatar', avatarName);
+            }
         }
     },
     //actions是异步操作，用于请求API
@@ -17,6 +26,15 @@ export default createStore({
         async fetchUser({ commit }) {
             try {
                 const { data } = await axios.get('/auth/me');
+                
+                // If user exists in the response, check for avatar in localStorage
+                if (data) {
+                    const savedAvatar = localStorage.getItem('user-avatar');
+                    if (savedAvatar && !data.avatar) {
+                        data.avatar = savedAvatar;
+                    }
+                }
+                
                 commit('setUser', data);
             } catch (error) {
                 commit('setUser', null);
@@ -32,9 +50,24 @@ export default createStore({
             } finally {
                 commit('setUser', null);
             }
+        },
+        async updateAvatar({ commit, state }, avatarName) {
+            try {
+                // You can implement the API call here to update the avatar in the backend
+                // For now, we'll just update the local state
+                commit('updateUserAvatar', avatarName);
+                return { success: true };
+            } catch (error) {
+                console.error('Update avatar failed:', error);
+                return { success: false, error };
+            }
         }
     },
     getters: {
-        isAuthenticated: (state) => !!state.user
+        isAuthenticated: (state) => !!state.user,
+        getUserAvatar: (state) => {
+            if (!state.user) return null;
+            return state.user.avatar || localStorage.getItem('user-avatar') || "George"; // Default to George if no avatar
+        }
     }
 });

@@ -4,11 +4,14 @@
       <h2 class="sidebar-title">ScreenVault</h2>
     </div>
 
-    <div class="user-profile" @click="navigateToProfile">
-      <div class="avatar">
-        <img :src="userAvatar" alt="User avatar" />
+    <div class="user-profile">
+      <div class="avatar" @click="openAvatarModal">
+        <img :src="avatarUrl" alt="User avatar" />
+        <div class="avatar-overlay">
+          <span class="change-avatar-text">Change</span>
+        </div>
       </div>
-      <div class="user-info">
+      <div class="user-info" @click="navigateToProfile">
         <p class="user-name">{{ userName }}</p>
       </div>
     </div>
@@ -84,6 +87,13 @@
         <span>Logout</span>
       </button>
     </div>
+    
+    <!-- Avatar Selection Modal -->
+    <avatar-selection-modal
+      :is-open="showAvatarModal"
+      @close="closeAvatarModal"
+      @avatar-updated="handleAvatarUpdated"
+    />
   </aside>
 </template>
 
@@ -92,12 +102,14 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useThemeStore } from '../../store/themeStore.js';
 import { useStore } from 'vuex';
+import AvatarSelectionModal from '../modals/AvatarSelectionModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 const themeStore = useThemeStore();
 const store = useStore();
 const isManageSectionOpen = ref(false);
+const showAvatarModal = ref(false);
 
 const isActiveManage = computed(() => route.path.startsWith('/manage'));
 
@@ -122,8 +134,24 @@ const userName = computed(() => {
 });
 
 const userAvatar = computed(() => {
-  return store.state.user?.avatar || '/images/default-avatar.png';
+  return store.state.user?.avatar || 'George';
 });
+
+const avatarUrl = computed(() => {
+  return `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${userAvatar.value}`;
+});
+
+function openAvatarModal() {
+  showAvatarModal.value = true;
+}
+
+function closeAvatarModal() {
+  showAvatarModal.value = false;
+}
+
+function handleAvatarUpdated(avatarName) {
+  console.log('Avatar updated to:', avatarName);
+}
 
 function changeTheme() {
   themeStore.setTheme(selectedTheme.value);
@@ -366,12 +394,38 @@ onMounted(() => {
   background: var(--background-muted);
   margin-right: var(--spacing-md);
   border: 2px solid var(--border-medium);
+  position: relative;
+  cursor: pointer;
 }
 
 .avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.avatar:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.change-avatar-text {
+  color: white;
+  font-size: var(--font-fontSize-xs);
+  font-weight: var(--font-fontWeight-medium);
 }
 
 .user-info {
