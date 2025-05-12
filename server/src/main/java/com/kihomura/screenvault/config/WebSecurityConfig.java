@@ -1,6 +1,7 @@
 package com.kihomura.screenvault.config;
 
 import com.kihomura.screenvault.config.authentication.*;
+import com.kihomura.screenvault.filter.SimpleCorsFilter;
 import com.kihomura.screenvault.security.JWTAuthenticationFilter;
 import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
@@ -33,6 +34,9 @@ public class WebSecurityConfig {
 
     @Autowired
     private MyOAuth2AuthenticationSuccessHandler myOAuth2AuthenticationSuccessHandler;
+
+    @Autowired
+    private SimpleCorsFilter simpleCorsFilter;
 
     private final UserDetailsService userDetailsService;
     private final JWTTokenProvider jwtTokenProvider;
@@ -112,6 +116,9 @@ public class WebSecurityConfig {
 
         // Disable CSRF
         http.csrf(AbstractHttpConfigurer::disable);
+        
+        // 添加SimpleCorsFilter到过滤器链的最前面
+        http.addFilterBefore(simpleCorsFilter, UsernamePasswordAuthenticationFilter.class);
 
         // JWT Filter
         http.addFilterBefore(new JWTAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);

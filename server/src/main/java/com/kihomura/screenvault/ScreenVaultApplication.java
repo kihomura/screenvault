@@ -1,5 +1,6 @@
 package com.kihomura.screenvault;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 public class ScreenVaultApplication {
+    
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+    private String allowedOrigins;
+    
     public static void main(String[] args) {
         SpringApplication.run(ScreenVaultApplication.class, args);
     }
@@ -18,7 +23,7 @@ public class ScreenVaultApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://screenvault-client-production.up.railway.app")
+                        .allowedOrigins(allowedOrigins.split(","))
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
                         .allowCredentials(true)
