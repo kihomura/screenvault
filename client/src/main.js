@@ -16,6 +16,7 @@ import * as echarts from 'echarts'
 // 这样请求会发送到前端域名，然后由nginx代理到后端
 const isDev = import.meta.env.DEV;
 const backendUrl = isDev ? (import.meta.env.VITE_API_URL || 'http://localhost:5555') : '';
+const backendDomain = 'https://screenvault-server-production.up.railway.app';
 
 console.log('环境:', isDev ? '开发环境' : '生产环境');
 console.log('Backend URL:', backendUrl);
@@ -26,9 +27,20 @@ axios.defaults.withCredentials = true; // 允许跨域请求携带凭证
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.headers.common['Accept'] = 'application/json';
 
-// 请求拦截器 - 为每个请求添加必要的头部
+// 请求拦截器 - 为每个请求添加必要的头部并确保使用相对路径
 axios.interceptors.request.use(function (config) {
+    // 确保使用withCredentials
     config.withCredentials = true;
+    
+    // 强制移除硬编码的绝对URL（在生产环境中）
+    if (!isDev && config.url) {
+        // 如果URL以后端域名开头，则转换为相对路径
+        if (config.url.startsWith(backendDomain)) {
+            config.url = config.url.replace(backendDomain, '');
+            console.log(`将绝对URL转换为相对路径: ${config.url}`);
+        }
+    }
+    
     console.log(`发送请求: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
 }, function (error) {
