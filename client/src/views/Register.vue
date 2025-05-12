@@ -58,13 +58,21 @@ export default {
       }
 
       try {
+        console.log("Sending register request to:", this.$http.defaults.baseURL + "/auth/register");
+        
         const response = await this.$http.post("/auth/register", {
           username: formData.username,
           password: formData.password,
           confirmPassword: formData.confirmPassword
         }, {
-          withCredentials: true
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         });
+
+        console.log("Register response:", response);
 
         if (response.data.code === 200) {
           this.message = response.data.message;
@@ -77,9 +85,18 @@ export default {
           this.error = true;
         }
       } catch (error) {
-        this.message = 'Sign up failed. Please try again';
+        console.error("Register error details:", error);
+        if (error.response) {
+          console.error("Error response:", error.response.data);
+          this.message = error.response.data.message || 'Registration failed: Server error';
+        } else if (error.request) {
+          console.error("No response received:", error.request);
+          this.message = 'No response from server. Please check your connection.';
+        } else {
+          console.error("Error setting up request:", error.message);
+          this.message = 'Error setting up request: ' + error.message;
+        }
         this.error = true;
-        console.error("Register error:", error);
       }
     },
     loginWithOAuth(provider) {
