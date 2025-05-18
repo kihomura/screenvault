@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mysql:
-    build: ./mysql
+    build: db
     container_name: screenvault-mysql
     restart: always
     ports:

@@ -37,20 +37,20 @@ public class CorsConfig implements WebMvcConfigurer {
         
         config.setAllowCredentials(true);
         
-        // 设置允许的源
+        // allowed origins
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         config.setAllowedOrigins(origins);
         
-        // 设置允许的HTTP方法
+        // allowed HTTP methods
         config.addAllowedMethod("*");
         
-        // 设置允许的头信息
+        // allowed headers
         config.addAllowedHeader("*");
 
-        // 设置暴露的响应头
+        // exposed response headers
         config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie", "X-XSRF-TOKEN"));
         
-        // 预检请求的有效期，单位为秒
+        // the max age for preflight request
         config.setMaxAge(3600L);
         
         source.registerCorsConfiguration("/**", config);
