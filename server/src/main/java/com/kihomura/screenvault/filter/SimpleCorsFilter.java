@@ -3,6 +3,8 @@ package com.kihomura.screenvault.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -18,6 +20,8 @@ import java.io.IOException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SimpleCorsFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(SimpleCorsFilter.class);
+
     @Value("${cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
@@ -28,23 +32,37 @@ public class SimpleCorsFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) resp;
 
         String origin = request.getHeader("Origin");
+        String method = request.getMethod();
+        String path = request.getRequestURI();
+        
+        logger.debug("处理请求: {} {} 来自 {}", method, path, origin);
         
         // 检查来源是否在允许的列表中
         if (origin != null && isAllowedOrigin(origin)) {
+            logger.debug("允许来源: {}", origin);
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
             response.setHeader("Access-Control-Max-Age", "3600");
             response.setHeader("Access-Control-Allow-Headers", 
-                "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-XSRF-TOKEN");
+                "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-XSRF-TOKEN, Cache-Control");
             response.setHeader("Access-Control-Expose-Headers", "Set-Cookie, Authorization");
+        } else if (origin != null) {
+            logger.warn("不允许的来源: {}", origin);
         }
 
         // 如果是OPTIONS请求，直接返回200 OK
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            logger.debug("处理OPTIONS预检请求");
             response.setStatus(HttpServletResponse.SC_OK);
         } else {
-            chain.doFilter(req, response);
+            // 继续处理请求
+            try {
+                chain.doFilter(req, response);
+            } catch (Exception e) {
+                logger.error("处理请求时出错: {} {}", method, path, e);
+                throw e;
+            }
         }
     }
 
@@ -60,9 +78,11 @@ public class SimpleCorsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
+        logger.info("SimpleCorsFilter初始化，允许的来源: {}", allowedOrigins);
     }
 
     @Override
     public void destroy() {
+        logger.info("SimpleCorsFilter销毁");
     }
 } 

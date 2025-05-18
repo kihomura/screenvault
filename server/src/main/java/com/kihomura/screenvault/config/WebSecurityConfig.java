@@ -5,6 +5,8 @@ import com.kihomura.screenvault.filter.SimpleCorsFilter;
 import com.kihomura.screenvault.security.JWTAuthenticationFilter;
 import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +34,8 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+
     @Autowired
     private MyOAuth2AuthenticationSuccessHandler myOAuth2AuthenticationSuccessHandler;
 
@@ -55,11 +59,13 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        logger.info("配置SecurityFilterChain");
+        
         // 未登录状态下可以访问的路径，其他路径的请求则需要先经过身份验证
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/login", "/auth/register", "/auth/check_username").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求
-                .requestMatchers("/auth/**", "/error").permitAll()
+                .requestMatchers("/auth/**", "/error", "/api/ip/**").permitAll()
                 .anyRequest().authenticated()
         );
 
@@ -123,23 +129,24 @@ public class WebSecurityConfig {
         // JWT Filter
         http.addFilterBefore(new JWTAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
-        //build()构建并返回一个SecurityFilterChain对象
-        //该对象包含所有配置的安全策略，会被Spring Security在应用启动时自动加载和执行
+        logger.info("SecurityFilterChain配置完成");
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        logger.info("配置CorsConfigurationSource");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(Arrays.asList("https://screenvault-client-production.up.railway.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie", "Content-Disposition"));
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+        logger.info("CorsConfigurationSource配置完成");
         return source;
     }
 
