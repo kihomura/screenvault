@@ -13,6 +13,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,7 @@ public class MyOAuth2AuthenticationSuccessHandler implements AuthenticationSucce
 
     private final JWTTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Value("${app.oauth2.redirect-uri}")  // in application.properties
     private String redirectUri;
@@ -30,7 +33,6 @@ public class MyOAuth2AuthenticationSuccessHandler implements AuthenticationSucce
     public MyOAuth2AuthenticationSuccessHandler(JWTTokenProvider jwtTokenProvider, @Lazy UserService userService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
-
     }
 
     @Override
@@ -72,15 +74,15 @@ public class MyOAuth2AuthenticationSuccessHandler implements AuthenticationSucce
         String token = jwtTokenProvider.generateToken(authentication);
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(request.isSecure())
                 .path("/")
                 .maxAge(30 * 24 * 60 * 60)
                 .sameSite("Lax")
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        // redirect to front-end
-        response.sendRedirect(redirectUri);
+        // redirect to front-end using Spring's RedirectStrategy
+        redirectStrategy.sendRedirect(request, response, redirectUri);
     }
 
 }
