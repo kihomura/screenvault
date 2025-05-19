@@ -123,6 +123,7 @@ import Playlists from "../components/widgets/Playlists.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import { useToastStore } from "../store/toastStore.js";
 import MainBtn from '../components/buttons/MainBtn.vue';
+import { storageManager } from "../utils/storageManager.js";
 
 const WIDGET_SIZES = {
   small: { value: 'small', label: 'Small (1×1)', w: 1, h: 1 },
@@ -342,7 +343,7 @@ export default {
     };
 
     const saveLayout = () => {
-      localStorage.setItem('dashboard-layout', JSON.stringify(layout.value));
+      storageManager.set('dashboard-layout', layout.value);
       toastStore.success('Layout saved successfully!');
       isEditMode.value = false;
       selectedWidgetType.value = '';
@@ -391,46 +392,11 @@ export default {
       }
     };
 
-    const initDefaultLayout = () => {
-      layout.value = [
-        {
-          x: 0,
-          y: 0,
-          w: 2,
-          h: 2,
-          i: 'default-recent-watch',
-          type: 'RecentWatch',
-          title: WIDGET_CONFIG.RecentWatch.defaultTitle,
-          size: 'large2'
-        },
-        {
-          x: 2,
-          y: 0,
-          w: 2,
-          h: 1,
-          i: 'default-favorite',
-          type: 'Favorite',
-          title: WIDGET_CONFIG.Favorite.defaultTitle,
-          size: 'mediumHorizontal'
-        },
-        {
-          x: 0,
-          y: 2,
-          w: 1,
-          h: 2,
-          i: 'default-wishlist',
-          type: 'Wishlist',
-          title: WIDGET_CONFIG.Wishlist.defaultTitle,
-          size: 'mediumVertical'
-        }
-      ];
-    };
-
     const loadSavedLayout = () => {
-      const savedLayout = localStorage.getItem('dashboard-layout');
+      const savedLayout = storageManager.get('dashboard-layout');
       if (savedLayout) {
         try {
-          const parsedLayout = JSON.parse(savedLayout);
+          const parsedLayout = Array.isArray(savedLayout) ? savedLayout : JSON.parse(savedLayout);
           if (Array.isArray(parsedLayout) && parsedLayout.length > 0) {
             const validLayout = parsedLayout.filter(item =>
                 item.x >= 0 && item.x + item.w <= 4 &&
@@ -461,11 +427,9 @@ export default {
           }
         } catch (e) {
           console.error('Failed to parse saved layout', e);
-          localStorage.removeItem('dashboard-layout');
+          storageManager.remove('dashboard-layout');
         }
       }
-
-      initDefaultLayout();
     };
 
     const updateDashboardWidth = () => {
@@ -475,7 +439,6 @@ export default {
         const newWidth = cellWidth * 4 + 30;
 
         if (Math.abs(dashboardWidth.value - newWidth) > 1) {
-          console.log('Dashboard width updated:', newWidth);
           dashboardWidth.value = newWidth;
         }
       }
@@ -489,7 +452,7 @@ export default {
 
         nextTick(() => {
           layout.value = layoutCopy;
-          localStorage.setItem('dashboard-layout', JSON.stringify(layoutCopy));
+          storageManager.set('dashboard-layout', layoutCopy);
         });
       }
     };

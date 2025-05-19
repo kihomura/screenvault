@@ -1,28 +1,49 @@
 import { defineStore } from 'pinia';
 import { themeConfig } from '../assets/theme.js';
+import { storageManager } from '../utils/storageManager';
 
 export const useThemeStore = defineStore('theme', {
     state: () => ({
-        currentTheme: localStorage.getItem('app-theme') || 'light',
+        currentTheme: 'light', // Initialize with a fixed default theme
     }),
     getters: {
-        themeVariables() {
-            return themeConfig[this.currentTheme];
+        themeVariables(state) {
+            return themeConfig[state.currentTheme];
         },
         availableThemes() {
             return Object.keys(themeConfig);
         }
     },
     actions: {
+        async refreshTheme() {
+            const savedTheme = storageManager.get('app-theme', 'light');
+            let themeToApply = 'light';
+
+            if (savedTheme && themeConfig[savedTheme]) {
+                themeToApply = savedTheme;
+            }
+
+            if (this.currentTheme !== themeToApply) {
+                this.currentTheme = themeToApply;
+            }
+            this.applyTheme();
+            return true;
+        },
         setTheme(themeName) {
             if (themeConfig[themeName]) {
                 this.currentTheme = themeName;
-                localStorage.setItem('app-theme', themeName);
+                storageManager.set('app-theme', themeName);
                 this.applyTheme();
+            } else {
+                console.warn('[themeStore.js] setTheme - themeName not found in themeConfig:', themeName);
             }
         },
         applyTheme() {
             const theme = themeConfig[this.currentTheme];
+            if (!theme) {
+                console.error(`[themeStore.js] applyTheme - Theme "${this.currentTheme}" not found in themeConfig.`);
+                return;
+            }
 
             const extractRGB = (color) => {
                 const hex = color.replace('#', '');
@@ -35,26 +56,19 @@ export const useThemeStore = defineStore('theme', {
             Object.keys(theme.colors).forEach((key) => {
                 if (typeof theme.colors[key] === 'object') {
                     Object.keys(theme.colors[key]).forEach((subKey) => {
-                        document.documentElement.style.setProperty(
-                            `--${key}-${subKey}`,
-                            theme.colors[key][subKey]
-                        );
-
-                        if (theme.colors[key][subKey].startsWith('#')) {
-                            document.documentElement.style.setProperty(
-                                `--${key}-${subKey}-rgb`,
-                                extractRGB(theme.colors[key][subKey])
-                            );
+                        const varName = `--${key}-${subKey}`;
+                        const varValue = theme.colors[key][subKey];
+                        document.documentElement.style.setProperty(varName, varValue);
+                        if (varValue.startsWith('#')) {
+                            document.documentElement.style.setProperty(`${varName}-rgb`, extractRGB(varValue));
                         }
                     });
                 } else {
-                    document.documentElement.style.setProperty(`--${key}`, theme.colors[key]);
-
-                    if (theme.colors[key].startsWith('#')) {
-                        document.documentElement.style.setProperty(
-                            `--${key}-rgb`,
-                            extractRGB(theme.colors[key])
-                        );
+                    const varName = `--${key}`;
+                    const varValue = theme.colors[key];
+                    document.documentElement.style.setProperty(varName, theme.colors[key]);
+                    if (varValue.startsWith('#')) {
+                        document.documentElement.style.setProperty(`${varName}-rgb`, extractRGB(varValue));
                     }
                 }
             });
@@ -88,14 +102,15 @@ export const useThemeStore = defineStore('theme', {
                 document.documentElement.style.setProperty(`--spacing-${key}`, theme.spacing[key]);
             });
 
-            document.body.className = document.body.className
-                .replace(/theme-\w+/g, '')
-                .trim();
+            let currentClasses = document.body.className.split(' ');
+            currentClasses = currentClasses.filter(cls => 
+                !cls.startsWith('theme-') && cls !== 'no-theme-page'
+            );
+            document.body.className = currentClasses.join(' ').trim();
             document.body.classList.add(`theme-${this.currentTheme}`);
         },
-
         initTheme() {
-            this.applyTheme();
+            this.refreshTheme();
         }
-    },
+    }
 });

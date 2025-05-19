@@ -13,7 +13,7 @@
       class="favorite-widget"
       @refresh="loadFavoriteContent"
   >
-    <!-- 使用命名插槽提供自定义图标 -->
+
     <template #icon>
       <div class="favorite-widget-icon">
         <font-awesome-icon :icon="['fas', 'star']" />
@@ -39,7 +39,7 @@
     <!-- footer: Select content button -->
     <template #footer>
       <div class="widget-footer-actions">
-        <button class="select-content-button" @click="isEditMode ? undefined : openSelectModal">
+        <button class="select-content-button" @click="handleSelectButtonClick">
           {{ favoriteContent ? 'Change Content' : 'Select Content' }}
         </button>
       </div>
@@ -53,6 +53,7 @@ import { useRouter } from 'vue-router';
 import BaseWidget from './BaseWidget.vue';
 import axios from 'axios';
 import { getContentImagePath } from "../../utils/index.js";
+import { storageManager } from "../../utils/storageManager.js";
 
 export default {
   name: 'FavoriteWidget',
@@ -96,7 +97,7 @@ export default {
       retryCount.value = 0;
 
       try {
-        const savedFavoriteId = localStorage.getItem(`favorite-content-${props.id}`);
+        const savedFavoriteId = storageManager.get(`favorite-content-${props.id}`);
 
         if (savedFavoriteId) {
           await fetchContentDetailsWithRetry(savedFavoriteId);
@@ -107,7 +108,7 @@ export default {
         error.value = true;
         errorMessage.value = err.message || 'Failed to load favorite content';
         if (err.message === 'Failed to fetch content details after multiple retries') {
-          localStorage.removeItem(`favorite-content-${props.id}`);
+          storageManager.remove(`favorite-content-${props.id}`);
           favoriteContent.value = null;
         }
       } finally {
@@ -149,7 +150,34 @@ export default {
       }
     };
 
+    const handleSelectButtonClick = (event) => {
+      console.log('Select content button clicked', {
+        isEditMode: props.isEditMode,
+        hasOpenContentModal: !!openContentModal
+      });
+      
+      // stop event propagation to prevent it from being captured by the parent element
+      event.stopPropagation();
+      
+      if (props.isEditMode) {
+        console.log('Button disabled in edit mode');
+        return;
+      }
+      
+      try {
+        openSelectModal();
+      } catch (error) {
+        console.error('Error opening select modal:', error);
+      }
+    };
+    
     const openSelectModal = () => {
+      console.log('Attempting to open content modal');
+      if (typeof openContentModal !== 'function') {
+        console.error('openContentModal is not a function', openContentModal);
+        return;
+      }
+      
       openContentModal({
         callback: handleContentSelected,
         mode: 'selectFavorite',
@@ -162,7 +190,7 @@ export default {
       if (content && content.id) {
         favoriteContent.value = content;
 
-        localStorage.setItem(`favorite-content-${props.id}`, content.id);
+        storageManager.set(`favorite-content-${props.id}`, content.id);
         error.value = false;
         errorMessage.value = '';
       } else {
@@ -190,6 +218,7 @@ export default {
       error,
       errorMessage,
       openSelectModal,
+      handleSelectButtonClick,
       handleContentSelected,
       handleCardClick,
       loadFavoriteContent,

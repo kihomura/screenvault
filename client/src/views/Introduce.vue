@@ -64,11 +64,6 @@ import AnimatedGrid from '../components/animatedGrid.vue';
 import AuthHeader from '../components/ui/AuthHeader.vue';
 
 onMounted(() => {
-  document.body.classList.add('no-theme-page');
-  document.body.classList.remove('theme-cyberpunk', 'theme-light', 'theme-dark');
-  
-  document.body.style.backgroundColor = '#080b15';
-  
   document.querySelectorAll('.glitch-text').forEach(element => {
     element.addEventListener('mouseover', () => {
       element.classList.add('active');
@@ -85,7 +80,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  document.body.style.removeProperty('backgroundColor');
+  // App.vue will handle body style when navigating away from a noTheme page
 });
 </script>
 

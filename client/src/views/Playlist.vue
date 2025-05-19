@@ -66,6 +66,7 @@ import InputButton from "../components/form/InputWithBtn.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 import { useToastStore } from "../store/toastStore.js";
+import { storageManager } from "../utils/storageManager.js";
 
 export default {
   name: 'playlist',
@@ -199,11 +200,11 @@ export default {
     saveListOrderToLocalStorage() {
       // store list id order to localStorage
       const listIds = this.lists.map(list => list.id);
-      localStorage.setItem(this.storageKey, JSON.stringify(listIds));
+      storageManager.set(this.storageKey, listIds);
     },
     getListOrderFromLocalStorage() {
-      const savedOrder = localStorage.getItem(this.storageKey);
-      return savedOrder ? JSON.parse(savedOrder) : null;
+      const savedOrder = storageManager.get(this.storageKey);
+      return savedOrder ? (Array.isArray(savedOrder) ? savedOrder : JSON.parse(savedOrder)) : null;
     },
     handleListUpdated(updatedList) {
       // Find the list in the array and update it

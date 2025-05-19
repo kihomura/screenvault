@@ -1,41 +1,89 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
+import { storageManager } from '../utils/storageManager';
 
 export default createStore({
-    //state存储全局状态下的user信息，默认null表示未登录
+    // State stores global user information, null by default indicates not logged in
     state: {
-        user: null
+        user: null,
+        _initialized: false
     },
-    //mutations负责修改state，必须是同步操作
     mutations: {
         setUser(state, user) {
-            if (user && !user.avatar) {
-                user.avatar = localStorage.getItem('user-avatar') || "George"; // Default avatar is George
+            if (user) {
+                const currentNamespace = getUserNamespaceFromUser(user);
+
+                if (!user.avatar) {
+                    if (!window.__VUEX_STORE__) {
+                        storageManager.init(this);
+                    }
+                    user.avatar = getUserAvatar(user) || "George";
+                }
             }
             state.user = user;
+            
+            if (!window.__VUEX_STORE__) {
+                storageManager.init(this);
+            }
+            storageManager.init(this); // Re-initialize namespace every time user changes
+            
+            if (user && !state._initialized) {
+                state._initialized = true;
+            }
         },
         updateUserAvatar(state, avatarName) {
             if (state.user) {
                 state.user.avatar = avatarName;
-                localStorage.setItem('user-avatar', avatarName);
+                const namespace = getUserNamespaceFromUser(state.user);
+                try {
+                    const storageStr = localStorage.getItem('screen-vault-storage');
+                    const storage = storageStr ? JSON.parse(storageStr) : { global: {}, users: {} };
+                    if (!storage.users[namespace]) {
+                        storage.users[namespace] = {};
+                    }
+                    storage.users[namespace]['user-avatar'] = avatarName;
+                    localStorage.setItem('screen-vault-storage', JSON.stringify(storage));
+                } catch (e) {
+                    console.error('Error saving avatar to localStorage:', e);
+                }
+                storageManager.set('user-avatar', avatarName);
             }
         }
     },
-    //actions是异步操作，用于请求API
+
     actions: {
-        async fetchUser({ commit }) {
+        async fetchUser({ commit, state }) {
             try {
                 const { data } = await axios.get('/auth/me');
-                
-                // If user exists in the response, check for avatar in localStorage
+                const wasLoggedIn = !!state.user;
+
                 if (data) {
-                    const savedAvatar = localStorage.getItem('user-avatar');
-                    if (savedAvatar && !data.avatar) {
-                        data.avatar = savedAvatar;
+                    const namespace = getUserNamespaceFromUser(data);
+                    try {
+                        const storage = JSON.parse(localStorage.getItem('screen-vault-storage') || '{"global":{},"users":{}}');
+                        const userAvatar = storage.users[namespace] && storage.users[namespace]['user-avatar'];
+                        if (userAvatar && !data.avatar) {
+                            data.avatar = userAvatar;
+                        }
+                    } catch (e) {
+                        console.error('Error reading saved avatar:', e);
                     }
                 }
                 
                 commit('setUser', data);
+                
+                const isLoggedIn = !!data;
+                const isOAuthLogin = !wasLoggedIn && isLoggedIn && window.location.pathname === '/dashboard';
+                
+                if (isOAuthLogin && !localStorage.getItem('just_logged_in') && !localStorage.getItem('login_refreshed')) {
+                    localStorage.setItem('login_refreshed', 'true');
+                    setTimeout(() => {
+                        window.location.reload();
+                        setTimeout(() => {
+                            localStorage.removeItem('login_refreshed');
+                        }, 1000);
+                    }, 100);
+                }
             } catch (error) {
                 commit('setUser', null);
             }
@@ -53,8 +101,6 @@ export default createStore({
         },
         async updateAvatar({ commit, state }, avatarName) {
             try {
-                // You can implement the API call here to update the avatar in the backend
-                // For now, we'll just update the local state
                 commit('updateUserAvatar', avatarName);
                 return { success: true };
             } catch (error) {
@@ -67,7 +113,49 @@ export default createStore({
         isAuthenticated: (state) => !!state.user,
         getUserAvatar: (state) => {
             if (!state.user) return null;
-            return state.user.avatar || localStorage.getItem('user-avatar') || "George"; // Default to George if no avatar
+
+            if (state.user.avatar) {
+                return state.user.avatar;
+            }
+
+            const savedAvatar = getUserAvatar(state.user);
+            if (savedAvatar) {
+                state.user.avatar = savedAvatar;
+                return savedAvatar;
+            }
+            
+            // Use default avatar as last resort
+            return "George";
         }
     }
 });
+
+function getUserNamespaceFromUser(user) {
+    if (!user) return 'anonymous';
+    return user.username ? `user-${user.username}` : 'anonymous';
+}
+
+function getUserAvatar(user) {
+    if (!user || !user.username) return null;
+    
+    try {
+        const namespace = getUserNamespaceFromUser(user);
+        
+        const storage = JSON.parse(localStorage.getItem('screen-vault-storage') || '{"global":{},"users":{}}');
+        
+        if (storage.users[namespace] && storage.users[namespace]['user-avatar']) {
+            const avatar = storage.users[namespace]['user-avatar'];
+            return avatar;
+        }
+
+        if (storage.users['anonymous'] && storage.users['anonymous']['user-avatar']) {
+            const avatar = storage.users['anonymous']['user-avatar'];
+            return avatar;
+        }
+        
+        return null;
+    } catch (e) {
+        console.error('Error getting user avatar:', e);
+        return null;
+    }
+}

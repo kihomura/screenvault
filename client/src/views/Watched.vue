@@ -114,6 +114,7 @@ import MainBtn from "../components/buttons/MainBtn.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 import { useToastStore } from "../store/toastStore.js";
+import { storageManager } from "../utils/storageManager.js";
 
 export default {
   name: 'WatchedPage',
@@ -311,7 +312,7 @@ export default {
       if (this.selectionMode) {
         this.toggleCardSelection(record);
       } else {
-        localStorage.setItem('watchedPageNumber', this.currentPage)
+        storageManager.set('watchedPageNumber', this.currentPage);
         this.$router.push({ name: 'ContentDetail', params: { id: record.contentId } });
       }
     },
@@ -413,10 +414,10 @@ export default {
 
     // restore page number from localstorage
     // for when come back from RecordDetail page
-    const savedPage = localStorage.getItem('watchedPageNumber');
+    const savedPage = storageManager.get('watchedPageNumber');
     if (savedPage) {
       this.currentPage = parseInt(savedPage);
-      localStorage.setItem('watchedPageNumber', '');
+      storageManager.set('watchedPageNumber', '');
     }
   }
 }

@@ -1,8 +1,8 @@
 <template>
   <div class="app-container" :class="{ 'no-theme': isNoThemePage }">
-    <cyberpunk-background v-if="currentTheme === 'cyberpunk' && !isNoThemePage"></cyberpunk-background>
-    <light-background v-if="currentTheme === 'light' && !isNoThemePage"></light-background>
-    <dark-background v-if="currentTheme === 'dark' && !isNoThemePage"></dark-background>
+    <cyberpunk-background v-if="themeStore.currentTheme === 'cyberpunk' && !isNoThemePage"></cyberpunk-background>
+    <light-background v-if="themeStore.currentTheme === 'light' && !isNoThemePage"></light-background>
+    <dark-background v-if="themeStore.currentTheme === 'dark' && !isNoThemePage"></dark-background>
     <sidebar-nav v-if="isAuthenticated && !isNoThemePage"></sidebar-nav>
     <main class="content-area" :class="{ 'full-width': isNoThemePage }">
       <router-view />
@@ -13,7 +13,7 @@
 
 <script setup>
 import { useThemeStore } from './store/themeStore.js';
-import { computed, onMounted, watch, ref, nextTick } from 'vue';
+import { computed, onMounted, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import SidebarNav from "./components/ui/Sidebar.vue";
@@ -27,63 +27,41 @@ import {
 const themeStore = useThemeStore();
 const store = useStore();
 const route = useRoute();
-const currentTheme = ref(themeStore.currentTheme);
 
-const isAuthenticated = computed(() => {
-  return store.getters.isAuthenticated;
-});
+const isAuthenticated = computed(() => store.getters.isAuthenticated);
+const isNoThemePage = computed(() => route.meta.noTheme === true);
 
-const isNoThemePage = computed(() => {
-  return route.meta.noTheme === true;
-});
-
-// Watch for authentication changes
-watch(() => isAuthenticated.value, (newValue) => {
-  nextTick(() => {
-    // When authentication state changes, ensure theme is properly applied
-    if (!isNoThemePage.value) {
-      document.body.style.removeProperty('backgroundColor');
-      document.body.classList.remove('auth-page');
-      themeStore.applyTheme();
-    }
-  });
-});
-
-// Watch for theme changes
-watch(() => themeStore.currentTheme, (newTheme) => {
-  if (!isNoThemePage.value) {
-    currentTheme.value = newTheme;
+watch(isAuthenticated, async (isAuth, oldIsAuth) => {
+  await nextTick(); 
+  if (isAuth && !oldIsAuth) {
+    await themeStore.refreshTheme(); 
+  } else if (!isAuth && oldIsAuth) { 
+    await themeStore.refreshTheme();
   }
 });
 
-// Watch for route changes to ensure theme is properly applied
-watch(() => route.path, () => {
-  nextTick(() => {
-    if (isNoThemePage.value) {
-      // No theme pages should not have theme styles
-      document.body.classList.add('no-theme-page');
-      document.body.classList.remove(`theme-${themeStore.currentTheme}`);
-    } else {
-      // Remove any inline background color style that might have been set by other components
-      document.body.style.removeProperty('backgroundColor');
-      document.body.classList.remove('no-theme-page');
-      // Re-apply the theme
-      themeStore.applyTheme();
-    }
-  });
-});
-
-onMounted(() => {
+watch(() => route.path, async (newPath, oldPath) => {
+  await nextTick();
   if (isNoThemePage.value) {
-    // For no-theme pages
     document.body.classList.add('no-theme-page');
     document.body.classList.remove(`theme-${themeStore.currentTheme}`);
   } else {
-    // Clear any inline styles that might interfere with theme
     document.body.style.removeProperty('backgroundColor');
-    // Apply the theme
-    themeStore.applyTheme();
-    currentTheme.value = themeStore.currentTheme;
+    document.body.classList.remove('no-theme-page');
+    themeStore.applyTheme();                             
+  }
+});
+
+onMounted(async () => {
+  await themeStore.refreshTheme();
+
+  if (isNoThemePage.value) {
+    document.body.classList.add('no-theme-page');
+    document.body.classList.remove(`theme-${themeStore.currentTheme}`);
+  } else {
+    document.body.style.removeProperty('backgroundColor');
+    document.body.classList.remove('no-theme-page');
+    themeStore.applyTheme(); 
   }
 });
 </script>
@@ -94,10 +72,6 @@ html, body {
 }
 
 .no-theme-page {
-  background-color: #252525 !important;
-}
-
-.auth-page {
   background-color: #252525 !important;
 }
 
