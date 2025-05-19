@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -26,7 +27,7 @@ public class MyOAuth2AuthenticationSuccessHandler implements AuthenticationSucce
     @Value("${app.oauth2.redirect-uri}")  // in application.properties
     private String redirectUri;
 
-    public MyOAuth2AuthenticationSuccessHandler(JWTTokenProvider jwtTokenProvider, UserService userService) {
+    public MyOAuth2AuthenticationSuccessHandler(JWTTokenProvider jwtTokenProvider, @Lazy UserService userService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
 

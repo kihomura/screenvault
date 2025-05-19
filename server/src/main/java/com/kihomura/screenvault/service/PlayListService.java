@@ -10,6 +10,7 @@ public interface PlayListService extends IService<PlayList> {
     List<PlayList> findAll();
     PlayList findWishlist();
     boolean createWishList();
+    boolean createWishListForUser(int userId);
     boolean saveOrUpdateList(PlayList playList);
     boolean deletePlayList(int id);
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kihomura.screenvault.mapper.UserMapper;
 import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.service.PlayListService;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -22,9 +23,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private final UserMapper userMapper;
     private PasswordEncoder passwordEncoder;
+    private final PlayListService playListService;
 
-    public UserServiceImpl(UserMapper userMapper) {
+    public UserServiceImpl(UserMapper userMapper, @Lazy PlayListService playListService) {
         this.userMapper = userMapper;
+        this.playListService = playListService;
     }
 
     // Break circular dependency by injecting PasswordEncoder through setter
@@ -55,6 +58,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setEnabled(true);
 
         save(user);
+        
+        // Create default wishlist for the new user
+        playListService.createWishListForUser(user.getId());
 
         return user;
     }
@@ -115,6 +121,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setEnabled(true);
         // 此处要求在调用前已设置好 provider 和 providerId
         save(user);
+        
+        // Create default wishlist for the new OAuth user
+        playListService.createWishListForUser(user.getId());
+        
         return user;
     }
 
