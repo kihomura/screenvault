@@ -4,7 +4,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
-  const apiUrl = env.API_URL || 'http://localhost:5555'
+  const apiUrl = env.VITE_API_URL || 'http://localhost:5555'
 
   return {
     plugins: [

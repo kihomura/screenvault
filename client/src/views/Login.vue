@@ -79,9 +79,9 @@ export default {
       }
     },
     loginWithOAuth(provider) {
-      const backendBaseUrl = import.meta.env.API_URL;
+      const backendBaseUrl = import.meta.env.VITE_API_URL;
       if (!backendBaseUrl) {
-        console.error('Error: VITE_API_BASE_URL is not defined. Please set it in your .env file.');
+        console.error('Error: VITE_API_URL is not defined. Please set it in your .env.production file and Railway environment variables.');
         this.message = "Configuration error: Unable to determine API server address.";
         this.error = true;
         return;

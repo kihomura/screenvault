@@ -21,7 +21,7 @@ import { faStar, faHeart, faList, faHistory, faFilm, faEye } from "@fortawesome/
 
 // set API request url based on the production/development environment
 const backendUrl = import.meta.env.DEV ? 
-    (import.meta.env.VITE_API_URL || 'http://localhost:5555') : 
+    (import.meta.env.VITE_API_URL || 'http://localhost:5555') :
     'https://screenvault-server-production.up.railway.app';
 
 // global settings for Axios
