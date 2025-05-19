@@ -45,7 +45,7 @@ spring:
 app:
   domain: ${APP_DOMAIN}
   oauth2:
-    redirect-uri: ${APP_DOMAIN}/dashboard
+    redirect-uri: https://${APP_DOMAIN}/dashboard
   jwt:
     secret: ${JWT_SECRET}
     expiration: 86400000 # 24 hours
