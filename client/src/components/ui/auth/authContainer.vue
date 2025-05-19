@@ -6,7 +6,7 @@
         :validationEnabled="validationEnabled"
         @submit="onSubmit"
     />
-    <p class="m-3">or</p>
+    <p class="form-text m-3">or</p>
 
     <!-- OAuth2 -->
     <form-button @click="handleOAuth('google')" class="oauth-button google m-2">
@@ -54,5 +54,9 @@ const handleOAuth = (provider) => {
   flex-direction: column;
   align-items: center;
   width: 400px;
+}
+
+.form-text {
+  color: #dfdbdb;
 }
 </style>

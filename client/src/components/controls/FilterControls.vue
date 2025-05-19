@@ -125,7 +125,7 @@ export default {
   border-radius: var(--border-radius-md);
   padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-fontSize-sm);
-  color: var(--text-primary);
+  color: var(--text-secondary);
   cursor: pointer;
   width: 100%;
   transition: all 0.2s ease;

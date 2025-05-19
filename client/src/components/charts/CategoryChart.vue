@@ -56,21 +56,24 @@ export default {
         this.chart = echarts.init(chartContainer);
         this.chartInitialized = true;
 
+        const textSecondaryColor = getComputedStyle(this.$el).getPropertyValue('--text-secondary').trim() || '#888888'; // Fallback
+
         if (!Array.isArray(this.chartData) || this.chartData.length === 0) {
-          // empty option when no data
           const emptyOption = {
             title: {
               text: 'No data available',
               left: 'center',
               top: 'center',
               textStyle: {
-                color: 'var(--text-secondary)'
+                color: textSecondaryColor
               }
             }
           };
           this.chart.setOption(emptyOption);
           return;
         }
+
+        const textPrimaryColor = getComputedStyle(this.$el).getPropertyValue('--text-primary').trim() || '#000000'; // Fallback
 
         const option = {
           tooltip: {
@@ -84,7 +87,7 @@ export default {
             bottom: 'bottom',
             data: this.chartData.map(item => this.formatCategoryName(item.name || '')),
             textStyle: {
-              color: 'var(--text-primary)',
+              color: textPrimaryColor,
               fontSize: 12
             }
           },
@@ -111,7 +114,7 @@ export default {
                 formatter: params => {
                   return `${params.name}\n${params.value} (${params.percent}%)`
                 },
-                color: 'var(--text-primary)',
+                color: textPrimaryColor,
                 fontSize: 12
               }
             }

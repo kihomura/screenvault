@@ -42,9 +42,9 @@ export default {
         this.chart = echarts.init(chartContainer);
         this.chartInitialized = true;
 
-        const textPrimaryColor = this.getCssVarColor('--text-primary');
-        const borderLightColor = this.getCssVarColor('--border-light');
-        const textSecondaryColor = this.getCssVarColor('--text-secondary');
+        const textPrimaryColor = this.getCssVarColor('--text-primary') || '#000000';
+        const textSecondaryColor = this.getCssVarColor('--text-secondary') || '#888888';
+        const borderLightColor = this.getCssVarColor('--border-light') || '#DDDDDD';
 
         if (!Array.isArray(this.chartData) || this.chartData.length === 0) {
           const emptyOption = {
@@ -53,7 +53,7 @@ export default {
               left: 'center',
               top: 'center',
               textStyle: {
-                color: textSecondaryColor,
+                color: textSecondaryColor
               }
             }
           };
@@ -62,18 +62,11 @@ export default {
         }
 
         // sort rating data by rating range
-        const sortedRatings = [...this.chartData]
-            .filter(item => item && item.name)
-            .sort((a, b) => {
-              try {
-                const aValue = parseFloat(a.name.split('-')[0]);
-                const bValue = parseFloat(b.name.split('-')[0]);
-                return isNaN(aValue) || isNaN(bValue) ? 0 : aValue - bValue;
-              } catch (error) {
-                console.warn('Error sorting rating data:', error);
-                return 0;
-              }
-            });
+        const sortedData = [...this.chartData].sort((a, b) => {
+          const aValue = parseFloat(a.name.split('-')[0]);
+          const bValue = parseFloat(b.name.split('-')[0]);
+          return aValue - bValue;
+        });
 
         const option = {
           tooltip: {
@@ -90,10 +83,8 @@ export default {
           },
           xAxis: {
             type: 'category',
-            data: sortedRatings.map(item => item.name || ''),
+            data: sortedData.map(item => item.name),
             axisLabel: {
-              interval: 0,
-              rotate: 30,
               color: textPrimaryColor
             },
             axisLine: {
@@ -104,13 +95,8 @@ export default {
           },
           yAxis: {
             type: 'value',
-            name: 'Count',
-            nameTextStyle: {
-              color: textSecondaryColor,
-              padding: [0, 0, 0, 30]
-            },
             axisLabel: {
-              color: textSecondaryColor
+              color: textPrimaryColor
             },
             axisLine: {
               lineStyle: {
@@ -126,16 +112,14 @@ export default {
           },
           series: [
             {
-              name: 'Rating',
+              name: 'Count',
               type: 'bar',
-              data: sortedRatings.map(item => {
-                return {
-                  value: item.count || 0,
-                  itemStyle: {
-                    color: this.getRatingColor(item.name || '')
-                  }
-                };
-              }),
+              data: sortedData.map(item => ({
+                value: item.count || 0,
+                itemStyle: {
+                  color: this.getRatingColor(item.name)
+                }
+              })),
               label: {
                 show: true,
                 position: 'top',

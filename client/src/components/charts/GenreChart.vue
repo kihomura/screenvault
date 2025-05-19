@@ -45,96 +45,97 @@ export default {
 
         this.chart = echarts.init(chartContainer);
         this.chartInitialized = true;
+
+        const textPrimaryColor = this.getCssVarColor('--text-primary') || '#000000'; // Fallback
+        const textSecondaryColor = this.getCssVarColor('--text-secondary') || '#888888'; // Fallback
+        const borderLightColor = this.getCssVarColor('--border-light') || '#DDDDDD'; // Fallback
+
+        if (!Array.isArray(this.chartData) || this.chartData.length === 0) {
+          const emptyOption = {
+            title: {
+              text: 'No data available',
+              left: 'center',
+              top: 'center',
+              textStyle: {
+                color: textSecondaryColor
+              }
+            }
+          };
+          this.chart.setOption(emptyOption);
+          return;
+        }
+
+        // Sort data if needed, or assume it's pre-sorted
+        const sortedData = [...this.chartData].sort((a, b) => b.count - a.count);
+
+        const option = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'value',
+            axisLabel: {
+              color: textPrimaryColor
+            },
+            axisLine: {
+              lineStyle: {
+                color: borderLightColor
+              }
+            },
+            splitLine: {
+              lineStyle: {
+                color: borderLightColor,
+                type: 'dashed'
+              }
+            }
+          },
+          yAxis: {
+            type: 'category',
+            data: sortedData.map(item => this.formatGenreName(item.name || '')),
+            axisLabel: {
+              interval: 0,
+              rotate: 0,
+              color: textPrimaryColor
+            },
+            axisLine: {
+              lineStyle: {
+                color: borderLightColor
+              }
+            }
+          },
+          series: [
+            {
+              name: 'Count',
+              type: 'bar',
+              data: sortedData.map(item => ({
+                value: item.count || 0,
+                itemStyle: {
+                  color: this.getGenreColor(item.name) // Use existing getGenreColor
+                }
+              })),
+              label: {
+                show: true,
+                position: 'right',
+                formatter: '{c}',
+                color: textPrimaryColor
+              }
+            }
+          ]
+        };
+
+        this.chart.setOption(option);
       } catch (error) {
         console.error('Failed to initialize chart:', error);
       }
-
-      const sortedGenres = [...this.chartData].sort((a, b) => b.count - a.count);
-
-      const textPrimaryColor = this.getCssVarColor('--text-primary');
-      const borderLightColor = this.getCssVarColor('--border-light');
-      const textSecondaryColor = this.getCssVarColor('--text-secondary');
-
-      if (!sortedGenres || sortedGenres.length === 0) {
-        const emptyOption = {
-          title: {
-            text: 'No data available',
-            left: 'center',
-            top: 'center',
-            textStyle: {
-              color: textSecondaryColor
-            }
-          }
-        };
-        this.chart.setOption(emptyOption);
-        return;
-      }
-
-      const option = {
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value',
-          axisLabel: {
-            color: textPrimaryColor
-          },
-          axisLine: {
-            lineStyle: {
-              color: borderLightColor
-            }
-          },
-          splitLine: {
-            lineStyle: {
-              color: borderLightColor,
-              type: 'dashed'
-            }
-          }
-        },
-        yAxis: {
-          type: 'category',
-          data: sortedGenres.map(item => this.formatGenreName(item.name || '')),
-          axisLabel: {
-            interval: 0,
-            rotate: 0,
-            color: textPrimaryColor
-          },
-          axisLine: {
-            lineStyle: {
-              color: borderLightColor
-            }
-          }
-        },
-        series: [
-          {
-            name: 'Count',
-            type: 'bar',
-            data: sortedGenres.map(item => ({
-              value: item.count || 0,
-              itemStyle: {
-                color: this.getGenreColor(item.name)
-              }
-            })),
-            label: {
-              show: true,
-              position: 'right',
-              formatter: '{c}',
-              color: textPrimaryColor
-            }
-          }
-        ]
-      };
-
-      this.chart.setOption(option);
     },
 
     resizeChart() {

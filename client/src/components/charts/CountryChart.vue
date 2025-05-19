@@ -49,13 +49,14 @@ export default {
 
         if (!Array.isArray(this.chartData) || this.chartData.length === 0) {
           // empty option when no data
+          const secondaryTextColor = getComputedStyle(this.$el).getPropertyValue('--text-secondary').trim();
           const emptyOption = {
             title: {
               text: 'No data available',
               left: 'center',
               top: 'center',
               textStyle: {
-                color: 'var(--text-secondary)'
+                color: secondaryTextColor || '#888888' // Fallback color
               }
             }
           };
@@ -63,6 +64,7 @@ export default {
           return;
         }
 
+        const primaryTextColor = getComputedStyle(this.$el).getPropertyValue('--text-primary').trim();
         const option = {
           tooltip: {
             trigger: 'item',
@@ -75,7 +77,7 @@ export default {
             bottom: 'bottom',
             data: this.chartData.map(item => item.name),
             textStyle: {
-              color: 'var(--text-primary)',
+              color: primaryTextColor || '#000000', // Fallback color
               fontSize: 12
             }
           },
@@ -102,7 +104,7 @@ export default {
                 formatter: params => {
                   return `${params.name}\n${params.value} (${params.percent}%)`
                 },
-                color: 'var(--text-primary)',
+                color: primaryTextColor || '#000000', // Fallback color
                 fontSize: 12
               }
             }
