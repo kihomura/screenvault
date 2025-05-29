@@ -644,6 +644,19 @@ select.form-control {
   background-repeat: no-repeat;
   background-position: right var(--spacing-lg) center;
   padding-right: var(--spacing-xxl);
+  color-scheme: dark;
+}
+
+/* Option styling - limited browser support but worth trying */
+select.form-control option {
+  background-color: var(--background-base);
+  color: var(--text-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+select.form-control option:hover,
+select.form-control option:focus {
+  background-color: var(--interactive-hover);
 }
 
 textarea.form-control {
@@ -690,6 +703,7 @@ textarea.form-control {
   max-height: 200px;
   overflow-y: auto;
   background-color: var(--background-base);
+  color: var(--text-primary);
   border: 1px solid var(--border-medium);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-level2-default);

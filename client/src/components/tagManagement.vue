@@ -436,6 +436,11 @@ export default {
   border-radius: var(--border-radius-md);
   background-color: var(--background-base);
   transition: all 0.3s ease;
+  color: var(--text-primary);
+}
+
+.edit-tag-input::placeholder {
+  color: var(--text-primary);
 }
 
 .edit-tag-input:focus {
