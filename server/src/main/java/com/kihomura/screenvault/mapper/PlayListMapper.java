@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.kihomura.screenvault.pojo.PlayList;
+import com.kihomura.screenvault.entity.PlayList;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;

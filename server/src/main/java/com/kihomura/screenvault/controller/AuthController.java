@@ -2,10 +2,9 @@ package com.kihomura.screenvault.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.kihomura.screenvault.mapper.UserMapper;
-import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.entity.User;
 import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;

@@ -3,7 +3,7 @@ package com.kihomura.screenvault.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kihomura.screenvault.mapper.ListContentMapper;
 import com.kihomura.screenvault.mapper.PlayListMapper;
-import com.kihomura.screenvault.pojo.PlayList;
+import com.kihomura.screenvault.entity.PlayList;
 import com.kihomura.screenvault.service.PlayListService;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.context.annotation.Lazy;

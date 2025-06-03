@@ -1,6 +1,6 @@
 package com.kihomura.screenvault.exception;
 
-import com.kihomura.screenvault.pojo.dto.ResponseMessage;
+import com.kihomura.screenvault.entity.dto.ResponseMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;

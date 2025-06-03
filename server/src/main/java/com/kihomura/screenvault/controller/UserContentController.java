@@ -1,9 +1,8 @@
 package com.kihomura.screenvault.controller;
 
-import com.kihomura.screenvault.pojo.UserContent;
-import com.kihomura.screenvault.pojo.dto.ResponseMessage;
+import com.kihomura.screenvault.entity.UserContent;
+import com.kihomura.screenvault.entity.dto.ResponseMessage;
 import com.kihomura.screenvault.service.UserContentService;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.kihomura.screenvault.pojo.UserContent;
+import com.kihomura.screenvault.entity.UserContent;
 
 import java.util.List;
 

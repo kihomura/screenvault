@@ -1,9 +1,8 @@
 package com.kihomura.screenvault.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.kihomura.screenvault.pojo.TagContent;
+import com.kihomura.screenvault.entity.TagContent;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Delete;
 

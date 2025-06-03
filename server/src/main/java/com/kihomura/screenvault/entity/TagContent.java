@@ -1,4 +1,4 @@
-package com.kihomura.screenvault.pojo;
+package com.kihomura.screenvault.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;

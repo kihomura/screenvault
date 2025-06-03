@@ -2,7 +2,7 @@ package com.kihomura.screenvault.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kihomura.screenvault.mapper.TagContentMapper;
-import com.kihomura.screenvault.pojo.TagContent;
+import com.kihomura.screenvault.entity.TagContent;
 import com.kihomura.screenvault.service.TagContentService;
 import org.springframework.stereotype.Service;
 

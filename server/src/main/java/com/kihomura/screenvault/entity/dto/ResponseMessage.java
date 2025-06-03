@@ -1,4 +1,4 @@
-package com.kihomura.screenvault.pojo.dto;
+package com.kihomura.screenvault.entity.dto;
 
 import org.springframework.http.HttpStatus;
 

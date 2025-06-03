@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.controller;
 
-import com.kihomura.screenvault.pojo.ListContent;
-import com.kihomura.screenvault.pojo.dto.ResponseMessage;
+import com.kihomura.screenvault.entity.ListContent;
+import com.kihomura.screenvault.entity.dto.ResponseMessage;
 import com.kihomura.screenvault.service.ListContentService;
 import org.springframework.web.bind.annotation.*;
 

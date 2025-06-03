@@ -5,16 +5,14 @@ import com.kihomura.screenvault.enums.Status;
 import com.kihomura.screenvault.mapper.ListContentMapper;
 import com.kihomura.screenvault.mapper.PlayListMapper;
 import com.kihomura.screenvault.mapper.UserContentMapper;
-import com.kihomura.screenvault.pojo.Content;
-import com.kihomura.screenvault.pojo.ListContent;
-import com.kihomura.screenvault.pojo.PlayList;
-import com.kihomura.screenvault.pojo.UserContent;
+import com.kihomura.screenvault.entity.ListContent;
+import com.kihomura.screenvault.entity.PlayList;
+import com.kihomura.screenvault.entity.UserContent;
 import com.kihomura.screenvault.service.ContentService;
 import com.kihomura.screenvault.service.UserContentService;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.stereotype.Service;
 
-import java.sql.Wrapper;
 import java.util.List;
 
 @Service

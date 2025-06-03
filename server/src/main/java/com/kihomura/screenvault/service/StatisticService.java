@@ -1,6 +1,6 @@
 package com.kihomura.screenvault.service;
 
-import com.kihomura.screenvault.pojo.Statistic;
+import com.kihomura.screenvault.entity.Statistic;
 
 public interface StatisticService {
 

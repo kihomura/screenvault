@@ -1,6 +1,6 @@
 package com.kihomura.screenvault.service.impl;
 
-import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.entity.User;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

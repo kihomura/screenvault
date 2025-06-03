@@ -6,10 +6,9 @@ import com.kihomura.screenvault.enums.Genre;
 import com.kihomura.screenvault.enums.SourceType;
 import com.kihomura.screenvault.mapper.ContentMapper;
 import com.kihomura.screenvault.service.ContentService;
-import com.kihomura.screenvault.pojo.Content;
+import com.kihomura.screenvault.entity.Content;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

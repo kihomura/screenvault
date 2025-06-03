@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.kihomura.screenvault.pojo.ReviewDetail;
+import com.kihomura.screenvault.entity.ReviewDetail;
 import org.apache.ibatis.type.MappedTypes;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.JdbcType;
@@ -13,19 +13,20 @@ import org.apache.ibatis.type.JdbcType;
 import java.util.List;
 
 @MappedTypes(List.class)
-@MappedJdbcTypes(JdbcType.VARCHAR)  // 或者JdbcType.JSON，取决于你的数据库字段类型
+@MappedJdbcTypes(JdbcType.VARCHAR)
 public class ReviewDetailTypeHandler extends AbstractJsonTypeHandler<List<ReviewDetail>> {
 
     private final ObjectMapper objectMapper;
 
-    public ReviewDetailTypeHandler() {
+    public ReviewDetailTypeHandler(Class<List<ReviewDetail>> type) {
+        super(type);
         this.objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
     @Override
-    protected List<ReviewDetail> parse(String json) {
+    public List<ReviewDetail> parse(String json) {
         try {
             if (json == null || json.isEmpty()) {
                 return null;
@@ -37,7 +38,7 @@ public class ReviewDetailTypeHandler extends AbstractJsonTypeHandler<List<Review
     }
 
     @Override
-    protected String toJson(List<ReviewDetail> obj) {
+    public String toJson(List<ReviewDetail> obj) {
         try {
             if (obj == null) {
                 return null;

@@ -1,8 +1,8 @@
 package com.kihomura.screenvault.controller;
 
-import com.kihomura.screenvault.pojo.Statistic;
+import com.kihomura.screenvault.entity.Statistic;
 import com.kihomura.screenvault.service.StatisticService;
-import com.kihomura.screenvault.pojo.dto.ResponseMessage;
+import com.kihomura.screenvault.entity.dto.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

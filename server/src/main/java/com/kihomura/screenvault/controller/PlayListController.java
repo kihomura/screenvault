@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.controller;
 
-import com.kihomura.screenvault.pojo.PlayList;
-import com.kihomura.screenvault.pojo.dto.ResponseMessage;
+import com.kihomura.screenvault.entity.PlayList;
+import com.kihomura.screenvault.entity.dto.ResponseMessage;
 import com.kihomura.screenvault.service.PlayListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

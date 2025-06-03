@@ -1,4 +1,4 @@
-package com.kihomura.screenvault.pojo;
+package com.kihomura.screenvault.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

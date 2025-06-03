@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.controller;
 
-import com.kihomura.screenvault.pojo.TagContent;
-import com.kihomura.screenvault.pojo.dto.ResponseMessage;
+import com.kihomura.screenvault.entity.TagContent;
+import com.kihomura.screenvault.entity.dto.ResponseMessage;
 import com.kihomura.screenvault.service.TagContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

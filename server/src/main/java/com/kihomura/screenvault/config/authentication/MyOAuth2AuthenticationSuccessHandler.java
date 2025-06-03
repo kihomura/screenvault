@@ -1,6 +1,6 @@
 package com.kihomura.screenvault.config.authentication;
 
-import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.entity.User;
 import com.kihomura.screenvault.security.JWTTokenProvider;
 import com.kihomura.screenvault.service.UserService;
 import jakarta.servlet.ServletException;

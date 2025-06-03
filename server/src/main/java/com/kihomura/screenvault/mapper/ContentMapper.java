@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.kihomura.screenvault.pojo.Content;
+import com.kihomura.screenvault.entity.Content;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

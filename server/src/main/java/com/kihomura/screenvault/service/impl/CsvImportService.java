@@ -1,6 +1,6 @@
 package com.kihomura.screenvault.service.impl;
 
-import com.kihomura.screenvault.pojo.Content;
+import com.kihomura.screenvault.entity.Content;
 import com.kihomura.screenvault.enums.Category;
 import com.kihomura.screenvault.enums.Genre;
 import com.kihomura.screenvault.enums.SourceType;

@@ -2,7 +2,7 @@ package com.kihomura.screenvault.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kihomura.screenvault.mapper.ListContentMapper;
-import com.kihomura.screenvault.pojo.ListContent;
+import com.kihomura.screenvault.entity.ListContent;
 import com.kihomura.screenvault.service.ListContentService;
 import org.springframework.stereotype.Service;
 

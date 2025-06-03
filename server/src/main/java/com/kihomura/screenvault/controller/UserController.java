@@ -1,6 +1,6 @@
 package com.kihomura.screenvault.controller;
 
-import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.entity.User;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.kihomura.screenvault.service.impl;
 
-import com.kihomura.screenvault.pojo.Statistic;
-import com.kihomura.screenvault.pojo.Statistic.StatisticData;
+import com.kihomura.screenvault.entity.Statistic;
+import com.kihomura.screenvault.entity.Statistic.StatisticData;
 import com.kihomura.screenvault.mapper.StatisticMapper;
 import com.kihomura.screenvault.service.StatisticService;
 import com.kihomura.screenvault.service.UserService;

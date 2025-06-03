@@ -3,7 +3,7 @@ package com.kihomura.screenvault.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kihomura.screenvault.mapper.UserMapper;
-import com.kihomura.screenvault.pojo.User;
+import com.kihomura.screenvault.entity.User;
 import com.kihomura.screenvault.service.PlayListService;
 import com.kihomura.screenvault.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
