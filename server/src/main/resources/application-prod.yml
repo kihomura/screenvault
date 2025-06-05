@@ -75,7 +75,7 @@ spring:
 # ===================================
 mybatis-plus:
   configuration:
-    log-impl: org.apache.ibatis.logging.nop.NopImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
     map-underscore-to-camel-case: true
   type-handlers-package: com.kihomura.screenvault.typehandler
 
