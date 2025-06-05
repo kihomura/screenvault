@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import {getContentImagePath} from "../../utils/index.js";
+import {getContentImagePath} from "../../utils/imageUtils.js";
 
 export default {
   name: 'ContentCard',

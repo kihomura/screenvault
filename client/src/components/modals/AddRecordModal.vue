@@ -129,7 +129,8 @@
 import MainBtn from "../buttons/MainBtn.vue";
 import RatingSelector from "../RatingStars.vue";
 import TagSelector from "../TagSelector.vue";
-import {formatYear, getContentImagePath} from "../../utils/index.js";
+import {formatYear} from "../../utils/dateUtils.js";
+import {getContentImagePath} from "../../utils/imageUtils.js";
 
 export default {
   name: 'AddRecordModal',

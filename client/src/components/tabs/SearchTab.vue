@@ -45,7 +45,7 @@
 
 <script>
 import ContentItem from '../ContentItem.vue';
-import {formatYear} from "../../utils/index.js";
+import {formatYear} from "../../utils/dateUtils.js";
 
 export default {
   name: 'SearchContentTab',

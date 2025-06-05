@@ -52,7 +52,7 @@ import { ref, inject, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseWidget from './BaseWidget.vue';
 import axios from 'axios';
-import { getContentImagePath } from "../../utils/index.js";
+import { getContentImagePath } from "../../utils/imageUtils.js";
 import { storageManager } from "../../utils/storageManager.js";
 
 export default {
