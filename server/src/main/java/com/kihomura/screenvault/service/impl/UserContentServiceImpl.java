@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Implementation of UserContentService interface.
+ * Handles user-content relationships including viewing records, ratings,
+ * and wishlist management operations.
+ */
 @Service
 public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserContent> implements UserContentService {
 
@@ -36,7 +41,7 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
     public UserContent findById(int id) {
         UserContent  userContent = userContentMapper.selectById(id);
         if(userContent == null) {
-            throw new IllegalArgumentException("Recording not fonud");
+            throw new IllegalArgumentException("Recording not found");
         }
         return userContent;
     }
@@ -62,6 +67,13 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
         return results;
     }
 
+    /**
+     * Saves or updates user content record with status management.
+     * Handles wishlist operations when status changes between WANT_TO_WATCH and WATCHED.
+     * 
+     * @param userContent the user content record to save or update
+     * @return true if operation succeeds, false otherwise
+     */
     @Override
     public boolean saveOrUpdateByUserAndContentId(UserContent userContent) {
 
@@ -97,6 +109,13 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
         return result;
     }
 
+    /**
+     * Adds content to user's wishlist.
+     * Updates both user_content table and list_content table for wishlist playlist.
+     * 
+     * @param contentId the content ID to add to wishlist
+     * @return true if operation succeeds, false otherwise
+     */
     @Override
     public boolean addToWishList(int contentId) {
 
@@ -116,6 +135,13 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
         return userContentUpdated && listContentMapper.insert(listContent) > 0;
     }
 
+    /**
+     * Removes content from user's wishlist.
+     * Updates both user_content table and list_content table for wishlist playlist.
+     * 
+     * @param contentId the content ID to remove from wishlist
+     * @return true if operation succeeds, false otherwise
+     */
     @Override
     public boolean removeFromWishList(int contentId) {
 
@@ -139,7 +165,7 @@ public class UserContentServiceImpl extends ServiceImpl<UserContentMapper, UserC
 
         UserContent oldUserContent = userContentMapper.selectById(id);
         if (oldUserContent == null) {
-            throw new IllegalArgumentException("Recording not fonud");
+            throw new IllegalArgumentException("Recording not found");
         }
 
         if (!oldUserContent.getUserId().equals(userService.getCurrentUserId())) {

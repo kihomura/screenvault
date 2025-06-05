@@ -1,4 +1,3 @@
-// MyAuthenticationEntryPoint类 - 处理匿名用户访问需要认证的资源
 package com.kihomura.screenvault.config.authentication;
 
 import com.alibaba.fastjson2.JSON;

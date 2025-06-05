@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Implementation of TagService interface.
+ * Handles tag management operations including creation, retrieval,
+ * update, and deletion with user ownership enforcement.
+ */
 @Service
 public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagService {
 
@@ -41,6 +46,14 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
         return this.saveOrUpdate(tag);
     }
 
+    /**
+     * Deletes a tag with ownership verification.
+     * Only the creator of the tag can delete it.
+     * 
+     * @param id the tag ID to delete
+     * @return true if deletion succeeds, false otherwise
+     * @throws IllegalArgumentException if tag not found or no permission to delete
+     */
     @Override
     public boolean deleteTag(int id) {
         Tag oldTag = tagMapper.selectById(id);

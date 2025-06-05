@@ -10,8 +10,8 @@ import java.util.List;
 public interface ContentMapper extends BaseMapper<Content> {
 
     /**
-     * 通过对title和other_title字段进行正则替换，将非字母字符去除后做模糊匹配
-     * REGEXP_REPLACE - MySQL8+ 的正则匹配函数
+     * Search content by title using fuzzy matching with regex normalization.
+     * Removes non-letter characters and converts to lowercase for matching.
      */
     @Select("SELECT * FROM contents " +
             "WHERE REGEXP_REPLACE(LOWER(title), '[^a-z]', '') LIKE CONCAT('%', #{title}, '%') " +
@@ -19,6 +19,9 @@ public interface ContentMapper extends BaseMapper<Content> {
             "AND category = 'OFFICIAL_DATA'")
     List<Content> findByTitle(String title);
 
+    /**
+     * Search custom content by title for specific user.
+     */
     @Select("SELECT * FROM contents " +
             "WHERE (REGEXP_REPLACE(LOWER(title), '[^a-z]', '') LIKE CONCAT('%', #{title}, '%') " +
             "OR REGEXP_REPLACE(LOWER(other_title), '[^a-z]', '') LIKE CONCAT('%', #{title}, '%')) " +

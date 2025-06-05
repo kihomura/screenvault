@@ -7,18 +7,32 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller for managing playlist-content relationships.
+ * Handles CRUD operations for the association between playlists and content items.
+ * Provides endpoints for adding/removing content from playlists and retrieving playlist contents.
+ */
 @RestController
 @RequestMapping("/list-content")
 public class ListContentController {
 
     private final ListContentService listContentService;
 
+    /**
+     * Constructor for ListContentController.
+     * 
+     * @param listContentService the service for list-content operations
+     */
     public ListContentController(ListContentService listContentService) {
         this.listContentService = listContentService;
     }
 
     /**
-     * get all contents from a list
+     * Retrieves all content items from a specific playlist.
+     * 
+     * GET: /list-content/list/{listId}
+     * @param listId the ID of the playlist to query
+     * @return ResponseMessage containing a list of content items in the playlist
      */
     @GetMapping("/list/{listId}")
     public ResponseMessage getContentsByListId(@PathVariable Integer listId) {
@@ -27,7 +41,11 @@ public class ListContentController {
     }
 
     /**
-     * get all lists of a content
+     * Retrieves all playlists that contain a specific content item.
+     * 
+     * GET: /list-content/content/{contentId}
+     * @param contentId the ID of the content to query
+     * @return ResponseMessage containing a list of playlists containing the content
      */
     @GetMapping("/content/{contentId}")
     public ResponseMessage getListsByContentId(@PathVariable Integer contentId) {
@@ -36,7 +54,12 @@ public class ListContentController {
     }
 
     /**
-     * add a content to a list
+     * Adds a content item to a playlist.
+     * Creates a new relationship between a playlist and content item.
+     * 
+     * POST: /list-content
+     * @param listContent the list-content relationship object to create
+     * @return ResponseMessage indicating success or failure of the operation
      */
     @PostMapping
     public ResponseMessage addContentToList(@RequestBody ListContent listContent) {
@@ -48,8 +71,12 @@ public class ListContentController {
     }
 
     /**
+     * Removes a content item from a playlist.
+     * Deletes the relationship between a playlist and content item.
+     * 
      * DELETE: /list-content
-     * remove a content from a list
+     * @param listContent the list-content relationship object containing listId and contentId
+     * @return ResponseMessage indicating success or failure of the operation
      */
     @DeleteMapping
     public ResponseMessage removeContentFromList(@RequestBody ListContent listContent) {
@@ -61,7 +88,12 @@ public class ListContentController {
     }
 
     /**
-     * add several contents to a list at once
+     * Adds multiple content items to a playlist in a single operation.
+     * Performs batch insertion of content items into a playlist for efficiency.
+     * 
+     * POST: /list-content/batch
+     * @param listContents list of list-content relationships to create
+     * @return ResponseMessage indicating success or failure of the batch operation
      */
     @PostMapping("/batch")
     public ResponseMessage batchAddContentToList(@RequestBody List<ListContent> listContents) {

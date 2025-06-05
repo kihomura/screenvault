@@ -35,6 +35,9 @@ public interface StatisticMapper extends BaseMapper<Object> {
             "GROUP BY c.category")
     List<StatisticData> getCategoryStatistics(@Param("userId") Integer userId, @Param("year") Integer year);
 
+    /**
+     * Get rating statistics grouped by rating ranges.
+     */
     @Select("SELECT " +
             "CASE " +
             "  WHEN uc.rate BETWEEN 0 AND 0.5 THEN '0-0.5' " +

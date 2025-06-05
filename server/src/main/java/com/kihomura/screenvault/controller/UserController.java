@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Controller for managing user profile operations and account settings.
+ * Handles user profile management including profile retrieval, updates, and password changes.
+ * Provides endpoints for authenticated users to manage their personal information.
+ */
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -21,13 +26,21 @@ public class UserController {
 
     private final UserService userService;
 
+    /**
+     * Constructor for UserController.
+     * 
+     * @param userService the service for user operations
+     */
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     /**
+     * Retrieves the profile information of the currently authenticated user.
+     * Returns comprehensive user profile data excluding sensitive information like passwords.
+     * 
      * GET: /user/profile
-     * Retrieves the profile of the currently authenticated user.
+     * @return ResponseEntity containing user profile data or error if user not found
      */
     @GetMapping("/profile")
     public ResponseEntity<Map<String, Object>> getUserProfile() {
@@ -52,8 +65,12 @@ public class UserController {
     }
 
     /**
-     * PUT: /user/update
      * Updates the profile information of the currently authenticated user.
+     * Allows users to modify their profile details such as nickname, email, and other information.
+     * 
+     * PUT: /user/update
+     * @param userUpdate the user object containing updated profile information
+     * @return ResponseEntity indicating success or failure of the update operation
      */
     @PutMapping("/update")
     public ResponseEntity<Map<String, Object>> updateUserProfile(@RequestBody User userUpdate) {
@@ -88,8 +105,12 @@ public class UserController {
     }
 
     /**
-     * PUT: /user/change-password
      * Changes the password of the currently authenticated user.
+     * Securely updates the user's password with proper encryption.
+     * 
+     * PUT: /user/change-password
+     * @param passwords a map containing the new password to set
+     * @return ResponseEntity indicating success or failure of the password change
      */
     @PutMapping("/change-password")
     public ResponseEntity<Map<String, Object>> changePassword(@RequestBody Map<String, String> passwords) {

@@ -13,6 +13,11 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of StatisticService interface.
+ * Provides statistical analysis of user's watched content including
+ * country, genre, category, and rating distributions with percentage calculations.
+ */
 @Service
 @RequiredArgsConstructor
 public class StatisticServiceImpl implements StatisticService {
@@ -82,6 +87,14 @@ public class StatisticServiceImpl implements StatisticService {
         return calculatePercentages(ratingStats, userId, year);
     }
 
+    /**
+     * Calculates percentage values for statistical data based on total watched count.
+     * 
+     * @param stats the raw statistical data
+     * @param userId the user ID for total count calculation
+     * @param year optional year filter for total count
+     * @return list of statistical data with calculated percentages
+     */
     private List<StatisticData> calculatePercentages(List<StatisticData> stats, Integer userId, Integer year) {
         Integer total = statisticMapper.getTotalWatchedCount(userId, year);
         if (total <= 0) {

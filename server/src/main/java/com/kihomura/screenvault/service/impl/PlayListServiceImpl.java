@@ -13,6 +13,11 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Implementation of PlayListService interface.
+ * Handles playlist management operations including creation, retrieval,
+ * update, deletion, and special wishlist functionality.
+ */
 @Service
 public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> implements PlayListService {
 
@@ -48,6 +53,11 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
         return playListMapper.findWishlistByUserId(userService.getCurrentUserId());
     }
 
+    /**
+     * Creates a default wishlist for the current user.
+     * 
+     * @return true if wishlist creation succeeds, false otherwise
+     */
     @Override
     public boolean createWishList() {
         PlayList playList = new PlayList();
@@ -58,6 +68,13 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
         return this.save(playList);
     }
 
+    /**
+     * Creates a default wishlist for a specific user.
+     * Used during user registration process.
+     * 
+     * @param userId the user ID to create wishlist for
+     * @return true if wishlist creation succeeds, false otherwise
+     */
     @Override
     public boolean createWishListForUser(int userId) {
         PlayList playList = new PlayList();
@@ -76,6 +93,14 @@ public class PlayListServiceImpl extends ServiceImpl<PlayListMapper, PlayList> i
         return this.saveOrUpdate(playList);
     }
 
+    /**
+     * Deletes a playlist and all its associated content relationships.
+     * Prevents deletion of default playlists and enforces ownership checks.
+     * 
+     * @param id the playlist ID to delete
+     * @return true if deletion succeeds, false otherwise
+     * @throws IllegalArgumentException if playlist not found, no permission, or trying to delete default playlist
+     */
     @Override
     public boolean deletePlayList(int id) {
 

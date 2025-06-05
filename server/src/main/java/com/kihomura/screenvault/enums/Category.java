@@ -9,7 +9,6 @@ public enum Category {
             return MOVIE; //default value
         }
 
-        // 规范化：去除所有空白字符，转为大写
         String normalized = text.trim().toUpperCase()
                 .replaceAll("\\s+", "_")
                 .replaceAll("[^A-Z_]", "");

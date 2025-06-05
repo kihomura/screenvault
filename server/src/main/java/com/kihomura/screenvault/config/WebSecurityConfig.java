@@ -30,6 +30,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+/**
+ * Web security configuration for Spring Security.
+ * Configures authentication, authorization, CORS, and JWT-based security.
+ * Supports both form-based and OAuth2 authentication mechanisms.
+ */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
@@ -47,9 +52,11 @@ public class WebSecurityConfig {
     private final UserService userService;
 
     /**
-     * 使用构造函数注入UserDetailsService
-     * @param userDetailsService 用来从数据库中加载用户信息
-     * @param jwtTokenProvider
+     * Constructor injection for security-related services.
+     * 
+     * @param userDetailsService service for loading user information from database
+     * @param jwtTokenProvider JWT token provider for authentication
+     * @param userService user service for user management operations
      */
     public WebSecurityConfig(UserDetailsService userDetailsService, JWTTokenProvider jwtTokenProvider, UserService userService) {
         this.userDetailsService = userDetailsService;
@@ -57,33 +64,41 @@ public class WebSecurityConfig {
         this.userService = userService;
     }
 
+    /**
+     * Configures the main security filter chain.
+     * Sets up authentication, authorization, CORS, session management, and custom filters.
+     * 
+     * @param http the HttpSecurity to configure
+     * @return configured SecurityFilterChain
+     * @throws Exception if configuration fails
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        logger.info("配置SecurityFilterChain");
+        logger.info("Configuring SecurityFilterChain");
         
-        // 未登录状态下可以访问的路径，其他路径的请求则需要先经过身份验证
+        // Paths accessible without authentication, other paths require authentication
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/login", "/auth/register", "/auth/check_username").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all OPTIONS requests
                 .requestMatchers("/auth/**", "/error", "/api/ip/**").permitAll()
                 .anyRequest().authenticated()
         );
 
-        // CORS配置 - 显式启用并指向corsConfigurationSource
+        // CORS configuration - explicitly enable and point to corsConfigurationSource
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // Login config
+        // Login configuration
         http.formLogin(form -> form
-                .loginPage("/auth/login") //未经过身份认证访问时的重定向路径
-                .loginProcessingUrl("/auth/login") //用于提交登录请求的路径
-                .usernameParameter("username") //对应前端表单的name
+                .loginPage("/auth/login") // Redirect path when accessing without authentication
+                .loginProcessingUrl("/auth/login") // Path for submitting login requests
+                .usernameParameter("username") // Corresponds to frontend form name
                 .passwordParameter("password")
                 .successHandler(new MyAuthenticationSuccessHandler(jwtTokenProvider))
                 .failureHandler(new MyAuthenticationFailureHandler())
-                .permitAll() //允许所有的用户访问登陆页面
+                .permitAll() // Allow all users to access login page
         );
 
-        // Logout config
+        // Logout configuration
         http.logout(logout -> logout
                 .logoutUrl("/auth/logout")
                 .clearAuthentication(true)
@@ -101,19 +116,18 @@ public class WebSecurityConfig {
 
         // Session management
         http.sessionManagement(session -> session
-                /*Session的创建策略：IF_REQUIRED指当没有身份验证信息时才会创建会话，如使用了JWT则不会创建Session
-                public enum SessionCreationPolicy {
-                    ALWAYS,
-                    IF_REQUIRED, 默认策略，只有需要时才创建会话
-                    NEVER,
-                    STATELESS 无状态认证，不创建会话
-                }*/
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 设置为无Session状态认证，使用JWT进行认证
-//                .maximumSessions(1)
-//                .expiredSessionStrategy(new MySessionInformationExpiredStrategy())
+                /*
+                Session creation policy: STATELESS for JWT-based authentication
+                SessionCreationPolicy options:
+                - ALWAYS: Always create session
+                - IF_REQUIRED: Default strategy, create session only when needed
+                - NEVER: Never create session
+                - STATELESS: Stateless authentication, no session creation
+                */
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Set to stateless authentication using JWT
         );
 
-        // OAuth2 login config
+        // OAuth2 login configuration
         http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/auth/login")
                 .successHandler(myOAuth2AuthenticationSuccessHandler)
@@ -123,19 +137,25 @@ public class WebSecurityConfig {
         // Disable CSRF
         http.csrf(AbstractHttpConfigurer::disable);
         
-        // 添加SimpleCorsFilter到过滤器链的最前面
+        // Add SimpleCorsFilter to the front of the filter chain
         http.addFilterBefore(simpleCorsFilter, UsernamePasswordAuthenticationFilter.class);
 
         // JWT Filter
         http.addFilterBefore(new JWTAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
-        logger.info("SecurityFilterChain配置完成");
+        logger.info("SecurityFilterChain configuration completed");
         return http.build();
     }
 
+    /**
+     * Configures CORS (Cross-Origin Resource Sharing) settings.
+     * Defines allowed origins, methods, headers, and other CORS policies.
+     * 
+     * @return configured CorsConfigurationSource
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        logger.info("配置CorsConfigurationSource");
+        logger.info("Configuring CorsConfigurationSource");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(Arrays.asList("https://screenvault-client-production.up.railway.app"));
@@ -146,19 +166,22 @@ public class WebSecurityConfig {
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        logger.info("CorsConfigurationSource配置完成");
+        logger.info("CorsConfigurationSource configuration completed");
         return source;
     }
 
     /**
-     * AuthenticationProvider - Spring Security中用于验证用户身份的组件
-     * 通常依赖于UserDetailsService来加载用户的具体信息
+     * AuthenticationProvider - Spring Security component for verifying user identity.
+     * Typically relies on UserDetailsService to load specific user information.
      *
-     * DaoAuthenticationProvider - Spring Security提供的一个实现
-     * 使用UserDetailsService和PasswordEncoder来验证用户的身份
+     * DaoAuthenticationProvider - Implementation provided by Spring Security
+     * that uses UserDetailsService and PasswordEncoder to verify user identity.
      *
-     * AuthenticationProvider会在认证流程中被调用
-     * 当提交登录请求时，Spring Security会根据配置的AuthenticationProvider来处理身份验证
+     * AuthenticationProvider is called during the authentication flow.
+     * When login requests are submitted, Spring Security processes authentication
+     * based on the configured AuthenticationProvider.
+     * 
+     * @return configured DaoAuthenticationProvider
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -169,16 +192,25 @@ public class WebSecurityConfig {
     }
 
     /**
-     * AuthenticationManager 负责协调认证过程
-     * 接收一个authentication对象
-     * 并委托给相应的AuthenticationProvider进行认证处理
+     * AuthenticationManager coordinates the authentication process.
+     * Receives an authentication object and delegates to appropriate
+     * AuthenticationProvider for authentication processing.
+     * 
+     * @param config authentication configuration
+     * @return configured AuthenticationManager
+     * @throws Exception if configuration fails
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // 将PasswordEncoder定义为一个独立的Bean，这样其他组件可以直接注入它
+    /**
+     * Defines PasswordEncoder as an independent Bean for dependency injection.
+     * Uses BCrypt algorithm for secure password hashing.
+     * 
+     * @return BCryptPasswordEncoder instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

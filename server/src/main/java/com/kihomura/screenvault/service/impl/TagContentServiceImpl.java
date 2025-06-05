@@ -8,6 +8,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Implementation of TagContentService interface.
+ * Handles tag-content relationship operations for content categorization
+ * and tag-based content discovery.
+ */
 @Service
 public class TagContentServiceImpl extends ServiceImpl<TagContentMapper, TagContent> implements TagContentService {
 

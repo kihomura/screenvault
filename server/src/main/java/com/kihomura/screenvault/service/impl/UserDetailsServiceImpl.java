@@ -11,16 +11,33 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+/**
+ * Implementation of Spring Security's UserDetailsService interface.
+ * Loads user-specific data for authentication and authorization purposes.
+ * Uses lazy injection to break circular dependency with UserService.
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserService userService;
 
-    // @Lazy breaks circular dependency
+    /**
+     * Constructor with lazy injection to break circular dependency.
+     * 
+     * @param userService user service for loading user data
+     */
     public UserDetailsServiceImpl(@Lazy UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * Loads user by username for Spring Security authentication.
+     * Converts application User entity to Spring Security UserDetails.
+     * 
+     * @param username the username identifying the user
+     * @return UserDetails object for Spring Security
+     * @throws UsernameNotFoundException if user is not found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("LoadUserByUsername - Raw username: [" + username + "]");

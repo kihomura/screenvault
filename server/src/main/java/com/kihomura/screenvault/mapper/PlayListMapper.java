@@ -17,6 +17,9 @@ public interface PlayListMapper extends BaseMapper<PlayList> {
     @Select("SELECT * FROM lists WHERE list_name = 'Wish List' AND is_default = true AND creator_id = #{userId}")
     PlayList findWishlistByUserId(int userId);
 
+    /**
+     * Delete non-default playlist by ID.
+     */
     @Delete("DELETE FROM lists WHERE id = #{listId} AND is_default = false")
     int deleteByListId(int listId);
 }

@@ -1,4 +1,3 @@
-// MyAuthenticationFailureHandler类 - 处理认证失败
 package com.kihomura.screenvault.config.authentication;
 
 import com.alibaba.fastjson2.JSON;

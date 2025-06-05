@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller for managing content items and content operations.
+ * Handles CRUD operations for content including movies, TV shows, and other media.
+ * Provides functionality for content search, creation, retrieval, update, and deletion.
+ */
 @RestController
 @RequestMapping("/content")
 public class ContentController {
@@ -17,15 +22,23 @@ public class ContentController {
     @Autowired
     private final ContentService contentService;
 
+    /**
+     * Constructor for ContentController.
+     * 
+     * @param contentService the service for content operations
+     */
     public ContentController(ContentService contentService) {
         this.contentService = contentService;
     }
 
     /**
-     * GET: /content/{title}
-     * @param title will be normalized by removing non-letter characters
-     *              and converting to lowercase for fuzzy matching.
-     * @return data will be a JSON array containing all matched contents.
+     * Searches for content by title with fuzzy matching.
+     * Performs title normalization by removing non-letter characters and converting to lowercase.
+     * Also searches by title and creator combination for comprehensive results.
+     * 
+     * GET: /content/title/{title}
+     * @param title the title to search for (will be normalized for fuzzy matching)
+     * @return ResponseMessage containing JSON array of all matched content items
      */
     @GetMapping("/title/{title}")
     public ResponseMessage getContentByTitle(@PathVariable String title) {
@@ -46,7 +59,12 @@ public class ContentController {
     }
 
     /**
-     * GET: /content/{id}
+     * Retrieves a specific content item by its ID.
+     * Returns detailed information about the requested content.
+     * 
+     * GET: /content/id/{id}
+     * @param id the ID of the content to retrieve
+     * @return ResponseMessage containing the content data or error if not found
      */
     @GetMapping("/id/{id}")
     public ResponseMessage getContentById(@PathVariable int id) {
@@ -58,7 +76,11 @@ public class ContentController {
     }
 
     /**
+     * Retrieves all user-created custom content.
+     * Returns content items that were manually added by users rather than from external sources.
+     * 
      * GET: /content/custom
+     * @return ResponseMessage containing list of custom content items
      */
     @GetMapping("/custom")
     public ResponseMessage getCustomContent() {
@@ -66,9 +88,12 @@ public class ContentController {
     }
 
     /**
+     * Creates a new content item or updates an existing one.
+     * Saves content information including title, description, metadata, and other details.
+     * 
      * POST: /content
-     * @param content
-     * @return
+     * @param content the content object to create or update
+     * @return ResponseMessage indicating success or failure of the operation
      */
     @PostMapping
     public ResponseMessage createContent(@RequestBody Content content) {
@@ -81,9 +106,12 @@ public class ContentController {
     }
 
     /**
-     * DELETE: /content/{id}
-     * @param id
-     * @return
+     * Deletes a content item by its ID.
+     * Removes the content and all its associated relationships (tags, playlists, user records).
+     * 
+     * DELETE: /content/id/{id}
+     * @param id the ID of the content to delete
+     * @return ResponseMessage indicating success or failure of the deletion
      */
     @DeleteMapping("/id/{id}")
     public ResponseMessage deleteContent(@PathVariable int id) {

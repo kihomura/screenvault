@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * 一个简单的CORS过滤器，确保在所有请求响应中添加正确的CORS头部
- * 这个过滤器优先级最高，在所有其他过滤器之前运行
+ * A simple CORS filter that ensures proper CORS headers are added to all request responses.
+ * This filter has the highest priority and runs before all other filters to handle cross-origin requests.
+ * It supports configurable allowed origins and handles preflight OPTIONS requests.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -25,6 +26,16 @@ public class SimpleCorsFilter implements Filter {
     @Value("${cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
+    /**
+     * Main filter method that processes all HTTP requests and adds appropriate CORS headers.
+     * Validates the request origin against allowed origins and handles OPTIONS preflight requests.
+     * 
+     * @param req the servlet request
+     * @param resp the servlet response
+     * @param chain the filter chain to continue processing
+     * @throws IOException if an I/O error occurs
+     * @throws ServletException if a servlet error occurs
+     */
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
             throws IOException, ServletException {
@@ -35,11 +46,11 @@ public class SimpleCorsFilter implements Filter {
         String method = request.getMethod();
         String path = request.getRequestURI();
         
-        logger.debug("处理请求: {} {} 来自 {}", method, path, origin);
+        logger.debug("Processing request: {} {} from origin: {}", method, path, origin);
         
-        // 检查来源是否在允许的列表中
+        // Check if the origin is in the allowed list
         if (origin != null && isAllowedOrigin(origin)) {
-            logger.debug("允许来源: {}", origin);
+            logger.debug("Allowing origin: {}", origin);
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
@@ -48,24 +59,30 @@ public class SimpleCorsFilter implements Filter {
                 "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-XSRF-TOKEN, Cache-Control");
             response.setHeader("Access-Control-Expose-Headers", "Set-Cookie, Authorization");
         } else if (origin != null) {
-            logger.warn("不允许的来源: {}", origin);
+            logger.warn("Rejecting origin: {}", origin);
         }
 
-        // 如果是OPTIONS请求，直接返回200 OK
+        // If it's an OPTIONS request, return 200 OK directly
         if ("OPTIONS".equalsIgnoreCase(method)) {
-            logger.debug("处理OPTIONS预检请求");
+            logger.debug("Handling OPTIONS preflight request");
             response.setStatus(HttpServletResponse.SC_OK);
         } else {
-            // 继续处理请求
+            // Continue processing the request
             try {
                 chain.doFilter(req, response);
             } catch (Exception e) {
-                logger.error("处理请求时出错: {} {}", method, path, e);
+                logger.error("Error occurred while processing request: {} {}", method, path, e);
                 throw e;
             }
         }
     }
 
+    /**
+     * Checks if the given origin is in the list of allowed origins.
+     * 
+     * @param origin the origin to check
+     * @return true if the origin is allowed, false otherwise
+     */
     private boolean isAllowedOrigin(String origin) {
         String[] origins = allowedOrigins.split(",");
         for (String allowedOrigin : origins) {
@@ -76,13 +93,23 @@ public class SimpleCorsFilter implements Filter {
         return false;
     }
 
+    /**
+     * Initializes the filter with configuration parameters.
+     * Logs the allowed origins for debugging purposes.
+     * 
+     * @param filterConfig the filter configuration
+     */
     @Override
     public void init(FilterConfig filterConfig) {
-        logger.info("SimpleCorsFilter初始化，允许的来源: {}", allowedOrigins);
+        logger.info("SimpleCorsFilter initialized with allowed origins: {}", allowedOrigins);
     }
 
+    /**
+     * Cleanup method called when the filter is destroyed.
+     * Logs the filter destruction for debugging purposes.
+     */
     @Override
     public void destroy() {
-        logger.info("SimpleCorsFilter销毁");
+        logger.info("SimpleCorsFilter destroyed");
     }
 } 

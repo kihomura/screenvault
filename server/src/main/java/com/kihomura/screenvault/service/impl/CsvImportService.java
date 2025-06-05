@@ -27,6 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Service for importing content data from CSV files.
+ * Handles batch import of movies and TV shows data with error recovery capabilities.
+ * Supports resuming imports from the last successfully processed line.
+ */
 @Service
 public class CsvImportService {
 
@@ -35,13 +40,14 @@ public class CsvImportService {
     private static final String CSV_DIR = "metadata";
 
     @Autowired
-    private ContentMapper contentMapper; // 使用MyBatis Plus的Mapper替换JPA的Repository
-    // to avoid interruptions from unexpected errors,
-    // records the last imported line, so it can resume from there next time
+    private ContentMapper contentMapper;
+    
+    // Records the last imported line to avoid interruptions from unexpected errors,
+    // so it can resume from there next time
     private AtomicInteger lastSuccessfulLine = new AtomicInteger(0);
 
     /**
-     * import all .csv files
+     * Imports all CSV files (movies and TV shows).
      */
     public void importAllData() {
         try {
@@ -53,7 +59,8 @@ public class CsvImportService {
     }
 
     /**
-     * Imports a single CSV file from a specific line (last interrupted line)
+     * Imports a single CSV file from a specific line (last interrupted line).
+     * 
      * @param fileName The name of the CSV file (movies or tv_shows)
      * @param startLine The starting line number (0 for the header, 1 for the first data row)
      */
@@ -67,7 +74,10 @@ public class CsvImportService {
     }
 
     /**
-     * Imports a single CSV file
+     * Imports a single CSV file starting from line 1 (skipping header).
+     * 
+     * @param fileName the CSV file name
+     * @param defaultCategory the default category for content
      */
     @Transactional
     public void importCsvFile(String fileName, Category defaultCategory) {
@@ -75,7 +85,12 @@ public class CsvImportService {
     }
 
     /**
-     * Imports a single CSV file starting from a specified line
+     * Imports a single CSV file starting from a specified line.
+     * Uses batch processing for efficient database operations.
+     * 
+     * @param fileName the CSV file name
+     * @param defaultCategory the default category for content
+     * @param startLine the line number to start from
      */
     @Transactional
     public void importCsvFileFromLine(String fileName, Category defaultCategory, int startLine) {
@@ -175,7 +190,9 @@ public class CsvImportService {
     }
 
     /**
-     * Save content one by one, used as a fallback strategy when batch saving fails
+     * Saves content one by one, used as a fallback strategy when batch saving fails.
+     * 
+     * @param batch the batch of content to save individually
      */
     private void saveOneByOne(List<Content> batch) {
         int saved = 0;
@@ -191,7 +208,11 @@ public class CsvImportService {
     }
 
     /**
-     * Fix the quotation marks issue in the CSV file
+     * Fixes quotation marks issues in CSV files.
+     * Creates a cleaned version of the CSV file with proper quote handling.
+     * 
+     * @param fileName the CSV file to fix
+     * @return the path of the fixed file
      */
     public String fixCsvQuotes(String fileName) {
         Path inputPath = Paths.get(CSV_DIR, fileName);

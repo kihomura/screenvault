@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Implementation of ContentService interface.
+ * Handles content management operations including search, creation,
+ * update, and deletion with title normalization and enum validation.
+ */
 @Service
 public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> implements ContentService {
 
@@ -40,6 +45,14 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
         return contentMapper.findCustomContentByUserId(userService.getCurrentUserId());
     }
 
+    /**
+     * Saves or updates content with validation and user ownership assignment.
+     * Validates required fields and enum values before saving.
+     * 
+     * @param content the content to save or update
+     * @return true if operation succeeds, false otherwise
+     * @throws IllegalArgumentException if validation fails
+     */
     @Override
     public boolean saveOrUpdateContent(Content content) {
         if (content.getTitle() == null || content.getTitle().isEmpty()) {
@@ -66,13 +79,24 @@ public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> impl
     }
 
     /**
-     * 将输入字符串标准化：去除所有非字母字符，并转为小写
+     * Normalizes input string by removing all non-letter characters and converting to lowercase.
+     * Used for fuzzy title matching in search operations.
+     * 
+     * @param input the string to normalize
+     * @return normalized string containing only lowercase letters
      */
     private String normalize(String input) {
         if (input == null) return "";
         return input.replaceAll("[^a-zA-Z]", "").toLowerCase();
     }
 
+    /**
+     * Validates if a string value is a valid enum constant.
+     * 
+     * @param value the string value to validate
+     * @param enumClass the enum class to validate against
+     * @return true if value is a valid enum constant, false otherwise
+     */
     private boolean isValidEnumValue(String value, Class<? extends Enum<?>> enumClass) {
         try {
             Enum.valueOf(enumClass.asSubclass(Enum.class), value);

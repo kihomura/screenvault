@@ -18,6 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * Implementation of UserService interface.
+ * Handles user management operations including registration, authentication,
+ * profile updates, and OAuth2 user processing.
+ */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
@@ -25,17 +30,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private PasswordEncoder passwordEncoder;
     private final PlayListService playListService;
 
+    /**
+     * Constructor with lazy injection to break circular dependencies.
+     * 
+     * @param userMapper mapper for user database operations
+     * @param playListService service for playlist operations
+     */
     public UserServiceImpl(UserMapper userMapper, @Lazy PlayListService playListService) {
         this.userMapper = userMapper;
         this.playListService = playListService;
     }
 
-    // Break circular dependency by injecting PasswordEncoder through setter
+    /**
+     * Setter injection for PasswordEncoder to break circular dependency.
+     * 
+     * @param passwordEncoder encoder for password hashing
+     */
     @Autowired
     public void setPasswordEncoder(@Lazy PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a new user with form-based registration.
+     * Creates default wishlist for the new user.
+     * 
+     * @param user the user to register
+     * @return the registered user
+     * @throws RuntimeException if username already exists
+     */
     @Override
     @Transactional
     public User register(User user) {
@@ -102,7 +125,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 注册 OAuth2 用户，同时保存 provider 和 providerId 信息
+     * Registers OAuth2 user and saves provider and providerId information.
+     * Creates default wishlist for the new OAuth user.
+     * 
+     * @param user the OAuth2 user to register
+     * @return the registered user
+     * @throws RuntimeException if OAuth user already exists
      */
     @Override
     @Transactional
@@ -113,13 +141,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user.getNickname() == null || user.getNickname().trim().isEmpty()) {
             user.setNickname(user.getUsername());
         }
-        // 为 OAuth2 用户设置默认密码（后续可支持修改或置空）
+        // Set default password for OAuth2 users (can be modified or set to null later)
         user.setPassword(passwordEncoder.encode("oauth2user"));
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
         user.setEnabled(true);
-        // 此处要求在调用前已设置好 provider 和 providerId
+        // Requires provider and providerId to be set before calling this method
         save(user);
         
         // Create default wishlist for the new OAuth user
@@ -129,19 +157,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 更新 OAuth2 用户信息，同时确保 provider 与 providerId 被保存
-     * 在 OAuth2 登录过程中，如果用户已存在，且 provider 与 providerId 尚未设置，则进行保存
+     * Updates OAuth2 user information and ensures provider and providerId are saved.
+     * Called during OAuth2 login if user exists but provider/providerId are not set.
+     * 
+     * @param user the user to update
+     * @param attributes OAuth2 attributes from the provider
+     * @param provider the OAuth2 provider name
+     * @param providerId the user ID from the OAuth2 provider
+     * @return the updated user
      */
     @Override
     @Transactional
     public User updateUserFromOAuth2(User user, Map<String, Object> attributes, String provider, String providerId) {
-        // 根据 OAuth2 返回的属性更新用户信息，例如更新昵称
+        // Update user information based on OAuth2 attributes, e.g., update nickname
         if (attributes.get("name") != null) {
             user.setNickname((String) attributes.get("name"));
         }
         user.setUpdatedAt(LocalDateTime.now());
 
-        // 如果用户的 provider 和 providerId 还未设置，则更新
+        // If user's provider and providerId are not set, update them
         if (user.getProvider() == null || user.getProvider().isEmpty()) {
             user.setProvider(provider);
         }

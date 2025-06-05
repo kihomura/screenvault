@@ -10,6 +10,11 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Implementation of ListContentService interface.
+ * Handles playlist-content relationship operations including adding,
+ * removing, and querying content within playlists.
+ */
 @Service
 public class ListContentServiceImpl extends ServiceImpl<ListContentMapper, ListContent> implements ListContentService {
 
@@ -29,12 +34,20 @@ public class ListContentServiceImpl extends ServiceImpl<ListContentMapper, ListC
         return listContentMapper.findByContentId(contentId);
     }
 
+    /**
+     * Adds content to a playlist if it doesn't already exist.
+     * Sets current timestamp if addTime is not provided.
+     * 
+     * @param listContent the list-content relationship to add
+     * @return true if content is successfully added, false otherwise
+     * @throws IllegalArgumentException if content already exists in the list
+     */
     @Override
     public boolean addContentToList(ListContent listContent) {
         ListContent existingItem = listContentMapper.findByListIdAndContentId(
                 listContent.getListId(), listContent.getContentId());
 
-        if (existingItem == null) {
+        if (existingItem != null) {
             throw new IllegalArgumentException("Content already exists in the list");
         }
 
@@ -45,6 +58,13 @@ public class ListContentServiceImpl extends ServiceImpl<ListContentMapper, ListC
         return this.save(listContent);
     }
 
+    /**
+     * Batch adds multiple content items to playlists.
+     * Sets current timestamp for items without addTime.
+     * 
+     * @param listContent list of list-content relationships to add
+     * @return true if batch operation succeeds, false otherwise
+     */
     @Override
     public boolean addBatch(List<ListContent> listContent) {
         for (ListContent content : listContent) {

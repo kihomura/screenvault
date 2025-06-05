@@ -14,8 +14,9 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import javax.sql.DataSource;
 
 /**
- * 数据库初始化配置
- * 在生产环境中负责初始化数据库结构
+ * Database initialization configuration for production environment.
+ * Responsible for initializing database structure in production deployments.
+ * Only activates when spring.sql.init.mode is set to 'always'.
  */
 @Configuration
 @Profile("prod")
@@ -27,13 +28,16 @@ public class DatabaseInitConfig {
     private String initMode;
 
     /**
-     * 配置数据库初始化器
-     * 如果spring.sql.init.mode=always，则执行初始化
+     * Configures database initializer to execute schema scripts.
+     * Only executes when spring.sql.init.mode property is set to 'always'.
+     * 
+     * @param dataSource the data source to initialize
+     * @return configured DataSourceInitializer
      */
     @Bean
     @ConditionalOnProperty(name = "spring.sql.init.mode", havingValue = "always")
     public DataSourceInitializer dataSourceInitializer(DataSource dataSource) {
-        logger.info("正在初始化数据库...");
+        logger.info("Initializing database...");
         
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
         populator.addScript(new ClassPathResource("schema.sql"));

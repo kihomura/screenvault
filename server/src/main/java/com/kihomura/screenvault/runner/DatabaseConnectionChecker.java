@@ -10,8 +10,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * 检查数据库连接并记录连接信息
- * 用于确保应用程序正确连接到Railway提供的MySQL服务
+ * Database connection checker that validates and logs database connection information.
+ * Used to ensure the application properly connects to MySQL service provided by Railway.
+ * Only runs in production profile to verify database connectivity and schema status.
  */
 @Component
 @Profile("prod")
@@ -28,28 +29,34 @@ public class DatabaseConnectionChecker implements CommandLineRunner {
     @Value("${spring.datasource.username}")
     private String username;
 
+    /**
+     * Executes database connection check on application startup.
+     * Validates connection, logs database information, and checks schema status.
+     * 
+     * @param args command line arguments (not used)
+     */
     @Override
     public void run(String... args) {
-        logger.info("正在检查数据库连接...");
-        logger.info("数据库连接URL: {}", datasourceUrl);
-        logger.info("数据库用户名: {}", username);
+        logger.info("Checking database connection...");
+        logger.info("Database connection URL: {}", datasourceUrl);
+        logger.info("Database username: {}", username);
 
         try {
             String dbVersion = jdbcTemplate.queryForObject("SELECT VERSION()", String.class);
-            logger.info("数据库连接成功! MySQL版本: {}", dbVersion);
+            logger.info("Database connection successful! MySQL version: {}", dbVersion);
             
-            // 检查数据库中是否存在表
+            // Check if tables exist in the database
             Integer tableCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()", 
                 Integer.class
             );
-            logger.info("数据库中存在 {} 个表", tableCount);
+            logger.info("Database contains {} tables", tableCount);
             
             if (tableCount == 0) {
-                logger.warn("数据库为空，将执行初始化脚本");
+                logger.warn("Database is empty, initialization scripts will be executed");
             }
         } catch (Exception e) {
-            logger.error("数据库连接失败: {}", e.getMessage(), e);
+            logger.error("Database connection failed: {}", e.getMessage(), e);
         }
     }
 } 

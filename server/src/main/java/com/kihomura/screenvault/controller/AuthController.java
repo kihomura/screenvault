@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Authentication controller for handling user registration, login, logout and user information.
+ * Provides endpoints for user authentication and authorization operations.
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -29,6 +33,14 @@ public class AuthController {
     private final JWTTokenProvider jwtTokenProvider;
     private final UserMapper userMapper;
 
+    /**
+     * Constructor for AuthController.
+     * 
+     * @param userService the service for user operations
+     * @param authenticationManager Spring Security authentication manager
+     * @param jwtTokenProvider JWT token provider for generating and validating tokens
+     * @param userMapper MyBatis mapper for user database operations
+     */
     public AuthController(UserService userService, AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider, UserMapper userMapper) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
@@ -37,10 +49,12 @@ public class AuthController {
     }
 
     /**
+     * Gets the current authenticated user information.
+     * Indicates whether the current user is logged in and returns user details.
+     * 
      * GET: /auth/me
-     * Indicates whether the current user is logged in
-     * @param authentication
-     * @return
+     * @param authentication the current authentication object
+     * @return ResponseEntity containing user information or unauthorized status
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
@@ -62,10 +76,12 @@ public class AuthController {
     }
 
     /**
-     * POST: /auth/register
      * Registers a new user with the provided information.
-     * @param user The user object containing user details.
-     * @return ResponseEntity with the registration result.
+     * Creates a new user account and returns the registered user details.
+     * 
+     * POST: /auth/register
+     * @param user The user object containing registration details
+     * @return ResponseEntity with the registration result and user data
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody User user) {
@@ -74,8 +90,8 @@ public class AuthController {
         try {
             User registeredUser = userService.register(user);
 
-            //set password to null to hide sensitive information
-            //password will not be returned to the frontend
+            // Set password to null to hide sensitive information
+            // Password will not be returned to the frontend
             registeredUser.setPassword(null);
 
             result.put("code", 200);
@@ -89,6 +105,14 @@ public class AuthController {
         }
     }
 
+    /**
+     * Checks if a username already exists in the system.
+     * Used for validating username availability during registration.
+     * 
+     * GET: /auth/check_username
+     * @param username the username to check for availability
+     * @return ResponseEntity containing boolean result indicating if username exists
+     */
     @GetMapping("/check_username")
     public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
         int count = Math.toIntExact(userMapper.selectCount(new QueryWrapper<User>().eq("username", username)));
@@ -99,10 +123,13 @@ public class AuthController {
     }
 
     /**
+     * Handles user login by authenticating the provided credentials.
+     * Authenticates username and password, generates JWT token, and sets secure cookie.
+     * 
      * POST: /auth/login
-     * Handles user login by authenticating the provided credentials (username and password).
-     * @param loginRequest A map containing the username and password to authenticate.
-     * @return ResponseEntity
+     * @param loginRequest A map containing the username and password to authenticate
+     * @param response HTTP response object for setting authentication cookie
+     * @return ResponseEntity containing login result and user data
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest,
@@ -122,7 +149,6 @@ public class AuthController {
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userService.findByUsername(userDetails.getUsername());
-
 
             String jwt = jwtTokenProvider.generateToken(authentication);
 
@@ -153,6 +179,14 @@ public class AuthController {
         }
     }
 
+    /**
+     * Logs out the current user by clearing security context and authentication cookie.
+     * Removes JWT token cookie and clears Spring Security context.
+     * 
+     * POST: /auth/logout
+     * @param response HTTP response object for clearing authentication cookie
+     * @return ResponseEntity indicating successful logout
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
@@ -170,6 +204,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Retrieves detailed information about the currently authenticated user.
+     * Returns comprehensive user profile data for authenticated users.
+     * 
+     * GET: /auth/user-info
+     * @return ResponseEntity containing detailed user information or error status
+     */
     @GetMapping("/user-info")
     public ResponseEntity<Map<String, Object>> getUserInfo() {
         Map<String, Object> result = new HashMap<>();
