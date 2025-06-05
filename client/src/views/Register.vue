@@ -24,10 +24,10 @@
 </template>
 
 <script>
-import AnimatedGrid from '../components/animatedGrid.vue';
+import AnimatedGrid from '../components/common/animatedGrid.vue';
 import AuthHeader from '../components/ui/AuthHeader.vue';
 import AuthContainer from "../components/ui/auth/authContainer.vue";
-import MessageDisplay from "../components/form/message.vue";
+import MessageDisplay from "../components/forms/message.vue";
 
 export default {
   name: "Register",

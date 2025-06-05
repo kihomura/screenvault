@@ -1,10 +1,10 @@
 <template>
-  <div class="watched-tab">
+  <div class="wishlist-tab">
     <!-- Empty state -->
-    <div v-if="!watchedContents || watchedContents.length === 0" class="empty-state">
+    <div v-if="!wishlistContent || wishlistContent.length === 0" class="empty-state">
       <div class="empty-icon">📺</div>
-      <h3>No watched content yet</h3>
-      <p>Content you've watched will appear here</p>
+      <h3>No wishlist yet</h3>
+      <p>Content you want to watch will appear here</p>
     </div>
 
     <!-- Content list -->
@@ -26,15 +26,15 @@
 </template>
 
 <script>
-import ContentItem from '../ContentItem.vue';
+import ContentItem from '../../../common/ContentItem.vue';
 
 export default {
-  name: 'WatchedTab',
+  name: 'WishlistTab',
   components: {
     ContentItem
   },
   props: {
-    watchedContents: {
+    wishlistContent: {
       type: Array,
       default: () => []
     },
@@ -58,11 +58,11 @@ export default {
   data() {
     return {
       contents: [],
-      listsData: {} // for storing list content data
+      listsData: {}
     };
   },
   watch: {
-    watchedContents: {
+    wishlistContent: {
       immediate: true,
       handler() {
         this.fetchContents();
@@ -84,7 +84,7 @@ export default {
     isContentSelectable(content) {
       // For addRecord mode - all watched content is not selectable
       if (this.mode === 'addRecord') {
-        return false;
+        return content.status !== 'WATCHED';
       }
       // For addToList mode
       else if (this.mode === 'addToList' && this.targetListId) {
@@ -94,25 +94,16 @@ export default {
           return false;
         }
       }
-      // For addToWishlist mode - watched content should be selectable
+      // For addToWishlist mode
       else if (this.mode === 'addToWishlist') {
-        return true;
+        // already in wishlist should not be selectable
+        return false;
       }
       // For selectFavorite mode - all content should be selectable
       else if (this.mode === 'selectFavorite') {
         return true;
       }
       return true;
-    },
-    async fetchListContent(listId) {
-      try {
-        const response = await this.$http.get(`/list-content/list/${listId}`);
-        if (response && response.data && response.data.data) {
-          this.listsData[listId] = response.data.data;
-        }
-      } catch (error) {
-        console.error('Error fetching list content:', error);
-      }
     },
     selectContent(content) {
       if (!this.multiSelect) {
@@ -123,28 +114,33 @@ export default {
       this.$emit('toggle-selection', content);
     },
     async fetchContents() {
-      this.contents = [];
-      if (this.watchedContents && this.watchedContents.length > 0) {
-        try {
-          // Fetch full content details for each watched content
-          for (let i = 0; i < this.watchedContents.length; i++) {
-            const watchedItem = this.watchedContents[i];
-            if (watchedItem.status === 'WATCHED') { // Only include actually watched content
-              try {
-                const response = await this.$http.get(`content/id/${watchedItem.contentId}`);
-                if (response.data.data) {
-                  const content = response.data.data;
-                  content.status = 'WATCHED'; // Mark with status
-                  this.contents.push(content);
-                }
-              } catch (err) {
-                console.error(`Error fetching content id ${watchedItem.contentId}:`, err);
+      try {
+        this.contents = []; // Clear contents first
+        if (this.wishlistContent && this.wishlistContent.length > 0) {
+          for (let i = 0; i < this.wishlistContent.length; i++) {
+            const item = this.wishlistContent[i];
+            try {
+              const response = await this.$http.get(`content/id/${item.contentId}`);
+              if (response.data && response.data.data) {
+                this.contents.push(response.data.data);
               }
+            } catch (err) {
+              console.error(`Error fetching content id ${item.contentId}:`, err);
             }
           }
-        } catch (error) {
-          console.error("Error in fetchContents:", error);
         }
+      } catch (error) {
+        console.error('Error in fetchContents:', error);
+      }
+    },
+    async fetchListContent(listId) {
+      try {
+        const response = await this.$http.get(`/list-content/list/${listId}`);
+        if (response && response.data && response.data.data) {
+          this.listsData[listId] = response.data.data;
+        }
+      } catch (error) {
+        console.error('Error fetching list content:', error);
       }
     }
   }
@@ -152,7 +148,7 @@ export default {
 </script>
 
 <style scoped>
-.watched-tab {
+.wishlist-tab {
   padding: var(--spacing-md) 0;
 }
 

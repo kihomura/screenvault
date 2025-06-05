@@ -34,8 +34,8 @@
 </template>
 
 <script>
-import { formatYear } from "../utils/dateUtils.js";
-import { getContentImagePath } from "../utils/imageUtils.js";
+import { formatYear } from "../../utils/dateUtils.js";
+import { getContentImagePath } from "../../utils/imageUtils.js";
 
 export default {
   name: 'ContentItem',

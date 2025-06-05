@@ -79,14 +79,14 @@
 </template>
 
 <script>
-import ContentGrid from '../components/ui/CardGrid.vue';
+import ContentGrid from '../components/ui/layout/CardGrid.vue';
 import MainBtn from "../components/buttons/MainBtn.vue";
-import SelectionActionsBar from "../components/ui/SelectionBar.vue";
+import SelectionActionsBar from "../components/ui/layout/SelectionBar.vue";
 import AddToListModal from "../components/modals/AddToListModal.vue";
 import BackButton from "../components/buttons/BackButton.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
-import SortControls from "../components/controls/SortControls.vue";
+import SortControls from "../components/business/controls/SortControls.vue";
 import { useToastStore } from "../store/toastStore.js";
 
 export default {

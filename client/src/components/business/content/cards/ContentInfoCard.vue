@@ -47,8 +47,8 @@
 </template>
 
 <script>
-import {getContentImagePath} from "../../utils/imageUtils.js";
-import MainBtn from "../buttons/MainBtn.vue";
+import {getContentImagePath} from "../../../../utils/imageUtils.js";
+import MainBtn from "../../../buttons/MainBtn.vue";
 
 export default {
   name: 'ContentInfoCard',

@@ -127,8 +127,8 @@
 
 <script>
 import MainBtn from "../buttons/MainBtn.vue";
-import RatingSelector from "../RatingStars.vue";
-import TagSelector from "../TagSelector.vue";
+import RatingSelector from "../forms/selectors/RatingStars.vue";
+import TagSelector from "../forms/selectors/TagSelector.vue";
 import {formatYear} from "../../utils/dateUtils.js";
 import {getContentImagePath} from "../../utils/imageUtils.js";
 

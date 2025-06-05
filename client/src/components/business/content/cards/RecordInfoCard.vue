@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import MainBtn from "../buttons/MainBtn.vue";
+import MainBtn from "../../../buttons/MainBtn.vue";
 
 export default {
   name: 'RecordingInfoCard',

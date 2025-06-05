@@ -56,14 +56,14 @@
 </template>
 
 <script>
-import ContentGrid from "../components/ui/CardGrid.vue";
-import Pagination from "../components/ui/Pagination.vue";
-import SelectionActionsBar from "../components/ui/SelectionBar.vue";
-import MainBtn from "../components/buttons/MainBtn.vue";
-import ContentTabModal from "../components/modals/ContentTabModal.vue";
-import ConfirmModal from "../components/modals/ConfirmModal.vue";
-import AddCustomContentModal from "./modals/AddCustomContentModal.vue";
-import { useToastStore } from "../store/toastStore.js";
+import ContentGrid from "../../../ui/layout/CardGrid.vue";
+import Pagination from "../../../ui/layout/Pagination.vue";
+import SelectionActionsBar from "../../../ui/layout/SelectionBar.vue";
+import MainBtn from "../../../buttons/MainBtn.vue";
+import ContentTabModal from "../../../modals/ContentTabModal.vue";
+import ConfirmModal from "../../../modals/ConfirmModal.vue";
+import AddCustomContentModal from "../../../modals/AddCustomContentModal.vue";
+import { useToastStore } from "../../../../store/toastStore.js";
 
 export default {
   name: 'CustomContentManagement',

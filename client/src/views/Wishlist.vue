@@ -74,13 +74,13 @@
 </template>
 
 <script>
-import ContentGrid from "../components/ui/CardGrid.vue";
+import ContentGrid from "../components/ui/layout/CardGrid.vue";
 import AddRecordingModal from "../components/modals/AddRecordModal.vue";
 import AddToListModal from "../components/modals/AddToListModal.vue";
-import Pagination from "../components/ui/Pagination.vue";
-import FilterControls from "../components/controls/FilterControls.vue";
-import SortControls from "../components/controls/SortControls.vue";
-import SelectionActionsBar from "../components/ui/SelectionBar.vue";
+import Pagination from "../components/ui/layout/Pagination.vue";
+import FilterControls from "../components/business/controls/FilterControls.vue";
+import SortControls from "../components/business/controls/SortControls.vue";
+import SelectionActionsBar from "../components/ui/layout/SelectionBar.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";

@@ -51,7 +51,7 @@
 
 <script>
 import BaseWidget from './BaseWidget.vue';
-import ListItem from '../ui/list/ListItem.vue';
+import ListItem from '../../business/lists/ListItem.vue';
 
 export default {
   name: 'Playlist',

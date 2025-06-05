@@ -63,7 +63,7 @@
 
 <script setup>
 import { reactive, computed } from 'vue'
-import FormGroup from '../../form/inputGroup.vue'
+import FormGroup from '../../forms/inputs/inputGroup.vue'
 import LoginButton from "../../buttons/loginButton.vue";
 
 const props = defineProps({

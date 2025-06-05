@@ -50,10 +50,10 @@
 </template>
 
 <script>
-import RecordCard from "../cards/RecordCard.vue";
-import ContentCard from "../cards/ContentCard.vue";
-import EmptyState from "./EmptyState.vue";
-import MainBtn from "../buttons/MainBtn.vue";
+import RecordCard from "../../business/content/cards/RecordCard.vue";
+import ContentCard from "../../business/content/cards/ContentCard.vue";
+import EmptyState from "../../common/EmptyState.vue";
+import MainBtn from "../../buttons/MainBtn.vue";
 
 export default {
   name: 'CardGrid',

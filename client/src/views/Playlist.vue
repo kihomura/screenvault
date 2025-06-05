@@ -61,8 +61,8 @@
 </template>
 
 <script>
-import ListItem from '../components/ui/list/ListItem.vue';
-import InputButton from "../components/form/InputWithBtn.vue";
+import ListItem from '../components/business/lists/ListItem.vue';
+import InputButton from "../components/forms/inputs/InputWithBtn.vue";
 import MainBtn from "../components/buttons/MainBtn.vue";
 import ConfirmModal from "../components/modals/ConfirmModal.vue";
 import { useToastStore } from "../store/toastStore.js";

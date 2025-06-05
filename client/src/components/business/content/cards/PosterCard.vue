@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { getContentImagePath } from "../../utils/imageUtils.js";
+import { getContentImagePath } from "../../../../utils/imageUtils.js";
 
 export default {
   name: 'PosterCard',

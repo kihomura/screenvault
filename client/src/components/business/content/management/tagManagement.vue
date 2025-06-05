@@ -95,10 +95,10 @@
 </template>
 
 <script>
-import MainBtn from "./buttons/MainBtn.vue";
-import ConfirmModal from "./modals/ConfirmModal.vue";
-import InputWithBtn from "../components/form/InputWithBtn.vue";
-import { useToastStore } from "../store/toastStore.js";
+import MainBtn from "../../../buttons/MainBtn.vue";
+import ConfirmModal from "../../../modals/ConfirmModal.vue";
+import InputWithBtn from "../../../forms/inputs/InputWithBtn.vue";
+import { useToastStore } from "../../../../store/toastStore.js";
 
 export default {
   name: 'TagManagement',

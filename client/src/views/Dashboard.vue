@@ -116,10 +116,10 @@
 <script>
 import {ref, computed, onMounted, onUnmounted, nextTick, provide} from 'vue'
 import { GridLayout, GridItem } from 'vue3-grid-layout'
-import RecentWatch from "../components/widgets/RecentWatch.vue";
-import Favorite from "../components/widgets/Favorite.vue";
-import Wishlist from "../components/widgets/Wishlist.vue";
-import Playlists from "../components/widgets/Playlists.vue";
+import RecentWatch from "../components/business/widgets/RecentWatch.vue";
+import Favorite from "../components/business/widgets/Favorite.vue";
+import Wishlist from "../components/business/widgets/Wishlist.vue";
+import Playlists from "../components/business/widgets/Playlists.vue";
 import ContentTabModal from "../components/modals/ContentTabModal.vue";
 import { useToastStore } from "../store/toastStore.js";
 import MainBtn from '../components/buttons/MainBtn.vue';

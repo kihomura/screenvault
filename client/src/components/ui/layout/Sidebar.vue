@@ -100,9 +100,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useThemeStore } from '../../store/themeStore.js';
+import { useThemeStore } from '../../../store/themeStore.js';
 import { useStore } from 'vuex';
-import AvatarSelectionModal from '../modals/AvatarSelectionModal.vue';
+import AvatarSelectionModal from '../../modals/AvatarSelectionModal.vue';
 
 const router = useRouter();
 const route = useRoute();

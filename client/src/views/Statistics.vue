@@ -63,11 +63,11 @@
 </template>
 
 <script>
-import YearFilter from '../components/controls/YearFilter.vue';
-import CountryChart from '../components/charts/CountryChart.vue';
-import GenreChart from '../components/charts/GenreChart.vue';
-import CategoryChart from '../components/charts/CategoryChart.vue';
-import RatingChart from '../components/charts/RatingChart.vue';
+import YearFilter from '../components/business/controls/YearFilter.vue';
+import CountryChart from '../components/business/charts/CountryChart.vue';
+import GenreChart from '../components/business/charts/GenreChart.vue';
+import CategoryChart from '../components/business/charts/CategoryChart.vue';
+import RatingChart from '../components/business/charts/RatingChart.vue';
 
 export default {
   name: 'StatisticsPage',

@@ -8,20 +8,20 @@
       :error="error"
       :errorMessage="errorMessage"
       :empty="!records || records.length === 0"
-      :emptyMessage="'No items in wishlist'"
+      :emptyMessage="'No watch history'"
       :isEditMode="isEditMode"
-      @refresh="fetchWishlistItems"
-      class="wishlist-widget"
+      @refresh="fetchRecentWatches"
+      class="recent-watch-widget"
   >
     <!-- Add icon slot -->
     <template #icon>
-      <div class="wishlist-widget-icon">
-        <font-awesome-icon :icon="['fas', 'heart']" />
+      <div class="recent-watch-widget-icon">
+        <font-awesome-icon :icon="['fas', 'eye']" />
       </div>
     </template>
 
     <!-- content -->
-    <div class="wishlist-container">
+    <div class="recent-watches-container">
       <div class="poster-grid" :class="sizeClass">
         <div class="poster-card-wrapper" v-for="record in displayedRecords" :key="record.id">
           <poster-card
@@ -46,10 +46,10 @@
 
 <script>
 import BaseWidget from './BaseWidget.vue';
-import PosterCard from '../cards/PosterCard.vue';
+import PosterCard from '../../business/content/cards/PosterCard.vue';
 
 export default {
-  name: 'WishlistWidget',
+  name: 'RecentWatch',
   components: {
     BaseWidget,
     PosterCard
@@ -61,7 +61,7 @@ export default {
     },
     title: {
       type: String,
-      default: 'Wishlist'
+      default: 'Recent Watches'
     },
     size: {
       type: String,
@@ -83,10 +83,10 @@ export default {
   },
   computed: {
     displayedRecords() {
-      // Sort records by date added (newest first)
+      // sort records by watch date (newest first)
       let sortedRecords = [...this.records].sort((a, b) => {
-        const dateA = new Date(a.dateAdded).getTime();
-        const dateB = new Date(b.dateAdded).getTime();
+        const dateA = new Date(a.watchDate).getTime();
+        const dateB = new Date(b.watchDate).getTime();
         return dateB - dateA;
       });
 
@@ -102,15 +102,15 @@ export default {
     }
   },
   mounted() {
-    this.fetchWishlistItems();
+    this.fetchRecentWatches();
   },
   methods: {
-    async fetchWishlistItems() {
+    async fetchRecentWatches() {
       this.loading = true;
       this.error = false;
 
       try {
-        const response = await this.$http.get('/record/wishlist');
+        const response = await this.$http.get('/record');
         if (response.data && response.data.data) {
           this.records = response.data.data;
 
@@ -121,14 +121,15 @@ export default {
             }
           }
         } else {
-          console.error("Invalid API response for wishlist items", response);
+          console.error("Invalid API response for recent watches", response);
           this.error = true;
-          this.errorMessage = 'Failed to load wishlist';
+          this.errorMessage = 'Failed to load recent watches';
         }
       } catch (error) {
-        console.error("Error fetching wishlist items:", error);
+        console.error("Error fetching recent watches:", error);
         this.error = true;
         this.errorMessage = error.message || 'Failed to connect to server';
+
       } finally {
         this.loading = false;
       }
@@ -158,14 +159,14 @@ export default {
     viewAllRecords() {
       if (this.$router) {
         this.$router.push({
-          name: 'wishlist',
+          name: 'watched',
           query: {
-            sortBy: 'dateAdded',
+            sortBy: 'watchDate',
             sortOrder: 'desc'
           }
         });
       } else {
-        console.log('View all wishlist items');
+        console.log('View all records');
       }
     }
   }
@@ -173,12 +174,12 @@ export default {
 </script>
 
 <style scoped>
-.wishlist-widget {
+.recent-watch-widget {
   width: 100%;
   height: 100%;
 }
 
-.wishlist-widget-icon {
+.recent-watch-widget-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -186,19 +187,21 @@ export default {
   font-size: 1.2rem;
 }
 
-.wishlist-container {
+.recent-watches-container {
   width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 var(--spacing-md);
 }
 
 .poster-grid {
   display: grid;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   width: 100%;
+  justify-content: center;
 }
 
 .poster-card-wrapper {
@@ -209,11 +212,13 @@ export default {
 
 /* Grid layout based on component size */
 .grid-size-mediumHorizontal {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  max-width: 600px;
 }
 
 .grid-size-large1 {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  max-width: 900px;
 }
 
 /* Adjust grid columns for smaller screens */
@@ -275,8 +280,8 @@ export default {
   background-color: var(--interactive-hover);
 }
 
-.wishlist-widget.widget-drag-handle .view-all-button,
-.wishlist-widget.widget-drag-handle .poster-card-wrapper * {
+.recent-watch-widget.widget-drag-handle .view-all-button,
+.recent-watch-widget.widget-drag-handle .poster-card-wrapper * {
   pointer-events: none !important;
 }
 </style>

@@ -99,10 +99,10 @@
 </template>
 
 <script>
-import SearchTab from '../tabs/SearchTab.vue';
-import CustomContentTab from '../tabs/CustomContentTab.vue';
-import WatchedTab from '../tabs/WatchedTab.vue';
-import WishlistTab from '../tabs/WishlistTab.vue';
+import SearchTab from '../business/content/tabs/SearchTab.vue';
+import CustomContentTab from '../business/content/tabs/CustomContentTab.vue';
+import WatchedTab from '../business/content/tabs/WatchedTab.vue';
+import WishlistTab from '../business/content/tabs/WishlistTab.vue';
 import MainBtn from "../buttons/MainBtn.vue";
 
 export default {

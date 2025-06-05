@@ -60,7 +60,7 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
-import AnimatedGrid from '../components/animatedGrid.vue';
+import AnimatedGrid from '../components/common/animatedGrid.vue';
 import AuthHeader from '../components/ui/AuthHeader.vue';
 
 onMounted(() => {

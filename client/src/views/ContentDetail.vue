@@ -56,8 +56,8 @@
 
 <script>
 import BackButton from "../components/buttons/BackButton.vue";
-import ContentInfoCard from "../components/cards/ContentInfoCard.vue";
-import RecordingInfoCard from "../components/cards/RecordInfoCard.vue";
+import ContentInfoCard from "../components/business/content/cards/ContentInfoCard.vue";
+import RecordingInfoCard from "../components/business/content/cards/RecordInfoCard.vue";
 import AddRecordModal from "../components/modals/AddRecordModal.vue";
 import AddCustomContentModal from "../components/modals/AddCustomContentModal.vue";
 import { useToastStore } from "../store/toastStore.js";

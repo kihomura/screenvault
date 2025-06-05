@@ -25,8 +25,8 @@
 <script setup>
 import {computed} from 'vue';
 import {useRoute} from 'vue-router';
-import TagManagement from '../components/tagManagement.vue';
-import CustomContentManagement from '../components/CustomContentManagement.vue';
+import TagManagement from '../components/business/content/management/tagManagement.vue';
+import CustomContentManagement from '../components/business/content/management/CustomContentManagement.vue';
 
 const route = useRoute();
 const section = computed(() => route.params.section);

@@ -16,8 +16,8 @@ import { useThemeStore } from './store/themeStore.js';
 import { computed, onMounted, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import SidebarNav from "./components/ui/Sidebar.vue";
-import ToastManager from "./components/ui/ToastManager.vue";
+import SidebarNav from "./components/ui/layout/Sidebar.vue";
+import ToastManager from "./components/ui/feedback/ToastManager.vue";
 import { 
   CyberpunkBackground, 
   LightBackground, 

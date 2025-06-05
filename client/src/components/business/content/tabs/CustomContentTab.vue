@@ -40,9 +40,9 @@
 </template>
 
 <script>
-import ContentItem from '../ContentItem.vue';
-import MainBtn from '../buttons/MainBtn.vue';
-import AddCustomContentModal from '../modals/AddCustomContentModal.vue';
+import ContentItem from '../../../common/ContentItem.vue';
+import MainBtn from '../../../buttons/MainBtn.vue';
+import AddCustomContentModal from '../../../modals/AddCustomContentModal.vue';
 
 export default {
   name: 'CustomContentTab',
