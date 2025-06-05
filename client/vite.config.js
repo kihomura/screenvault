@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       vue(),
-      // vueDevTools(), // Commented out to prevent auto-opening dev tools
+      // vueDevTools(),
     ],
     base: '/',
     build: {

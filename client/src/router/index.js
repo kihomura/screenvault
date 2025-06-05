@@ -1,7 +1,13 @@
+/**
+ * Vue Router Configuration for ScreenVault Application
+ * Defines application routes with authentication guards and theme metadata
+ * Handles route protection and automatic redirects based on auth state
+ */
+
 import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store/store.js';
 
-// views
+// Import view components
 import intro from '../views/Introduce.vue';
 import login from '../views/Login.vue';
 import register from '../views/Register.vue';
@@ -15,6 +21,11 @@ import contentDetail from "../views/ContentDetail.vue";
 import playlistDetail from "../views/PlaylistDetail.vue";
 import Manage from "../views/Manage.vue";
 
+/**
+ * Route definitions with metadata for authentication and theme control
+ * - requiresAuth: boolean - Route requires user authentication
+ * - noTheme: boolean - Route should use no-theme styling (auth pages)
+ */
 const routes = [
   {
     path: '/',
@@ -91,25 +102,35 @@ const routes = [
   }
 ];
 
+// Create router instance with web history mode
 const router = createRouter({
   history: createWebHistory(),
   routes
 });
 
+/**
+ * Global navigation guard
+ * Handles authentication checks and automatic redirects
+ */
 router.beforeEach(async (to, from, next) => {
+  // Ensure user data is loaded before navigation
   if (store.state.user === null) {
     await store.dispatch('fetchUser');
   }
+  
   const isAuthenticated = store.getters.isAuthenticated;
 
-  //如果未登录，重定向到login
+  // Redirect unauthenticated users to login for protected routes
   if (to.meta.requiresAuth && !isAuthenticated) {
     return next({ name: 'login' });
   }
-  //如果已登录，重定向到Dashboard
+  
+  // Redirect authenticated users away from auth pages to dashboard
   if ((to.name === 'login' || to.name === 'intro' || to.name === 'register') && isAuthenticated) {
     return next({ name: 'dashboard' });
   }
+  
+  // Allow navigation to proceed
   next();
 });
 

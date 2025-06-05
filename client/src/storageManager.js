@@ -1,20 +1,35 @@
+/**
+ * Storage Manager for ScreenVault Application
+ * Provides centralized user-specific data storage with namespace isolation
+ * Supports migration from legacy localStorage to structured storage format
+ */
+
 const APP_STORAGE_KEY = 'screen-vault-storage';
-const GLOBAL_KEYS = [];
+const GLOBAL_KEYS = []; // Keys that should be stored globally instead of per-user
 
-// getStorageObject, saveStorageObject, getUserNamespace, isGlobalKey functions are assumed to be defined above and correct
-
+/**
+ * Main storage manager singleton
+ * Handles user-specific data storage with automatic namespace switching
+ */
 export const storageManager = {
+  /**
+   * Initialize storage manager with Vuex store integration
+   * Sets up user state change listeners for automatic namespace switching
+   * @param {Object} store - Vuex store instance
+   */
   init(store) {
     // console.log('[storageManager.js] init called');
     window.__VUEX_STORE__ = store;
 
     if (store && store.subscribe) {
+      // Listen for user state changes in Vuex
       store.subscribe((mutation, state) => {
         if (mutation.type === 'setUser') {
           const oldNamespace = this.currentNamespace; 
           this.currentNamespace = getUserNamespace(); 
           // console.log('[storageManager.js] setUser detected in Vuex. Old namespace:', oldNamespace, 'New namespace:', this.currentNamespace);
           
+          // Migrate data when user changes
           this.migrateThemeToUserNamespace();
           this.migrateExistingData();
           // console.log('[storageManager.js] Data migration complete for new user state.');
@@ -25,13 +40,24 @@ export const storageManager = {
     }
   },
 
+  // Current user namespace for data isolation
   currentNamespace: getUserNamespace(),
 
+  /**
+   * Get a value from user-specific or global storage
+   * @param {string} key - Storage key
+   * @param {*} defaultValue - Default value if key doesn't exist
+   * @returns {*} Stored value or default value
+   */
   get(key, defaultValue = null) {
     const storage = getStorageObject();
+    
+    // Handle global keys
     if (isGlobalKey(key)) {
       return storage.global[key] !== undefined ? storage.global[key] : defaultValue;
     }
+    
+    // Handle user-specific keys
     const userNamespace = getUserNamespace();
     if (!storage.users[userNamespace]) {
       return defaultValue;
@@ -41,11 +67,19 @@ export const storageManager = {
         : defaultValue;
   },
 
+  /**
+   * Set a value in user-specific or global storage
+   * @param {string} key - Storage key
+   * @param {*} value - Value to store
+   */
   set(key, value) {
     const storage = getStorageObject();
+    
     if (isGlobalKey(key)) {
+      // Store in global namespace
       storage.global[key] = value;
     } else {
+      // Store in user-specific namespace
       const userNamespace = getUserNamespace();
       if (!storage.users[userNamespace]) {
         storage.users[userNamespace] = {};
@@ -55,8 +89,13 @@ export const storageManager = {
     saveStorageObject(storage);
   },
 
+  /**
+   * Remove a value from storage
+   * @param {string} key - Storage key to remove
+   */
   remove(key) {
     const storage = getStorageObject();
+    
     if (isGlobalKey(key)) {
       delete storage.global[key];
     } else {
@@ -68,13 +107,21 @@ export const storageManager = {
     saveStorageObject(storage);
   },
 
+  /**
+   * Migrate existing localStorage data to user-specific namespace
+   * Handles legacy data from before namespace implementation
+   */
   migrateExistingData() {
     const storage = getStorageObject();
     const userNamespace = getUserNamespace(); 
     // console.log('[storageManager.js] migrateExistingData for namespace:', userNamespace);
+    
+    // Ensure user namespace exists
     if (!storage.users[userNamespace]) {
       storage.users[userNamespace] = {};
     }
+    
+    // Define keys that should be migrated to user-specific storage
     const keysToMigrate = [
       { pattern: /^favorite-content-widget-.*$/, global: false },
       { key: 'user-avatar', global: false },
@@ -84,37 +131,49 @@ export const storageManager = {
       { key: 'watchedPageNumber', global: false }
     ];
 
+    // Scan localStorage for keys to migrate
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key === APP_STORAGE_KEY) continue;
+      if (key === APP_STORAGE_KEY) continue; // Skip our structured storage key
+      
       const keyConfig = keysToMigrate.find(k =>
           (k.key && k.key === key) || (k.pattern && k.pattern.test(key))
       );
+      
       if (keyConfig) {
         const value = localStorage.getItem(key);
         try {
+          // Try to parse as JSON
           const parsedValue = JSON.parse(value);
           if (keyConfig.global) storage.global[key] = parsedValue;
           else storage.users[userNamespace][key] = parsedValue;
         } catch (e) {
+          // Store as string if JSON parsing fails
           if (keyConfig.global) storage.global[key] = value;
           else storage.users[userNamespace][key] = value;
         }
+        // Remove migrated key from localStorage
         localStorage.removeItem(key);
       }
     }
     saveStorageObject(storage);
   },
 
+  /**
+   * Migrate theme settings to current user namespace
+   * Handles theme migration from global or anonymous user to authenticated user
+   */
   migrateThemeToUserNamespace() {
     const storage = getStorageObject();
     const userNamespace = getUserNamespace();
     // console.log('[storageManager.js] migrateThemeToUserNamespace for namespace:', userNamespace);
     
+    // Ensure user namespace exists
     if (!storage.users[userNamespace]) {
       storage.users[userNamespace] = {};
     }
     
+    // Migrate from global theme storage
     if (storage.global && storage.global['app-theme']) {
       const globalTheme = storage.global['app-theme'];
       // console.log('[storageManager.js] Found global app-theme:', globalTheme);
@@ -125,7 +184,9 @@ export const storageManager = {
       delete storage.global['app-theme'];
       saveStorageObject(storage);
       // console.log('[storageManager.js] Deleted global app-theme and saved storage.');
-    } else if (storage.users['anonymous'] && storage.users['anonymous']['app-theme'] && userNamespace !== 'anonymous') {
+    } 
+    // Migrate from anonymous user theme storage
+    else if (storage.users['anonymous'] && storage.users['anonymous']['app-theme'] && userNamespace !== 'anonymous') {
       const anonymousTheme = storage.users['anonymous']['app-theme'];
       // console.log('[storageManager.js] Found anonymous app-theme:', anonymousTheme, 'Current user ns:', userNamespace);
       if (!storage.users[userNamespace]['app-theme']) {
@@ -140,16 +201,28 @@ export const storageManager = {
   },
 };
 
-// Assume getStorageObject, saveStorageObject, getUserNamespace, isGlobalKey are defined
-// For example (these need to be complete based on your original file):
+/**
+ * Helper Functions
+ */
+
+/**
+ * Get the structured storage object from localStorage
+ * @returns {Object} Storage object with global and users properties
+ */
 function getStorageObject() {
   const storageStr = localStorage.getItem(APP_STORAGE_KEY);
-  try { return storageStr ? JSON.parse(storageStr) : { global: {}, users: {} }; }
-  catch (e) { 
+  try { 
+    return storageStr ? JSON.parse(storageStr) : { global: {}, users: {} }; 
+  } catch (e) { 
     console.error('[storageManager.js] Error parsing storage object:', e);
     return { global: {}, users: {} }; 
   }
 }
+
+/**
+ * Save the structured storage object to localStorage
+ * @param {Object} obj - Storage object to save
+ */
 function saveStorageObject(obj) { 
   try {
     localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(obj)); 
@@ -157,6 +230,11 @@ function saveStorageObject(obj) {
     console.error('[storageManager.js] Error saving storage object:', e);
   }
 }
+
+/**
+ * Get the current user's namespace for data isolation
+ * @returns {string} User namespace (user-{username} or anonymous)
+ */
 function getUserNamespace() {
   try {
     const store = window.__VUEX_STORE__;
@@ -168,6 +246,14 @@ function getUserNamespace() {
     return 'anonymous'; 
   }
 }
-function isGlobalKey(key) { return GLOBAL_KEYS.includes(key) || key.startsWith('global-'); }
+
+/**
+ * Check if a key should be stored globally instead of per-user
+ * @param {string} key - Storage key to check
+ * @returns {boolean} True if key should be global
+ */
+function isGlobalKey(key) { 
+  return GLOBAL_KEYS.includes(key) || key.startsWith('global-'); 
+}
 
 export default storageManager; 
