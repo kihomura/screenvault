@@ -20,11 +20,16 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faStar, faHeart, faList, faHistory, faFilm, faEye } from "@fortawesome/free-solid-svg-icons";
 
 // set API request url based on the production/development environment
-const backendUrl = import.meta.env.DEV ? 
-    (import.meta.env.VITE_API_URL || 'http://localhost:5555') :
-    'https://screenvault-server-production.up.railway.app';
+// Always prioritize VITE_API_URL if set, otherwise use default based on environment
+const backendUrl = import.meta.env.VITE_API_URL ||
+    (import.meta.env.DEV ?
+        'http://localhost:5555' :
+        'https://screenvault-server-production.up.railway.app');
 
 // global settings for Axios
+console.log('[main.js] Backend URL:', backendUrl);
+console.log('[main.js] DEV mode:', import.meta.env.DEV);
+console.log('[main.js] VITE_API_URL:', import.meta.env.VITE_API_URL);
 axios.defaults.baseURL = backendUrl;
 axios.defaults.withCredentials = true; // allow cross-origin requests to carry credentials
 axios.defaults.headers.common['Content-Type'] = 'application/json';
@@ -77,11 +82,11 @@ linkElement.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;5
 document.head.appendChild(linkElement);
 
 (async () => {
-  try {
-    await store.dispatch('fetchUser');
-  } catch (e) {
-    console.error('Failed to fetch user data on init:', e); // Keep this important error log
-  } finally {
-    app.mount('#app');
-  }
+    try {
+        await store.dispatch('fetchUser');
+    } catch (e) {
+        console.error('Failed to fetch user data on init:', e); // Keep this important error log
+    } finally {
+        app.mount('#app');
+    }
 })();

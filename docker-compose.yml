@@ -9,7 +9,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: screen_vault
@@ -32,9 +32,15 @@ services:
       - "5555:5555"
     environment:
       # when first run and need to import csv to db
-      #- SPRING_PROFILES_ACTIVE=prod,csv-import
-      - SPRING_PROFILES_ACTIVE=prod
-      - APP_DOMAIN=${APP_DOMAIN:-localhost:80}
+      SPRING_PROFILES_ACTIVE: prod,csv-import
+      #      SPRING_PROFILES_ACTIVE: prod
+      APP_DOMAIN: ${APP_DOMAIN:-localhost:80}
+      DB_URL: jdbc:mysql://mysql:3306/screen_vault
+      DB_USERNAME: root
+      DB_PASSWORD: 123456
+      JWT_SECRET: screen-vault-local-development-secret-key-for-hs512-algorithm-minimum-64-bytes
+      JWT_EXPIRATION: 86400000
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
     volumes:
       - ./logs:/app/logs
       - ./metadata:/app/metadata

@@ -8,6 +8,7 @@ RUN npm install
 
 COPY . .
 RUN npm install @rollup/rollup-linux-x64-gnu --no-save || true
+ENV VITE_API_URL=http://localhost:5555
 RUN ROLLUP_NO_NATIVE=true npm run build
 
 # Production stage
