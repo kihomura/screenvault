@@ -62,5 +62,28 @@ coverage
 
 *.tsbuildinfo
 
-# Application.properties
+# ===================================
+# SENSITIVE CONFIGURATION FILES
+# ===================================
+# Environment variables and local config files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+*.env
+
+# Local development configuration (contains sensitive data)
 /server/src/main/resources/application-local.properties
+
+# Any files containing actual credentials
+**/credentials.properties
+**/secrets.properties
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE specific environment files
+.vscode/settings.json

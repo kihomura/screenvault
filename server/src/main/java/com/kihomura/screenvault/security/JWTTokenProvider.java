@@ -2,26 +2,42 @@ package com.kihomura.screenvault.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
 @Component
 public class JWTTokenProvider {
 
-    private final SecretKey jwtSecret = generateSecureKey();
-    private final long jwtExpirationInMs = 30L * 24 * 60 * 60 * 1000; // 30 days
+    private final SecretKey jwtSecret;
+    private final long jwtExpirationInMs;
 
-    private static SecretKey generateSecureKey() {
-        byte[] keyBytes = new byte[64];
-        new SecureRandom().nextBytes(keyBytes);
-        return Keys.hmacShaKeyFor(keyBytes);
+    // Constructor injection to use configuration values
+    public JWTTokenProvider(@Value("${app.jwt.secret}") String jwtSecretString,
+                           @Value("${app.jwt.expiration}") long jwtExpiration) {
+        // Ensure the secret is at least 512 bits (64 bytes) for HS512
+        byte[] keyBytes = jwtSecretString.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 64) {
+            // Pad the key to 64 bytes for HS512 compatibility
+            byte[] paddedKey = new byte[64];
+            System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 64));
+            // Fill remaining bytes with a pattern based on the original key
+            for (int i = keyBytes.length; i < 64; i++) {
+                paddedKey[i] = (byte) (keyBytes[i % keyBytes.length] ^ i);
+            }
+            keyBytes = paddedKey;
+        }
+        this.jwtSecret = Keys.hmacShaKeyFor(keyBytes);
+        this.jwtExpirationInMs = jwtExpiration;
+        
+        // Log key length for debugging
+        System.out.println("JWT Secret key length: " + keyBytes.length + " bytes (" + (keyBytes.length * 8) + " bits)");
     }
 
     public String generateToken(Authentication authentication) {
@@ -71,7 +87,8 @@ public class JWTTokenProvider {
                 .parseSignedClaims(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
-            // Log the exception if needed
+            // Log the exception for debugging
+            System.err.println("JWT validation failed: " + ex.getMessage());
         }
         return false;
     }

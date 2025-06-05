@@ -79,13 +79,18 @@ export default {
       }
     },
     loginWithOAuth(provider) {
-      const backendBaseUrl = import.meta.env.VITE_API_URL;
+      // Use the same logic as main.js for determining backend URL
+      const backendBaseUrl = import.meta.env.DEV ? 
+        (import.meta.env.VITE_API_URL || 'http://localhost:5555') :
+        'https://screenvault-server-production.up.railway.app';
+      
       if (!backendBaseUrl) {
-        console.error('Error: VITE_API_URL is not defined. Please set it in your .env.production file and Railway environment variables.');
+        console.error('Error: Unable to determine backend URL.');
         this.message = "Configuration error: Unable to determine API server address.";
         this.error = true;
         return;
       }
+      
       window.location.href = `${backendBaseUrl}/oauth2/authorization/${provider}`;
     }
   }

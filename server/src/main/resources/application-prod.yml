@@ -1,24 +1,41 @@
+# ===================================
+# PRODUCTION ENVIRONMENT CONFIGURATION
+# ===================================
+
 server:
-  port: ${PORT:5555}
+  port: ${SERVER_PORT:5555}
+  address: ${SERVER_ADDRESS:0.0.0.0}
   servlet:
     context-path: /
   forward-headers-strategy: NATIVE
 
 spring:
+  # ===================================
+  # PRODUCTION DATABASE
+  # ===================================
   datasource:
-    url: ${SPRING_DATASOURCE_URL}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${DB_URL}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:10}
+      idle-timeout: ${DB_POOL_IDLE_TIMEOUT:30000}
+      connection-timeout: ${DB_POOL_CONNECTION_TIMEOUT:60000}
+      
+  # ===================================
+  # SQL INITIALIZATION
+  # ===================================
   sql:
     init:
-      mode: never
+      mode: ${SQL_INIT_MODE:never}
       schema-locations: classpath:schema.sql
       continue-on-error: true
+      
+  # ===================================
+  # OAUTH2 CONFIGURATION
+  # ===================================
   security:
     oauth2:
       client:
@@ -41,19 +58,51 @@ spring:
             authorization-uri: https://github.com/login/oauth/authorize
             token-uri: https://github.com/login/oauth/access_token
             user-info-uri: https://api.github.com/user
+            
+  # ===================================
+  # CORS CONFIGURATION
+  # ===================================
+  web:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
 
+# ===================================
+# MYBATIS PLUS CONFIGURATION
+# ===================================
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nop.NopImpl
+    map-underscore-to-camel-case: true
+  type-handlers-package: com.kihomura.screenvault.typehandler
+
+# ===================================
+# APPLICATION SPECIFIC CONFIG
+# ===================================
 app:
   domain: ${APP_DOMAIN}
   oauth2:
     redirect-uri: https://${APP_DOMAIN}/dashboard
   jwt:
     secret: ${JWT_SECRET}
-    expiration: 86400000 # 24 hours
+    expiration: ${JWT_EXPIRATION:86400000}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
+# ===================================
+# PRODUCTION LOGGING
+# ===================================
 logging:
   level:
-    root: INFO
-    com.kihomura: DEBUG
-    org.springframework.jdbc.datasource.init: DEBUG
+    root: ${LOG_LEVEL_ROOT:WARN}
+    com.kihomura.screenvault: ${LOG_LEVEL_APP:INFO}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:WARN}
+    org.springframework.web: ${LOG_LEVEL_WEB:WARN}
   file:
-    name: /app/logs/application.log 
+    name: ${LOG_FILE_PATH:/app/logs/application.log}
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" 
